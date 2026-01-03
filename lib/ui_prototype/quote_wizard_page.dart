@@ -10,8 +10,8 @@ class QuoteWizardPage extends StatefulWidget {
 }
 
 class _QuoteWizardPageState extends State<QuoteWizardPage> {
-  final _clientsRepo = ClientsRepo(orgId: ClientsPage._tempOrgId);
-  final _quotesRepo = QuotesRepo(orgId: ClientsPage._tempOrgId);
+  late ClientsRepositoryLocalFirst _clientsRepo;
+  late QuotesRepositoryLocalFirst _quotesRepo;
 
   String? clientId;
   String clientName = '';
@@ -32,6 +32,14 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
   void initState() {
     super.initState();
     _loadSettingsOptions();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final deps = AppDependencies.of(context);
+    _clientsRepo = deps.clientsRepository;
+    _quotesRepo = deps.quotesRepository;
   }
 
   bool _initFailed = false;
