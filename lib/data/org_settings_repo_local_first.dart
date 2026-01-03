@@ -23,7 +23,7 @@ class OrgSettingsRepositoryLocalFirst {
 
   Stream<OrgSettings> stream() async* {
     final controller = StreamController<OrgSettings>();
-    StreamSubscription<OrgSettingsRow?>? dataSub;
+  StreamSubscription<OrgSettings>? dataSub;
 
     void listenSession(AppSession? session) {
       dataSub?.cancel();
