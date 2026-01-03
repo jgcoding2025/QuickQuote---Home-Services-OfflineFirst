@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'local_db.g.dart';
@@ -52,7 +51,8 @@ class Quotes extends Table {
   BoolColumn get homeOccupied => boolean().withDefault(const Constant(true))();
   TextColumn get entryCode => text().withDefault(const Constant(''))();
   TextColumn get paymentMethod => text().withDefault(const Constant(''))();
-  BoolColumn get feedbackDiscussed => boolean().withDefault(const Constant(false))();
+  BoolColumn get feedbackDiscussed =>
+      boolean().withDefault(const Constant(false))();
   RealColumn get laborRate => real().withDefault(const Constant(40.0))();
   BoolColumn get taxEnabled => boolean().withDefault(const Constant(false))();
   BoolColumn get ccEnabled => boolean().withDefault(const Constant(false))();
@@ -159,9 +159,9 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<List<QuoteItemRow>> loadQuoteItems(String quoteId) {
-    return (select(quoteItems)
-          ..where((tbl) => tbl.quoteId.equals(quoteId)))
-        .get();
+    return (select(
+      quoteItems,
+    )..where((tbl) => tbl.quoteId.equals(quoteId))).get();
   }
 
   Stream<OrgSettingsRow?> watchOrgSettings(String orgId) {
@@ -183,8 +183,13 @@ class AppDatabase extends _$AppDatabase {
     return into(orgSettingsTable).insertOnConflictUpdate(entry);
   }
 
-  Future<void> replaceQuoteItems(String quoteId, List<QuoteItemRow> items) async {
-    await (delete(quoteItems)..where((tbl) => tbl.quoteId.equals(quoteId))).go();
+  Future<void> replaceQuoteItems(
+    String quoteId,
+    List<QuoteItemRow> items,
+  ) async {
+    await (delete(
+      quoteItems,
+    )..where((tbl) => tbl.quoteId.equals(quoteId))).go();
     if (items.isEmpty) {
       return;
     }
@@ -204,10 +209,13 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<int> getLastSync(String entityType, String orgId) async {
-    final row = await (select(syncState)
-          ..where((tbl) => tbl.id.equals(entityType) & tbl.orgId.equals(orgId))
-          ..limit(1))
-        .getSingleOrNull();
+    final row =
+        await (select(syncState)
+              ..where(
+                (tbl) => tbl.id.equals(entityType) & tbl.orgId.equals(orgId),
+              )
+              ..limit(1))
+            .getSingleOrNull();
     return row?.lastSyncAt ?? 0;
   }
 
@@ -218,8 +226,7 @@ class AppDatabase extends _$AppDatabase {
     await (update(quotes)..where((tbl) => tbl.orgId.equals(fromOrgId))).write(
       QuotesCompanion(orgId: Value(toOrgId)),
     );
-    await (update(quoteItems)
-          ..where((tbl) => tbl.orgId.equals(fromOrgId)))
+    await (update(quoteItems)..where((tbl) => tbl.orgId.equals(fromOrgId)))
         .write(QuoteItemsCompanion(orgId: Value(toOrgId)));
     await (update(orgSettingsTable)
           ..where((tbl) => tbl.orgId.equals(fromOrgId)))
@@ -227,9 +234,8 @@ class AppDatabase extends _$AppDatabase {
     await (update(outbox)..where((tbl) => tbl.orgId.equals(fromOrgId))).write(
       OutboxCompanion(orgId: Value(toOrgId)),
     );
-    await (update(syncState)..where((tbl) => tbl.orgId.equals(fromOrgId))).write(
-      SyncStateCompanion(orgId: Value(toOrgId)),
-    );
+    await (update(syncState)..where((tbl) => tbl.orgId.equals(fromOrgId)))
+        .write(SyncStateCompanion(orgId: Value(toOrgId)));
   }
 
   static LazyDatabase _openConnection() {
