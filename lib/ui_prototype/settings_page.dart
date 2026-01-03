@@ -213,6 +213,7 @@ class _SettingsPageState extends State<SettingsPage>
                       await Clipboard.setData(
                         ClipboardData(text: _inviteCode ?? ''),
                       );
+                      if (!mounted) return;
                       if (mounted) _snack(context, 'Invite code copied.');
                     },
                     icon: const Icon(Icons.copy),
