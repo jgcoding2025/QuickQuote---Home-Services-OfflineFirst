@@ -25,7 +25,7 @@ class ClientsRepositoryLocalFirst {
 
   Stream<List<Client>> streamClients() async* {
     final controller = StreamController<List<Client>>();
-    StreamSubscription<List<ClientRow>>? dataSub;
+  StreamSubscription<List<Client>>? dataSub;
 
     void listenSession(AppSession? session) {
       dataSub?.cancel();
