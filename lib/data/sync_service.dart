@@ -12,8 +12,8 @@ enum SyncStatus { online, offline, syncing, error }
 
 class SyncService {
   SyncService({required AppDatabase db, required SessionController session})
-      : _db = db,
-        _sessionController = session;
+    : _db = db,
+      _sessionController = session;
 
   final AppDatabase _db;
   final SessionController _sessionController;
@@ -24,9 +24,7 @@ class SyncService {
 
   Future<void> start() async {
     _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
-      final isOnline = results is List<ConnectivityResult>
-          ? results.any((r) => r != ConnectivityResult.none)
-          : results != ConnectivityResult.none;
+      final isOnline = results.any((r) => r != ConnectivityResult.none);
       if (isOnline) {
         sync();
       } else {
@@ -66,13 +64,13 @@ class SyncService {
   }
 
   Future<void> _uploadOutbox(String orgId) async {
-    final pending = await (_db.select(_db.outbox)
-          ..where(
-            (tbl) =>
-                tbl.orgId.equals(orgId) & tbl.status.equals('pending'),
-          )
-          ..orderBy([(tbl) => OrderingTerm.asc(tbl.updatedAt)]))
-        .get();
+    final pending =
+        await (_db.select(_db.outbox)
+              ..where(
+                (tbl) => tbl.orgId.equals(orgId) & tbl.status.equals('pending'),
+              )
+              ..orderBy([(tbl) => OrderingTerm.asc(tbl.updatedAt)]))
+            .get();
     for (final item in pending) {
       final payload = _decodePayload(item.payload);
       final updatedAt = payload['updatedAt'] is int
@@ -89,9 +87,7 @@ class SyncService {
       };
       await doc.set(data, SetOptions(merge: true));
       await (_db.update(_db.outbox)..where((tbl) => tbl.id.equals(item.id)))
-          .write(
-        OutboxCompanion(status: const Value('synced')),
-      );
+          .write(OutboxCompanion(status: const Value('synced')));
     }
   }
 
@@ -116,10 +112,11 @@ class SyncService {
       if (updatedAt > maxUpdatedAt) {
         maxUpdatedAt = updatedAt;
       }
-      final existing = await (_db.select(_db.clients)
-            ..where((tbl) => tbl.id.equals(doc.id))
-            ..limit(1))
-          .getSingleOrNull();
+      final existing =
+          await (_db.select(_db.clients)
+                ..where((tbl) => tbl.id.equals(doc.id))
+                ..limit(1))
+              .getSingleOrNull();
       if (existing != null && existing.updatedAt >= updatedAt) {
         continue;
       }
@@ -161,10 +158,11 @@ class SyncService {
       if (updatedAt > maxUpdatedAt) {
         maxUpdatedAt = updatedAt;
       }
-      final existing = await (_db.select(_db.quotes)
-            ..where((tbl) => tbl.id.equals(doc.id))
-            ..limit(1))
-          .getSingleOrNull();
+      final existing =
+          await (_db.select(_db.quotes)
+                ..where((tbl) => tbl.id.equals(doc.id))
+                ..limit(1))
+              .getSingleOrNull();
       if (existing != null && existing.updatedAt >= updatedAt) {
         continue;
       }
@@ -231,10 +229,11 @@ class SyncService {
     if (updatedAt <= lastSync) {
       return;
     }
-    final existing = await (_db.select(_db.orgSettingsTable)
-          ..where((tbl) => tbl.orgId.equals(orgId))
-          ..limit(1))
-        .getSingleOrNull();
+    final existing =
+        await (_db.select(_db.orgSettingsTable)
+              ..where((tbl) => tbl.orgId.equals(orgId))
+              ..limit(1))
+            .getSingleOrNull();
     if (existing != null && existing.updatedAt >= updatedAt) {
       return;
     }

@@ -2,6 +2,354 @@
 
 part of 'local_db.dart';
 
+// ignore_for_file: type=lint
+class $ClientsTable extends Clients with TableInfo<$ClientsTable, ClientRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ClientsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _orgIdMeta = const VerificationMeta('orgId');
+  @override
+  late final GeneratedColumn<String> orgId = GeneratedColumn<String>(
+    'org_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedMeta = const VerificationMeta(
+    'deleted',
+  );
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+    'deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _firstNameMeta = const VerificationMeta(
+    'firstName',
+  );
+  @override
+  late final GeneratedColumn<String> firstName = GeneratedColumn<String>(
+    'first_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _lastNameMeta = const VerificationMeta(
+    'lastName',
+  );
+  @override
+  late final GeneratedColumn<String> lastName = GeneratedColumn<String>(
+    'last_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _street1Meta = const VerificationMeta(
+    'street1',
+  );
+  @override
+  late final GeneratedColumn<String> street1 = GeneratedColumn<String>(
+    'street1',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _street2Meta = const VerificationMeta(
+    'street2',
+  );
+  @override
+  late final GeneratedColumn<String> street2 = GeneratedColumn<String>(
+    'street2',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _cityMeta = const VerificationMeta('city');
+  @override
+  late final GeneratedColumn<String> city = GeneratedColumn<String>(
+    'city',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _zipMeta = const VerificationMeta('zip');
+  @override
+  late final GeneratedColumn<String> zip = GeneratedColumn<String>(
+    'zip',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
+  @override
+  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
+    'phone',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    orgId,
+    updatedAt,
+    deleted,
+    firstName,
+    lastName,
+    street1,
+    street2,
+    city,
+    state,
+    zip,
+    phone,
+    email,
+    notes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'clients';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ClientRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('org_id')) {
+      context.handle(
+        _orgIdMeta,
+        orgId.isAcceptableOrUnknown(data['org_id']!, _orgIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orgIdMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted')) {
+      context.handle(
+        _deletedMeta,
+        deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta),
+      );
+    }
+    if (data.containsKey('first_name')) {
+      context.handle(
+        _firstNameMeta,
+        firstName.isAcceptableOrUnknown(data['first_name']!, _firstNameMeta),
+      );
+    }
+    if (data.containsKey('last_name')) {
+      context.handle(
+        _lastNameMeta,
+        lastName.isAcceptableOrUnknown(data['last_name']!, _lastNameMeta),
+      );
+    }
+    if (data.containsKey('street1')) {
+      context.handle(
+        _street1Meta,
+        street1.isAcceptableOrUnknown(data['street1']!, _street1Meta),
+      );
+    }
+    if (data.containsKey('street2')) {
+      context.handle(
+        _street2Meta,
+        street2.isAcceptableOrUnknown(data['street2']!, _street2Meta),
+      );
+    }
+    if (data.containsKey('city')) {
+      context.handle(
+        _cityMeta,
+        city.isAcceptableOrUnknown(data['city']!, _cityMeta),
+      );
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    }
+    if (data.containsKey('zip')) {
+      context.handle(
+        _zipMeta,
+        zip.isAcceptableOrUnknown(data['zip']!, _zipMeta),
+      );
+    }
+    if (data.containsKey('phone')) {
+      context.handle(
+        _phoneMeta,
+        phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta),
+      );
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ClientRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ClientRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      orgId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}org_id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}deleted'],
+      )!,
+      firstName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}first_name'],
+      )!,
+      lastName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_name'],
+      )!,
+      street1: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}street1'],
+      )!,
+      street2: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}street2'],
+      )!,
+      city: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}city'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      zip: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}zip'],
+      )!,
+      phone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}phone'],
+      )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      )!,
+    );
+  }
+
+  @override
+  $ClientsTable createAlias(String alias) {
+    return $ClientsTable(attachedDatabase, alias);
+  }
+}
+
 class ClientRow extends DataClass implements Insertable<ClientRow> {
   final String id;
   final String orgId;
@@ -33,57 +381,24 @@ class ClientRow extends DataClass implements Insertable<ClientRow> {
     required this.email,
     required this.notes,
   });
-  factory ClientRow.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return ClientRow(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      orgId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}org_id'])!,
-      updatedAt: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      deleted: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}deleted'])!,
-      firstName: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}first_name'])!,
-      lastName: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}last_name'])!,
-      street1: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}street1'])!,
-      street2: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}street2'])!,
-      city: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}city'])!,
-      state: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}state'])!,
-      zip: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}zip'])!,
-      phone: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}phone'])!,
-      email: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}email'])!,
-      notes: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}notes'])!,
-    );
-  }
   @override
-  Map<String, Expression<Object>> toColumns(bool nullToAbsent) {
-    return {
-      'id': Variable<String>(id),
-      'org_id': Variable<String>(orgId),
-      'updated_at': Variable<int>(updatedAt),
-      'deleted': Variable<bool>(deleted),
-      'first_name': Variable<String>(firstName),
-      'last_name': Variable<String>(lastName),
-      'street1': Variable<String>(street1),
-      'street2': Variable<String>(street2),
-      'city': Variable<String>(city),
-      'state': Variable<String>(state),
-      'zip': Variable<String>(zip),
-      'phone': Variable<String>(phone),
-      'email': Variable<String>(email),
-      'notes': Variable<String>(notes),
-    };
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['org_id'] = Variable<String>(orgId);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['deleted'] = Variable<bool>(deleted);
+    map['first_name'] = Variable<String>(firstName);
+    map['last_name'] = Variable<String>(lastName);
+    map['street1'] = Variable<String>(street1);
+    map['street2'] = Variable<String>(street2);
+    map['city'] = Variable<String>(city);
+    map['state'] = Variable<String>(state);
+    map['zip'] = Variable<String>(zip);
+    map['phone'] = Variable<String>(phone);
+    map['email'] = Variable<String>(email);
+    map['notes'] = Variable<String>(notes);
+    return map;
   }
 
   ClientsCompanion toCompanion(bool nullToAbsent) {
@@ -104,6 +419,156 @@ class ClientRow extends DataClass implements Insertable<ClientRow> {
       notes: Value(notes),
     );
   }
+
+  factory ClientRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ClientRow(
+      id: serializer.fromJson<String>(json['id']),
+      orgId: serializer.fromJson<String>(json['orgId']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
+      firstName: serializer.fromJson<String>(json['firstName']),
+      lastName: serializer.fromJson<String>(json['lastName']),
+      street1: serializer.fromJson<String>(json['street1']),
+      street2: serializer.fromJson<String>(json['street2']),
+      city: serializer.fromJson<String>(json['city']),
+      state: serializer.fromJson<String>(json['state']),
+      zip: serializer.fromJson<String>(json['zip']),
+      phone: serializer.fromJson<String>(json['phone']),
+      email: serializer.fromJson<String>(json['email']),
+      notes: serializer.fromJson<String>(json['notes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'orgId': serializer.toJson<String>(orgId),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deleted': serializer.toJson<bool>(deleted),
+      'firstName': serializer.toJson<String>(firstName),
+      'lastName': serializer.toJson<String>(lastName),
+      'street1': serializer.toJson<String>(street1),
+      'street2': serializer.toJson<String>(street2),
+      'city': serializer.toJson<String>(city),
+      'state': serializer.toJson<String>(state),
+      'zip': serializer.toJson<String>(zip),
+      'phone': serializer.toJson<String>(phone),
+      'email': serializer.toJson<String>(email),
+      'notes': serializer.toJson<String>(notes),
+    };
+  }
+
+  ClientRow copyWith({
+    String? id,
+    String? orgId,
+    int? updatedAt,
+    bool? deleted,
+    String? firstName,
+    String? lastName,
+    String? street1,
+    String? street2,
+    String? city,
+    String? state,
+    String? zip,
+    String? phone,
+    String? email,
+    String? notes,
+  }) => ClientRow(
+    id: id ?? this.id,
+    orgId: orgId ?? this.orgId,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deleted: deleted ?? this.deleted,
+    firstName: firstName ?? this.firstName,
+    lastName: lastName ?? this.lastName,
+    street1: street1 ?? this.street1,
+    street2: street2 ?? this.street2,
+    city: city ?? this.city,
+    state: state ?? this.state,
+    zip: zip ?? this.zip,
+    phone: phone ?? this.phone,
+    email: email ?? this.email,
+    notes: notes ?? this.notes,
+  );
+  ClientRow copyWithCompanion(ClientsCompanion data) {
+    return ClientRow(
+      id: data.id.present ? data.id.value : this.id,
+      orgId: data.orgId.present ? data.orgId.value : this.orgId,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
+      firstName: data.firstName.present ? data.firstName.value : this.firstName,
+      lastName: data.lastName.present ? data.lastName.value : this.lastName,
+      street1: data.street1.present ? data.street1.value : this.street1,
+      street2: data.street2.present ? data.street2.value : this.street2,
+      city: data.city.present ? data.city.value : this.city,
+      state: data.state.present ? data.state.value : this.state,
+      zip: data.zip.present ? data.zip.value : this.zip,
+      phone: data.phone.present ? data.phone.value : this.phone,
+      email: data.email.present ? data.email.value : this.email,
+      notes: data.notes.present ? data.notes.value : this.notes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClientRow(')
+          ..write('id: $id, ')
+          ..write('orgId: $orgId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deleted: $deleted, ')
+          ..write('firstName: $firstName, ')
+          ..write('lastName: $lastName, ')
+          ..write('street1: $street1, ')
+          ..write('street2: $street2, ')
+          ..write('city: $city, ')
+          ..write('state: $state, ')
+          ..write('zip: $zip, ')
+          ..write('phone: $phone, ')
+          ..write('email: $email, ')
+          ..write('notes: $notes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    orgId,
+    updatedAt,
+    deleted,
+    firstName,
+    lastName,
+    street1,
+    street2,
+    city,
+    state,
+    zip,
+    phone,
+    email,
+    notes,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ClientRow &&
+          other.id == this.id &&
+          other.orgId == this.orgId &&
+          other.updatedAt == this.updatedAt &&
+          other.deleted == this.deleted &&
+          other.firstName == this.firstName &&
+          other.lastName == this.lastName &&
+          other.street1 == this.street1 &&
+          other.street2 == this.street2 &&
+          other.city == this.city &&
+          other.state == this.state &&
+          other.zip == this.zip &&
+          other.phone == this.phone &&
+          other.email == this.email &&
+          other.notes == this.notes);
 }
 
 class ClientsCompanion extends UpdateCompanion<ClientRow> {
@@ -121,6 +586,7 @@ class ClientsCompanion extends UpdateCompanion<ClientRow> {
   final Value<String> phone;
   final Value<String> email;
   final Value<String> notes;
+  final Value<int> rowid;
   const ClientsCompanion({
     this.id = const Value.absent(),
     this.orgId = const Value.absent(),
@@ -136,7 +602,27 @@ class ClientsCompanion extends UpdateCompanion<ClientRow> {
     this.phone = const Value.absent(),
     this.email = const Value.absent(),
     this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
+  ClientsCompanion.insert({
+    required String id,
+    required String orgId,
+    required int updatedAt,
+    this.deleted = const Value.absent(),
+    this.firstName = const Value.absent(),
+    this.lastName = const Value.absent(),
+    this.street1 = const Value.absent(),
+    this.street2 = const Value.absent(),
+    this.city = const Value.absent(),
+    this.state = const Value.absent(),
+    this.zip = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.email = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       orgId = Value(orgId),
+       updatedAt = Value(updatedAt);
   static Insertable<ClientRow> custom({
     Expression<String>? id,
     Expression<String>? orgId,
@@ -152,6 +638,7 @@ class ClientsCompanion extends UpdateCompanion<ClientRow> {
     Expression<String>? phone,
     Expression<String>? email,
     Expression<String>? notes,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -168,30 +655,126 @@ class ClientsCompanion extends UpdateCompanion<ClientRow> {
       if (phone != null) 'phone': phone,
       if (email != null) 'email': email,
       if (notes != null) 'notes': notes,
+      if (rowid != null) 'rowid': rowid,
     });
+  }
+
+  ClientsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? orgId,
+    Value<int>? updatedAt,
+    Value<bool>? deleted,
+    Value<String>? firstName,
+    Value<String>? lastName,
+    Value<String>? street1,
+    Value<String>? street2,
+    Value<String>? city,
+    Value<String>? state,
+    Value<String>? zip,
+    Value<String>? phone,
+    Value<String>? email,
+    Value<String>? notes,
+    Value<int>? rowid,
+  }) {
+    return ClientsCompanion(
+      id: id ?? this.id,
+      orgId: orgId ?? this.orgId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deleted: deleted ?? this.deleted,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      street1: street1 ?? this.street1,
+      street2: street2 ?? this.street2,
+      city: city ?? this.city,
+      state: state ?? this.state,
+      zip: zip ?? this.zip,
+      phone: phone ?? this.phone,
+      email: email ?? this.email,
+      notes: notes ?? this.notes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (orgId.present) {
+      map['org_id'] = Variable<String>(orgId.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
+    if (firstName.present) {
+      map['first_name'] = Variable<String>(firstName.value);
+    }
+    if (lastName.present) {
+      map['last_name'] = Variable<String>(lastName.value);
+    }
+    if (street1.present) {
+      map['street1'] = Variable<String>(street1.value);
+    }
+    if (street2.present) {
+      map['street2'] = Variable<String>(street2.value);
+    }
+    if (city.present) {
+      map['city'] = Variable<String>(city.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (zip.present) {
+      map['zip'] = Variable<String>(zip.value);
+    }
+    if (phone.present) {
+      map['phone'] = Variable<String>(phone.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClientsCompanion(')
+          ..write('id: $id, ')
+          ..write('orgId: $orgId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deleted: $deleted, ')
+          ..write('firstName: $firstName, ')
+          ..write('lastName: $lastName, ')
+          ..write('street1: $street1, ')
+          ..write('street2: $street2, ')
+          ..write('city: $city, ')
+          ..write('state: $state, ')
+          ..write('zip: $zip, ')
+          ..write('phone: $phone, ')
+          ..write('email: $email, ')
+          ..write('notes: $notes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
   }
 }
 
-class $ClientsTable extends Clients
-    with TableInfo<$ClientsTable, ClientRow> {
+class $QuotesTable extends Quotes with TableInfo<$QuotesTable, QuoteRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ClientsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = VerificationMeta('id');
-  static const VerificationMeta _orgIdMeta = VerificationMeta('orgId');
-  static const VerificationMeta _updatedAtMeta = VerificationMeta('updatedAt');
-  static const VerificationMeta _deletedMeta = VerificationMeta('deleted');
-  static const VerificationMeta _firstNameMeta = VerificationMeta('firstName');
-  static const VerificationMeta _lastNameMeta = VerificationMeta('lastName');
-  static const VerificationMeta _street1Meta = VerificationMeta('street1');
-  static const VerificationMeta _street2Meta = VerificationMeta('street2');
-  static const VerificationMeta _cityMeta = VerificationMeta('city');
-  static const VerificationMeta _stateMeta = VerificationMeta('state');
-  static const VerificationMeta _zipMeta = VerificationMeta('zip');
-  static const VerificationMeta _phoneMeta = VerificationMeta('phone');
-  static const VerificationMeta _emailMeta = VerificationMeta('email');
-  static const VerificationMeta _notesMeta = VerificationMeta('notes');
+  $QuotesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
     'id',
@@ -200,6 +783,7 @@ class $ClientsTable extends Clients
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _orgIdMeta = const VerificationMeta('orgId');
   @override
   late final GeneratedColumn<String> orgId = GeneratedColumn<String>(
     'org_id',
@@ -207,6 +791,9 @@ class $ClientsTable extends Clients
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
   );
   @override
   late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
@@ -216,6 +803,9 @@ class $ClientsTable extends Clients
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _deletedMeta = const VerificationMeta(
+    'deleted',
+  );
   @override
   late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
     'deleted',
@@ -223,92 +813,366 @@ class $ClientsTable extends Clients
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("deleted" IN (0, 1))',
+    ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _clientIdMeta = const VerificationMeta(
+    'clientId',
+  );
   @override
-  late final GeneratedColumn<String> firstName = GeneratedColumn<String>(
-    'first_name',
+  late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
+    'client_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _clientNameMeta = const VerificationMeta(
+    'clientName',
+  );
   @override
-  late final GeneratedColumn<String> lastName = GeneratedColumn<String>(
-    'last_name',
+  late final GeneratedColumn<String> clientName = GeneratedColumn<String>(
+    'client_name',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _quoteNameMeta = const VerificationMeta(
+    'quoteName',
+  );
   @override
-  late final GeneratedColumn<String> street1 = GeneratedColumn<String>(
-    'street1',
+  late final GeneratedColumn<String> quoteName = GeneratedColumn<String>(
+    'quote_name',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _quoteDateMeta = const VerificationMeta(
+    'quoteDate',
+  );
   @override
-  late final GeneratedColumn<String> street2 = GeneratedColumn<String>(
-    'street2',
+  late final GeneratedColumn<String> quoteDate = GeneratedColumn<String>(
+    'quote_date',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _serviceTypeMeta = const VerificationMeta(
+    'serviceType',
+  );
   @override
-  late final GeneratedColumn<String> city = GeneratedColumn<String>(
-    'city',
+  late final GeneratedColumn<String> serviceType = GeneratedColumn<String>(
+    'service_type',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _frequencyMeta = const VerificationMeta(
+    'frequency',
+  );
   @override
-  late final GeneratedColumn<String> state = GeneratedColumn<String>(
-    'state',
+  late final GeneratedColumn<String> frequency = GeneratedColumn<String>(
+    'frequency',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _lastProCleanMeta = const VerificationMeta(
+    'lastProClean',
+  );
   @override
-  late final GeneratedColumn<String> zip = GeneratedColumn<String>(
-    'zip',
+  late final GeneratedColumn<String> lastProClean = GeneratedColumn<String>(
+    'last_pro_clean',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
-  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
-    'phone',
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Draft'),
+  );
+  static const VerificationMeta _totalMeta = const VerificationMeta('total');
+  @override
+  late final GeneratedColumn<double> total = GeneratedColumn<double>(
+    'total',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _addressMeta = const VerificationMeta(
+    'address',
+  );
+  @override
+  late final GeneratedColumn<String> address = GeneratedColumn<String>(
+    'address',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _totalSqFtMeta = const VerificationMeta(
+    'totalSqFt',
+  );
   @override
-  late final GeneratedColumn<String> email = GeneratedColumn<String>(
-    'email',
+  late final GeneratedColumn<String> totalSqFt = GeneratedColumn<String>(
+    'total_sq_ft',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _useTotalSqFtMeta = const VerificationMeta(
+    'useTotalSqFt',
+  );
   @override
-  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
-    'notes',
+  late final GeneratedColumn<bool> useTotalSqFt = GeneratedColumn<bool>(
+    'use_total_sq_ft',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("use_total_sq_ft" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _estimatedSqFtMeta = const VerificationMeta(
+    'estimatedSqFt',
+  );
+  @override
+  late final GeneratedColumn<String> estimatedSqFt = GeneratedColumn<String>(
+    'estimated_sq_ft',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _petsPresentMeta = const VerificationMeta(
+    'petsPresent',
+  );
+  @override
+  late final GeneratedColumn<bool> petsPresent = GeneratedColumn<bool>(
+    'pets_present',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("pets_present" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _homeOccupiedMeta = const VerificationMeta(
+    'homeOccupied',
+  );
+  @override
+  late final GeneratedColumn<bool> homeOccupied = GeneratedColumn<bool>(
+    'home_occupied',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("home_occupied" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _entryCodeMeta = const VerificationMeta(
+    'entryCode',
+  );
+  @override
+  late final GeneratedColumn<String> entryCode = GeneratedColumn<String>(
+    'entry_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _paymentMethodMeta = const VerificationMeta(
+    'paymentMethod',
+  );
+  @override
+  late final GeneratedColumn<String> paymentMethod = GeneratedColumn<String>(
+    'payment_method',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _feedbackDiscussedMeta = const VerificationMeta(
+    'feedbackDiscussed',
+  );
+  @override
+  late final GeneratedColumn<bool> feedbackDiscussed = GeneratedColumn<bool>(
+    'feedback_discussed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("feedback_discussed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _laborRateMeta = const VerificationMeta(
+    'laborRate',
+  );
+  @override
+  late final GeneratedColumn<double> laborRate = GeneratedColumn<double>(
+    'labor_rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(40.0),
+  );
+  static const VerificationMeta _taxEnabledMeta = const VerificationMeta(
+    'taxEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> taxEnabled = GeneratedColumn<bool>(
+    'tax_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("tax_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _ccEnabledMeta = const VerificationMeta(
+    'ccEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> ccEnabled = GeneratedColumn<bool>(
+    'cc_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("cc_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _taxRateMeta = const VerificationMeta(
+    'taxRate',
+  );
+  @override
+  late final GeneratedColumn<double> taxRate = GeneratedColumn<double>(
+    'tax_rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.07),
+  );
+  static const VerificationMeta _ccRateMeta = const VerificationMeta('ccRate');
+  @override
+  late final GeneratedColumn<double> ccRate = GeneratedColumn<double>(
+    'cc_rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.03),
+  );
+  static const VerificationMeta _defaultRoomTypeMeta = const VerificationMeta(
+    'defaultRoomType',
+  );
+  @override
+  late final GeneratedColumn<String> defaultRoomType = GeneratedColumn<String>(
+    'default_room_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _defaultLevelMeta = const VerificationMeta(
+    'defaultLevel',
+  );
+  @override
+  late final GeneratedColumn<String> defaultLevel = GeneratedColumn<String>(
+    'default_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _defaultSizeMeta = const VerificationMeta(
+    'defaultSize',
+  );
+  @override
+  late final GeneratedColumn<String> defaultSize = GeneratedColumn<String>(
+    'default_size',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _defaultComplexityMeta = const VerificationMeta(
+    'defaultComplexity',
+  );
+  @override
+  late final GeneratedColumn<String> defaultComplexity =
+      GeneratedColumn<String>(
+        'default_complexity',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _subItemTypeMeta = const VerificationMeta(
+    'subItemType',
+  );
+  @override
+  late final GeneratedColumn<String> subItemType = GeneratedColumn<String>(
+    'sub_item_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _specialNotesMeta = const VerificationMeta(
+    'specialNotes',
+  );
+  @override
+  late final GeneratedColumn<String> specialNotes = GeneratedColumn<String>(
+    'special_notes',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -317,96 +1181,442 @@ class $ClientsTable extends Clients
   );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        orgId,
-        updatedAt,
-        deleted,
-        firstName,
-        lastName,
-        street1,
-        street2,
-        city,
-        state,
-        zip,
-        phone,
-        email,
-        notes,
-      ];
+    id,
+    orgId,
+    updatedAt,
+    deleted,
+    clientId,
+    clientName,
+    quoteName,
+    quoteDate,
+    serviceType,
+    frequency,
+    lastProClean,
+    status,
+    total,
+    address,
+    totalSqFt,
+    useTotalSqFt,
+    estimatedSqFt,
+    petsPresent,
+    homeOccupied,
+    entryCode,
+    paymentMethod,
+    feedbackDiscussed,
+    laborRate,
+    taxEnabled,
+    ccEnabled,
+    taxRate,
+    ccRate,
+    defaultRoomType,
+    defaultLevel,
+    defaultSize,
+    defaultComplexity,
+    subItemType,
+    specialNotes,
+  ];
   @override
-  String get aliasedName => _alias ?? 'clients';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'clients';
+  String get actualTableName => $name;
+  static const String $name = 'quotes';
   @override
-  VerificationContext validateIntegrity(Insertable<ClientRow> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<QuoteRow> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('org_id')) {
       context.handle(
-          _orgIdMeta, orgId.isAcceptableOrUnknown(data['org_id']!, _orgIdMeta));
+        _orgIdMeta,
+        orgId.isAcceptableOrUnknown(data['org_id']!, _orgIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orgIdMeta);
     }
     if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
     }
     if (data.containsKey('deleted')) {
-      context.handle(_deletedMeta,
-          deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta));
-    }
-    if (data.containsKey('first_name')) {
-      context.handle(_firstNameMeta,
-          firstName.isAcceptableOrUnknown(data['first_name']!, _firstNameMeta));
-    }
-    if (data.containsKey('last_name')) {
-      context.handle(_lastNameMeta,
-          lastName.isAcceptableOrUnknown(data['last_name']!, _lastNameMeta));
-    }
-    if (data.containsKey('street1')) {
-      context.handle(_street1Meta,
-          street1.isAcceptableOrUnknown(data['street1']!, _street1Meta));
-    }
-    if (data.containsKey('street2')) {
-      context.handle(_street2Meta,
-          street2.isAcceptableOrUnknown(data['street2']!, _street2Meta));
-    }
-    if (data.containsKey('city')) {
       context.handle(
-          _cityMeta, city.isAcceptableOrUnknown(data['city']!, _cityMeta));
+        _deletedMeta,
+        deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta),
+      );
     }
-    if (data.containsKey('state')) {
+    if (data.containsKey('client_id')) {
       context.handle(
-          _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
+        _clientIdMeta,
+        clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
+      );
     }
-    if (data.containsKey('zip')) {
+    if (data.containsKey('client_name')) {
       context.handle(
-          _zipMeta, zip.isAcceptableOrUnknown(data['zip']!, _zipMeta));
+        _clientNameMeta,
+        clientName.isAcceptableOrUnknown(data['client_name']!, _clientNameMeta),
+      );
     }
-    if (data.containsKey('phone')) {
+    if (data.containsKey('quote_name')) {
       context.handle(
-          _phoneMeta, phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta));
+        _quoteNameMeta,
+        quoteName.isAcceptableOrUnknown(data['quote_name']!, _quoteNameMeta),
+      );
     }
-    if (data.containsKey('email')) {
+    if (data.containsKey('quote_date')) {
       context.handle(
-          _emailMeta, email.isAcceptableOrUnknown(data['email']!, _emailMeta));
+        _quoteDateMeta,
+        quoteDate.isAcceptableOrUnknown(data['quote_date']!, _quoteDateMeta),
+      );
     }
-    if (data.containsKey('notes')) {
+    if (data.containsKey('service_type')) {
       context.handle(
-          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+        _serviceTypeMeta,
+        serviceType.isAcceptableOrUnknown(
+          data['service_type']!,
+          _serviceTypeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('frequency')) {
+      context.handle(
+        _frequencyMeta,
+        frequency.isAcceptableOrUnknown(data['frequency']!, _frequencyMeta),
+      );
+    }
+    if (data.containsKey('last_pro_clean')) {
+      context.handle(
+        _lastProCleanMeta,
+        lastProClean.isAcceptableOrUnknown(
+          data['last_pro_clean']!,
+          _lastProCleanMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('total')) {
+      context.handle(
+        _totalMeta,
+        total.isAcceptableOrUnknown(data['total']!, _totalMeta),
+      );
+    }
+    if (data.containsKey('address')) {
+      context.handle(
+        _addressMeta,
+        address.isAcceptableOrUnknown(data['address']!, _addressMeta),
+      );
+    }
+    if (data.containsKey('total_sq_ft')) {
+      context.handle(
+        _totalSqFtMeta,
+        totalSqFt.isAcceptableOrUnknown(data['total_sq_ft']!, _totalSqFtMeta),
+      );
+    }
+    if (data.containsKey('use_total_sq_ft')) {
+      context.handle(
+        _useTotalSqFtMeta,
+        useTotalSqFt.isAcceptableOrUnknown(
+          data['use_total_sq_ft']!,
+          _useTotalSqFtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('estimated_sq_ft')) {
+      context.handle(
+        _estimatedSqFtMeta,
+        estimatedSqFt.isAcceptableOrUnknown(
+          data['estimated_sq_ft']!,
+          _estimatedSqFtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pets_present')) {
+      context.handle(
+        _petsPresentMeta,
+        petsPresent.isAcceptableOrUnknown(
+          data['pets_present']!,
+          _petsPresentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('home_occupied')) {
+      context.handle(
+        _homeOccupiedMeta,
+        homeOccupied.isAcceptableOrUnknown(
+          data['home_occupied']!,
+          _homeOccupiedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('entry_code')) {
+      context.handle(
+        _entryCodeMeta,
+        entryCode.isAcceptableOrUnknown(data['entry_code']!, _entryCodeMeta),
+      );
+    }
+    if (data.containsKey('payment_method')) {
+      context.handle(
+        _paymentMethodMeta,
+        paymentMethod.isAcceptableOrUnknown(
+          data['payment_method']!,
+          _paymentMethodMeta,
+        ),
+      );
+    }
+    if (data.containsKey('feedback_discussed')) {
+      context.handle(
+        _feedbackDiscussedMeta,
+        feedbackDiscussed.isAcceptableOrUnknown(
+          data['feedback_discussed']!,
+          _feedbackDiscussedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('labor_rate')) {
+      context.handle(
+        _laborRateMeta,
+        laborRate.isAcceptableOrUnknown(data['labor_rate']!, _laborRateMeta),
+      );
+    }
+    if (data.containsKey('tax_enabled')) {
+      context.handle(
+        _taxEnabledMeta,
+        taxEnabled.isAcceptableOrUnknown(data['tax_enabled']!, _taxEnabledMeta),
+      );
+    }
+    if (data.containsKey('cc_enabled')) {
+      context.handle(
+        _ccEnabledMeta,
+        ccEnabled.isAcceptableOrUnknown(data['cc_enabled']!, _ccEnabledMeta),
+      );
+    }
+    if (data.containsKey('tax_rate')) {
+      context.handle(
+        _taxRateMeta,
+        taxRate.isAcceptableOrUnknown(data['tax_rate']!, _taxRateMeta),
+      );
+    }
+    if (data.containsKey('cc_rate')) {
+      context.handle(
+        _ccRateMeta,
+        ccRate.isAcceptableOrUnknown(data['cc_rate']!, _ccRateMeta),
+      );
+    }
+    if (data.containsKey('default_room_type')) {
+      context.handle(
+        _defaultRoomTypeMeta,
+        defaultRoomType.isAcceptableOrUnknown(
+          data['default_room_type']!,
+          _defaultRoomTypeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('default_level')) {
+      context.handle(
+        _defaultLevelMeta,
+        defaultLevel.isAcceptableOrUnknown(
+          data['default_level']!,
+          _defaultLevelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('default_size')) {
+      context.handle(
+        _defaultSizeMeta,
+        defaultSize.isAcceptableOrUnknown(
+          data['default_size']!,
+          _defaultSizeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('default_complexity')) {
+      context.handle(
+        _defaultComplexityMeta,
+        defaultComplexity.isAcceptableOrUnknown(
+          data['default_complexity']!,
+          _defaultComplexityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sub_item_type')) {
+      context.handle(
+        _subItemTypeMeta,
+        subItemType.isAcceptableOrUnknown(
+          data['sub_item_type']!,
+          _subItemTypeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('special_notes')) {
+      context.handle(
+        _specialNotesMeta,
+        specialNotes.isAcceptableOrUnknown(
+          data['special_notes']!,
+          _specialNotesMeta,
+        ),
+      );
     }
     return context;
   }
 
   @override
-  ClientRow map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ClientRow.fromData(data, prefix: tablePrefix);
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  QuoteRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuoteRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      orgId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}org_id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}deleted'],
+      )!,
+      clientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_id'],
+      )!,
+      clientName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_name'],
+      )!,
+      quoteName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quote_name'],
+      )!,
+      quoteDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quote_date'],
+      )!,
+      serviceType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}service_type'],
+      )!,
+      frequency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}frequency'],
+      )!,
+      lastProClean: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_pro_clean'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      total: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}total'],
+      )!,
+      address: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}address'],
+      )!,
+      totalSqFt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}total_sq_ft'],
+      )!,
+      useTotalSqFt: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}use_total_sq_ft'],
+      )!,
+      estimatedSqFt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}estimated_sq_ft'],
+      )!,
+      petsPresent: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}pets_present'],
+      )!,
+      homeOccupied: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}home_occupied'],
+      )!,
+      entryCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entry_code'],
+      )!,
+      paymentMethod: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_method'],
+      )!,
+      feedbackDiscussed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}feedback_discussed'],
+      )!,
+      laborRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}labor_rate'],
+      )!,
+      taxEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}tax_enabled'],
+      )!,
+      ccEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}cc_enabled'],
+      )!,
+      taxRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}tax_rate'],
+      )!,
+      ccRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}cc_rate'],
+      )!,
+      defaultRoomType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}default_room_type'],
+      )!,
+      defaultLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}default_level'],
+      )!,
+      defaultSize: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}default_size'],
+      )!,
+      defaultComplexity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}default_complexity'],
+      )!,
+      subItemType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sub_item_type'],
+      )!,
+      specialNotes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}special_notes'],
+      )!,
+    );
   }
 
   @override
-  $ClientsTable createAlias(String alias) {
-    return $ClientsTable(attachedDatabase, alias);
+  $QuotesTable createAlias(String alias) {
+    return $QuotesTable(attachedDatabase, alias);
   }
 }
 
@@ -479,114 +1689,43 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
     required this.subItemType,
     required this.specialNotes,
   });
-  factory QuoteRow.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return QuoteRow(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      orgId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}org_id'])!,
-      updatedAt: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      deleted: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}deleted'])!,
-      clientId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}client_id'])!,
-      clientName: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}client_name'])!,
-      quoteName: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}quote_name'])!,
-      quoteDate: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}quote_date'])!,
-      serviceType: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}service_type'])!,
-      frequency: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}frequency'])!,
-      lastProClean: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}last_pro_clean'])!,
-      status: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}status'])!,
-      total: const RealType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}total'])!,
-      address: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}address'])!,
-      totalSqFt: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}total_sq_ft'])!,
-      useTotalSqFt: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}use_total_sq_ft'])!,
-      estimatedSqFt: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}estimated_sq_ft'])!,
-      petsPresent: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}pets_present'])!,
-      homeOccupied: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}home_occupied'])!,
-      entryCode: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}entry_code'])!,
-      paymentMethod: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}payment_method'])!,
-      feedbackDiscussed: const BoolType().mapFromDatabaseResponse(
-          data['${effectivePrefix}feedback_discussed'])!,
-      laborRate: const RealType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}labor_rate'])!,
-      taxEnabled: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}tax_enabled'])!,
-      ccEnabled: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}cc_enabled'])!,
-      taxRate: const RealType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}tax_rate'])!,
-      ccRate: const RealType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}cc_rate'])!,
-      defaultRoomType: const StringType().mapFromDatabaseResponse(
-          data['${effectivePrefix}default_room_type'])!,
-      defaultLevel: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}default_level'])!,
-      defaultSize: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}default_size'])!,
-      defaultComplexity: const StringType().mapFromDatabaseResponse(
-          data['${effectivePrefix}default_complexity'])!,
-      subItemType: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}sub_item_type'])!,
-      specialNotes: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}special_notes'])!,
-    );
-  }
   @override
-  Map<String, Expression<Object>> toColumns(bool nullToAbsent) {
-    return {
-      'id': Variable<String>(id),
-      'org_id': Variable<String>(orgId),
-      'updated_at': Variable<int>(updatedAt),
-      'deleted': Variable<bool>(deleted),
-      'client_id': Variable<String>(clientId),
-      'client_name': Variable<String>(clientName),
-      'quote_name': Variable<String>(quoteName),
-      'quote_date': Variable<String>(quoteDate),
-      'service_type': Variable<String>(serviceType),
-      'frequency': Variable<String>(frequency),
-      'last_pro_clean': Variable<String>(lastProClean),
-      'status': Variable<String>(status),
-      'total': Variable<double>(total),
-      'address': Variable<String>(address),
-      'total_sq_ft': Variable<String>(totalSqFt),
-      'use_total_sq_ft': Variable<bool>(useTotalSqFt),
-      'estimated_sq_ft': Variable<String>(estimatedSqFt),
-      'pets_present': Variable<bool>(petsPresent),
-      'home_occupied': Variable<bool>(homeOccupied),
-      'entry_code': Variable<String>(entryCode),
-      'payment_method': Variable<String>(paymentMethod),
-      'feedback_discussed': Variable<bool>(feedbackDiscussed),
-      'labor_rate': Variable<double>(laborRate),
-      'tax_enabled': Variable<bool>(taxEnabled),
-      'cc_enabled': Variable<bool>(ccEnabled),
-      'tax_rate': Variable<double>(taxRate),
-      'cc_rate': Variable<double>(ccRate),
-      'default_room_type': Variable<String>(defaultRoomType),
-      'default_level': Variable<String>(defaultLevel),
-      'default_size': Variable<String>(defaultSize),
-      'default_complexity': Variable<String>(defaultComplexity),
-      'sub_item_type': Variable<String>(subItemType),
-      'special_notes': Variable<String>(specialNotes),
-    };
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['org_id'] = Variable<String>(orgId);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['deleted'] = Variable<bool>(deleted);
+    map['client_id'] = Variable<String>(clientId);
+    map['client_name'] = Variable<String>(clientName);
+    map['quote_name'] = Variable<String>(quoteName);
+    map['quote_date'] = Variable<String>(quoteDate);
+    map['service_type'] = Variable<String>(serviceType);
+    map['frequency'] = Variable<String>(frequency);
+    map['last_pro_clean'] = Variable<String>(lastProClean);
+    map['status'] = Variable<String>(status);
+    map['total'] = Variable<double>(total);
+    map['address'] = Variable<String>(address);
+    map['total_sq_ft'] = Variable<String>(totalSqFt);
+    map['use_total_sq_ft'] = Variable<bool>(useTotalSqFt);
+    map['estimated_sq_ft'] = Variable<String>(estimatedSqFt);
+    map['pets_present'] = Variable<bool>(petsPresent);
+    map['home_occupied'] = Variable<bool>(homeOccupied);
+    map['entry_code'] = Variable<String>(entryCode);
+    map['payment_method'] = Variable<String>(paymentMethod);
+    map['feedback_discussed'] = Variable<bool>(feedbackDiscussed);
+    map['labor_rate'] = Variable<double>(laborRate);
+    map['tax_enabled'] = Variable<bool>(taxEnabled);
+    map['cc_enabled'] = Variable<bool>(ccEnabled);
+    map['tax_rate'] = Variable<double>(taxRate);
+    map['cc_rate'] = Variable<double>(ccRate);
+    map['default_room_type'] = Variable<String>(defaultRoomType);
+    map['default_level'] = Variable<String>(defaultLevel);
+    map['default_size'] = Variable<String>(defaultSize);
+    map['default_complexity'] = Variable<String>(defaultComplexity);
+    map['sub_item_type'] = Variable<String>(subItemType);
+    map['special_notes'] = Variable<String>(specialNotes);
+    return map;
   }
 
   QuotesCompanion toCompanion(bool nullToAbsent) {
@@ -626,6 +1765,340 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
       specialNotes: Value(specialNotes),
     );
   }
+
+  factory QuoteRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuoteRow(
+      id: serializer.fromJson<String>(json['id']),
+      orgId: serializer.fromJson<String>(json['orgId']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
+      clientId: serializer.fromJson<String>(json['clientId']),
+      clientName: serializer.fromJson<String>(json['clientName']),
+      quoteName: serializer.fromJson<String>(json['quoteName']),
+      quoteDate: serializer.fromJson<String>(json['quoteDate']),
+      serviceType: serializer.fromJson<String>(json['serviceType']),
+      frequency: serializer.fromJson<String>(json['frequency']),
+      lastProClean: serializer.fromJson<String>(json['lastProClean']),
+      status: serializer.fromJson<String>(json['status']),
+      total: serializer.fromJson<double>(json['total']),
+      address: serializer.fromJson<String>(json['address']),
+      totalSqFt: serializer.fromJson<String>(json['totalSqFt']),
+      useTotalSqFt: serializer.fromJson<bool>(json['useTotalSqFt']),
+      estimatedSqFt: serializer.fromJson<String>(json['estimatedSqFt']),
+      petsPresent: serializer.fromJson<bool>(json['petsPresent']),
+      homeOccupied: serializer.fromJson<bool>(json['homeOccupied']),
+      entryCode: serializer.fromJson<String>(json['entryCode']),
+      paymentMethod: serializer.fromJson<String>(json['paymentMethod']),
+      feedbackDiscussed: serializer.fromJson<bool>(json['feedbackDiscussed']),
+      laborRate: serializer.fromJson<double>(json['laborRate']),
+      taxEnabled: serializer.fromJson<bool>(json['taxEnabled']),
+      ccEnabled: serializer.fromJson<bool>(json['ccEnabled']),
+      taxRate: serializer.fromJson<double>(json['taxRate']),
+      ccRate: serializer.fromJson<double>(json['ccRate']),
+      defaultRoomType: serializer.fromJson<String>(json['defaultRoomType']),
+      defaultLevel: serializer.fromJson<String>(json['defaultLevel']),
+      defaultSize: serializer.fromJson<String>(json['defaultSize']),
+      defaultComplexity: serializer.fromJson<String>(json['defaultComplexity']),
+      subItemType: serializer.fromJson<String>(json['subItemType']),
+      specialNotes: serializer.fromJson<String>(json['specialNotes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'orgId': serializer.toJson<String>(orgId),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deleted': serializer.toJson<bool>(deleted),
+      'clientId': serializer.toJson<String>(clientId),
+      'clientName': serializer.toJson<String>(clientName),
+      'quoteName': serializer.toJson<String>(quoteName),
+      'quoteDate': serializer.toJson<String>(quoteDate),
+      'serviceType': serializer.toJson<String>(serviceType),
+      'frequency': serializer.toJson<String>(frequency),
+      'lastProClean': serializer.toJson<String>(lastProClean),
+      'status': serializer.toJson<String>(status),
+      'total': serializer.toJson<double>(total),
+      'address': serializer.toJson<String>(address),
+      'totalSqFt': serializer.toJson<String>(totalSqFt),
+      'useTotalSqFt': serializer.toJson<bool>(useTotalSqFt),
+      'estimatedSqFt': serializer.toJson<String>(estimatedSqFt),
+      'petsPresent': serializer.toJson<bool>(petsPresent),
+      'homeOccupied': serializer.toJson<bool>(homeOccupied),
+      'entryCode': serializer.toJson<String>(entryCode),
+      'paymentMethod': serializer.toJson<String>(paymentMethod),
+      'feedbackDiscussed': serializer.toJson<bool>(feedbackDiscussed),
+      'laborRate': serializer.toJson<double>(laborRate),
+      'taxEnabled': serializer.toJson<bool>(taxEnabled),
+      'ccEnabled': serializer.toJson<bool>(ccEnabled),
+      'taxRate': serializer.toJson<double>(taxRate),
+      'ccRate': serializer.toJson<double>(ccRate),
+      'defaultRoomType': serializer.toJson<String>(defaultRoomType),
+      'defaultLevel': serializer.toJson<String>(defaultLevel),
+      'defaultSize': serializer.toJson<String>(defaultSize),
+      'defaultComplexity': serializer.toJson<String>(defaultComplexity),
+      'subItemType': serializer.toJson<String>(subItemType),
+      'specialNotes': serializer.toJson<String>(specialNotes),
+    };
+  }
+
+  QuoteRow copyWith({
+    String? id,
+    String? orgId,
+    int? updatedAt,
+    bool? deleted,
+    String? clientId,
+    String? clientName,
+    String? quoteName,
+    String? quoteDate,
+    String? serviceType,
+    String? frequency,
+    String? lastProClean,
+    String? status,
+    double? total,
+    String? address,
+    String? totalSqFt,
+    bool? useTotalSqFt,
+    String? estimatedSqFt,
+    bool? petsPresent,
+    bool? homeOccupied,
+    String? entryCode,
+    String? paymentMethod,
+    bool? feedbackDiscussed,
+    double? laborRate,
+    bool? taxEnabled,
+    bool? ccEnabled,
+    double? taxRate,
+    double? ccRate,
+    String? defaultRoomType,
+    String? defaultLevel,
+    String? defaultSize,
+    String? defaultComplexity,
+    String? subItemType,
+    String? specialNotes,
+  }) => QuoteRow(
+    id: id ?? this.id,
+    orgId: orgId ?? this.orgId,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deleted: deleted ?? this.deleted,
+    clientId: clientId ?? this.clientId,
+    clientName: clientName ?? this.clientName,
+    quoteName: quoteName ?? this.quoteName,
+    quoteDate: quoteDate ?? this.quoteDate,
+    serviceType: serviceType ?? this.serviceType,
+    frequency: frequency ?? this.frequency,
+    lastProClean: lastProClean ?? this.lastProClean,
+    status: status ?? this.status,
+    total: total ?? this.total,
+    address: address ?? this.address,
+    totalSqFt: totalSqFt ?? this.totalSqFt,
+    useTotalSqFt: useTotalSqFt ?? this.useTotalSqFt,
+    estimatedSqFt: estimatedSqFt ?? this.estimatedSqFt,
+    petsPresent: petsPresent ?? this.petsPresent,
+    homeOccupied: homeOccupied ?? this.homeOccupied,
+    entryCode: entryCode ?? this.entryCode,
+    paymentMethod: paymentMethod ?? this.paymentMethod,
+    feedbackDiscussed: feedbackDiscussed ?? this.feedbackDiscussed,
+    laborRate: laborRate ?? this.laborRate,
+    taxEnabled: taxEnabled ?? this.taxEnabled,
+    ccEnabled: ccEnabled ?? this.ccEnabled,
+    taxRate: taxRate ?? this.taxRate,
+    ccRate: ccRate ?? this.ccRate,
+    defaultRoomType: defaultRoomType ?? this.defaultRoomType,
+    defaultLevel: defaultLevel ?? this.defaultLevel,
+    defaultSize: defaultSize ?? this.defaultSize,
+    defaultComplexity: defaultComplexity ?? this.defaultComplexity,
+    subItemType: subItemType ?? this.subItemType,
+    specialNotes: specialNotes ?? this.specialNotes,
+  );
+  QuoteRow copyWithCompanion(QuotesCompanion data) {
+    return QuoteRow(
+      id: data.id.present ? data.id.value : this.id,
+      orgId: data.orgId.present ? data.orgId.value : this.orgId,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
+      clientId: data.clientId.present ? data.clientId.value : this.clientId,
+      clientName: data.clientName.present
+          ? data.clientName.value
+          : this.clientName,
+      quoteName: data.quoteName.present ? data.quoteName.value : this.quoteName,
+      quoteDate: data.quoteDate.present ? data.quoteDate.value : this.quoteDate,
+      serviceType: data.serviceType.present
+          ? data.serviceType.value
+          : this.serviceType,
+      frequency: data.frequency.present ? data.frequency.value : this.frequency,
+      lastProClean: data.lastProClean.present
+          ? data.lastProClean.value
+          : this.lastProClean,
+      status: data.status.present ? data.status.value : this.status,
+      total: data.total.present ? data.total.value : this.total,
+      address: data.address.present ? data.address.value : this.address,
+      totalSqFt: data.totalSqFt.present ? data.totalSqFt.value : this.totalSqFt,
+      useTotalSqFt: data.useTotalSqFt.present
+          ? data.useTotalSqFt.value
+          : this.useTotalSqFt,
+      estimatedSqFt: data.estimatedSqFt.present
+          ? data.estimatedSqFt.value
+          : this.estimatedSqFt,
+      petsPresent: data.petsPresent.present
+          ? data.petsPresent.value
+          : this.petsPresent,
+      homeOccupied: data.homeOccupied.present
+          ? data.homeOccupied.value
+          : this.homeOccupied,
+      entryCode: data.entryCode.present ? data.entryCode.value : this.entryCode,
+      paymentMethod: data.paymentMethod.present
+          ? data.paymentMethod.value
+          : this.paymentMethod,
+      feedbackDiscussed: data.feedbackDiscussed.present
+          ? data.feedbackDiscussed.value
+          : this.feedbackDiscussed,
+      laborRate: data.laborRate.present ? data.laborRate.value : this.laborRate,
+      taxEnabled: data.taxEnabled.present
+          ? data.taxEnabled.value
+          : this.taxEnabled,
+      ccEnabled: data.ccEnabled.present ? data.ccEnabled.value : this.ccEnabled,
+      taxRate: data.taxRate.present ? data.taxRate.value : this.taxRate,
+      ccRate: data.ccRate.present ? data.ccRate.value : this.ccRate,
+      defaultRoomType: data.defaultRoomType.present
+          ? data.defaultRoomType.value
+          : this.defaultRoomType,
+      defaultLevel: data.defaultLevel.present
+          ? data.defaultLevel.value
+          : this.defaultLevel,
+      defaultSize: data.defaultSize.present
+          ? data.defaultSize.value
+          : this.defaultSize,
+      defaultComplexity: data.defaultComplexity.present
+          ? data.defaultComplexity.value
+          : this.defaultComplexity,
+      subItemType: data.subItemType.present
+          ? data.subItemType.value
+          : this.subItemType,
+      specialNotes: data.specialNotes.present
+          ? data.specialNotes.value
+          : this.specialNotes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuoteRow(')
+          ..write('id: $id, ')
+          ..write('orgId: $orgId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deleted: $deleted, ')
+          ..write('clientId: $clientId, ')
+          ..write('clientName: $clientName, ')
+          ..write('quoteName: $quoteName, ')
+          ..write('quoteDate: $quoteDate, ')
+          ..write('serviceType: $serviceType, ')
+          ..write('frequency: $frequency, ')
+          ..write('lastProClean: $lastProClean, ')
+          ..write('status: $status, ')
+          ..write('total: $total, ')
+          ..write('address: $address, ')
+          ..write('totalSqFt: $totalSqFt, ')
+          ..write('useTotalSqFt: $useTotalSqFt, ')
+          ..write('estimatedSqFt: $estimatedSqFt, ')
+          ..write('petsPresent: $petsPresent, ')
+          ..write('homeOccupied: $homeOccupied, ')
+          ..write('entryCode: $entryCode, ')
+          ..write('paymentMethod: $paymentMethod, ')
+          ..write('feedbackDiscussed: $feedbackDiscussed, ')
+          ..write('laborRate: $laborRate, ')
+          ..write('taxEnabled: $taxEnabled, ')
+          ..write('ccEnabled: $ccEnabled, ')
+          ..write('taxRate: $taxRate, ')
+          ..write('ccRate: $ccRate, ')
+          ..write('defaultRoomType: $defaultRoomType, ')
+          ..write('defaultLevel: $defaultLevel, ')
+          ..write('defaultSize: $defaultSize, ')
+          ..write('defaultComplexity: $defaultComplexity, ')
+          ..write('subItemType: $subItemType, ')
+          ..write('specialNotes: $specialNotes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    orgId,
+    updatedAt,
+    deleted,
+    clientId,
+    clientName,
+    quoteName,
+    quoteDate,
+    serviceType,
+    frequency,
+    lastProClean,
+    status,
+    total,
+    address,
+    totalSqFt,
+    useTotalSqFt,
+    estimatedSqFt,
+    petsPresent,
+    homeOccupied,
+    entryCode,
+    paymentMethod,
+    feedbackDiscussed,
+    laborRate,
+    taxEnabled,
+    ccEnabled,
+    taxRate,
+    ccRate,
+    defaultRoomType,
+    defaultLevel,
+    defaultSize,
+    defaultComplexity,
+    subItemType,
+    specialNotes,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuoteRow &&
+          other.id == this.id &&
+          other.orgId == this.orgId &&
+          other.updatedAt == this.updatedAt &&
+          other.deleted == this.deleted &&
+          other.clientId == this.clientId &&
+          other.clientName == this.clientName &&
+          other.quoteName == this.quoteName &&
+          other.quoteDate == this.quoteDate &&
+          other.serviceType == this.serviceType &&
+          other.frequency == this.frequency &&
+          other.lastProClean == this.lastProClean &&
+          other.status == this.status &&
+          other.total == this.total &&
+          other.address == this.address &&
+          other.totalSqFt == this.totalSqFt &&
+          other.useTotalSqFt == this.useTotalSqFt &&
+          other.estimatedSqFt == this.estimatedSqFt &&
+          other.petsPresent == this.petsPresent &&
+          other.homeOccupied == this.homeOccupied &&
+          other.entryCode == this.entryCode &&
+          other.paymentMethod == this.paymentMethod &&
+          other.feedbackDiscussed == this.feedbackDiscussed &&
+          other.laborRate == this.laborRate &&
+          other.taxEnabled == this.taxEnabled &&
+          other.ccEnabled == this.ccEnabled &&
+          other.taxRate == this.taxRate &&
+          other.ccRate == this.ccRate &&
+          other.defaultRoomType == this.defaultRoomType &&
+          other.defaultLevel == this.defaultLevel &&
+          other.defaultSize == this.defaultSize &&
+          other.defaultComplexity == this.defaultComplexity &&
+          other.subItemType == this.subItemType &&
+          other.specialNotes == this.specialNotes);
 }
 
 class QuotesCompanion extends UpdateCompanion<QuoteRow> {
@@ -662,6 +2135,7 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
   final Value<String> defaultComplexity;
   final Value<String> subItemType;
   final Value<String> specialNotes;
+  final Value<int> rowid;
   const QuotesCompanion({
     this.id = const Value.absent(),
     this.orgId = const Value.absent(),
@@ -696,7 +2170,46 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
     this.defaultComplexity = const Value.absent(),
     this.subItemType = const Value.absent(),
     this.specialNotes = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
+  QuotesCompanion.insert({
+    required String id,
+    required String orgId,
+    required int updatedAt,
+    this.deleted = const Value.absent(),
+    this.clientId = const Value.absent(),
+    this.clientName = const Value.absent(),
+    this.quoteName = const Value.absent(),
+    this.quoteDate = const Value.absent(),
+    this.serviceType = const Value.absent(),
+    this.frequency = const Value.absent(),
+    this.lastProClean = const Value.absent(),
+    this.status = const Value.absent(),
+    this.total = const Value.absent(),
+    this.address = const Value.absent(),
+    this.totalSqFt = const Value.absent(),
+    this.useTotalSqFt = const Value.absent(),
+    this.estimatedSqFt = const Value.absent(),
+    this.petsPresent = const Value.absent(),
+    this.homeOccupied = const Value.absent(),
+    this.entryCode = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
+    this.feedbackDiscussed = const Value.absent(),
+    this.laborRate = const Value.absent(),
+    this.taxEnabled = const Value.absent(),
+    this.ccEnabled = const Value.absent(),
+    this.taxRate = const Value.absent(),
+    this.ccRate = const Value.absent(),
+    this.defaultRoomType = const Value.absent(),
+    this.defaultLevel = const Value.absent(),
+    this.defaultSize = const Value.absent(),
+    this.defaultComplexity = const Value.absent(),
+    this.subItemType = const Value.absent(),
+    this.specialNotes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       orgId = Value(orgId),
+       updatedAt = Value(updatedAt);
   static Insertable<QuoteRow> custom({
     Expression<String>? id,
     Expression<String>? orgId,
@@ -731,6 +2244,7 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
     Expression<String>? defaultComplexity,
     Expression<String>? subItemType,
     Expression<String>? specialNotes,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -766,64 +2280,241 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
       if (defaultComplexity != null) 'default_complexity': defaultComplexity,
       if (subItemType != null) 'sub_item_type': subItemType,
       if (specialNotes != null) 'special_notes': specialNotes,
+      if (rowid != null) 'rowid': rowid,
     });
+  }
+
+  QuotesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? orgId,
+    Value<int>? updatedAt,
+    Value<bool>? deleted,
+    Value<String>? clientId,
+    Value<String>? clientName,
+    Value<String>? quoteName,
+    Value<String>? quoteDate,
+    Value<String>? serviceType,
+    Value<String>? frequency,
+    Value<String>? lastProClean,
+    Value<String>? status,
+    Value<double>? total,
+    Value<String>? address,
+    Value<String>? totalSqFt,
+    Value<bool>? useTotalSqFt,
+    Value<String>? estimatedSqFt,
+    Value<bool>? petsPresent,
+    Value<bool>? homeOccupied,
+    Value<String>? entryCode,
+    Value<String>? paymentMethod,
+    Value<bool>? feedbackDiscussed,
+    Value<double>? laborRate,
+    Value<bool>? taxEnabled,
+    Value<bool>? ccEnabled,
+    Value<double>? taxRate,
+    Value<double>? ccRate,
+    Value<String>? defaultRoomType,
+    Value<String>? defaultLevel,
+    Value<String>? defaultSize,
+    Value<String>? defaultComplexity,
+    Value<String>? subItemType,
+    Value<String>? specialNotes,
+    Value<int>? rowid,
+  }) {
+    return QuotesCompanion(
+      id: id ?? this.id,
+      orgId: orgId ?? this.orgId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deleted: deleted ?? this.deleted,
+      clientId: clientId ?? this.clientId,
+      clientName: clientName ?? this.clientName,
+      quoteName: quoteName ?? this.quoteName,
+      quoteDate: quoteDate ?? this.quoteDate,
+      serviceType: serviceType ?? this.serviceType,
+      frequency: frequency ?? this.frequency,
+      lastProClean: lastProClean ?? this.lastProClean,
+      status: status ?? this.status,
+      total: total ?? this.total,
+      address: address ?? this.address,
+      totalSqFt: totalSqFt ?? this.totalSqFt,
+      useTotalSqFt: useTotalSqFt ?? this.useTotalSqFt,
+      estimatedSqFt: estimatedSqFt ?? this.estimatedSqFt,
+      petsPresent: petsPresent ?? this.petsPresent,
+      homeOccupied: homeOccupied ?? this.homeOccupied,
+      entryCode: entryCode ?? this.entryCode,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      feedbackDiscussed: feedbackDiscussed ?? this.feedbackDiscussed,
+      laborRate: laborRate ?? this.laborRate,
+      taxEnabled: taxEnabled ?? this.taxEnabled,
+      ccEnabled: ccEnabled ?? this.ccEnabled,
+      taxRate: taxRate ?? this.taxRate,
+      ccRate: ccRate ?? this.ccRate,
+      defaultRoomType: defaultRoomType ?? this.defaultRoomType,
+      defaultLevel: defaultLevel ?? this.defaultLevel,
+      defaultSize: defaultSize ?? this.defaultSize,
+      defaultComplexity: defaultComplexity ?? this.defaultComplexity,
+      subItemType: subItemType ?? this.subItemType,
+      specialNotes: specialNotes ?? this.specialNotes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (orgId.present) {
+      map['org_id'] = Variable<String>(orgId.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
+    if (clientId.present) {
+      map['client_id'] = Variable<String>(clientId.value);
+    }
+    if (clientName.present) {
+      map['client_name'] = Variable<String>(clientName.value);
+    }
+    if (quoteName.present) {
+      map['quote_name'] = Variable<String>(quoteName.value);
+    }
+    if (quoteDate.present) {
+      map['quote_date'] = Variable<String>(quoteDate.value);
+    }
+    if (serviceType.present) {
+      map['service_type'] = Variable<String>(serviceType.value);
+    }
+    if (frequency.present) {
+      map['frequency'] = Variable<String>(frequency.value);
+    }
+    if (lastProClean.present) {
+      map['last_pro_clean'] = Variable<String>(lastProClean.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (total.present) {
+      map['total'] = Variable<double>(total.value);
+    }
+    if (address.present) {
+      map['address'] = Variable<String>(address.value);
+    }
+    if (totalSqFt.present) {
+      map['total_sq_ft'] = Variable<String>(totalSqFt.value);
+    }
+    if (useTotalSqFt.present) {
+      map['use_total_sq_ft'] = Variable<bool>(useTotalSqFt.value);
+    }
+    if (estimatedSqFt.present) {
+      map['estimated_sq_ft'] = Variable<String>(estimatedSqFt.value);
+    }
+    if (petsPresent.present) {
+      map['pets_present'] = Variable<bool>(petsPresent.value);
+    }
+    if (homeOccupied.present) {
+      map['home_occupied'] = Variable<bool>(homeOccupied.value);
+    }
+    if (entryCode.present) {
+      map['entry_code'] = Variable<String>(entryCode.value);
+    }
+    if (paymentMethod.present) {
+      map['payment_method'] = Variable<String>(paymentMethod.value);
+    }
+    if (feedbackDiscussed.present) {
+      map['feedback_discussed'] = Variable<bool>(feedbackDiscussed.value);
+    }
+    if (laborRate.present) {
+      map['labor_rate'] = Variable<double>(laborRate.value);
+    }
+    if (taxEnabled.present) {
+      map['tax_enabled'] = Variable<bool>(taxEnabled.value);
+    }
+    if (ccEnabled.present) {
+      map['cc_enabled'] = Variable<bool>(ccEnabled.value);
+    }
+    if (taxRate.present) {
+      map['tax_rate'] = Variable<double>(taxRate.value);
+    }
+    if (ccRate.present) {
+      map['cc_rate'] = Variable<double>(ccRate.value);
+    }
+    if (defaultRoomType.present) {
+      map['default_room_type'] = Variable<String>(defaultRoomType.value);
+    }
+    if (defaultLevel.present) {
+      map['default_level'] = Variable<String>(defaultLevel.value);
+    }
+    if (defaultSize.present) {
+      map['default_size'] = Variable<String>(defaultSize.value);
+    }
+    if (defaultComplexity.present) {
+      map['default_complexity'] = Variable<String>(defaultComplexity.value);
+    }
+    if (subItemType.present) {
+      map['sub_item_type'] = Variable<String>(subItemType.value);
+    }
+    if (specialNotes.present) {
+      map['special_notes'] = Variable<String>(specialNotes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuotesCompanion(')
+          ..write('id: $id, ')
+          ..write('orgId: $orgId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deleted: $deleted, ')
+          ..write('clientId: $clientId, ')
+          ..write('clientName: $clientName, ')
+          ..write('quoteName: $quoteName, ')
+          ..write('quoteDate: $quoteDate, ')
+          ..write('serviceType: $serviceType, ')
+          ..write('frequency: $frequency, ')
+          ..write('lastProClean: $lastProClean, ')
+          ..write('status: $status, ')
+          ..write('total: $total, ')
+          ..write('address: $address, ')
+          ..write('totalSqFt: $totalSqFt, ')
+          ..write('useTotalSqFt: $useTotalSqFt, ')
+          ..write('estimatedSqFt: $estimatedSqFt, ')
+          ..write('petsPresent: $petsPresent, ')
+          ..write('homeOccupied: $homeOccupied, ')
+          ..write('entryCode: $entryCode, ')
+          ..write('paymentMethod: $paymentMethod, ')
+          ..write('feedbackDiscussed: $feedbackDiscussed, ')
+          ..write('laborRate: $laborRate, ')
+          ..write('taxEnabled: $taxEnabled, ')
+          ..write('ccEnabled: $ccEnabled, ')
+          ..write('taxRate: $taxRate, ')
+          ..write('ccRate: $ccRate, ')
+          ..write('defaultRoomType: $defaultRoomType, ')
+          ..write('defaultLevel: $defaultLevel, ')
+          ..write('defaultSize: $defaultSize, ')
+          ..write('defaultComplexity: $defaultComplexity, ')
+          ..write('subItemType: $subItemType, ')
+          ..write('specialNotes: $specialNotes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
   }
 }
 
-class $QuotesTable extends Quotes with TableInfo<$QuotesTable, QuoteRow> {
+class $QuoteItemsTable extends QuoteItems
+    with TableInfo<$QuoteItemsTable, QuoteItemRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $QuotesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = VerificationMeta('id');
-  static const VerificationMeta _orgIdMeta = VerificationMeta('orgId');
-  static const VerificationMeta _updatedAtMeta = VerificationMeta('updatedAt');
-  static const VerificationMeta _deletedMeta = VerificationMeta('deleted');
-  static const VerificationMeta _clientIdMeta = VerificationMeta('clientId');
-  static const VerificationMeta _clientNameMeta =
-      VerificationMeta('clientName');
-  static const VerificationMeta _quoteNameMeta = VerificationMeta('quoteName');
-  static const VerificationMeta _quoteDateMeta = VerificationMeta('quoteDate');
-  static const VerificationMeta _serviceTypeMeta =
-      VerificationMeta('serviceType');
-  static const VerificationMeta _frequencyMeta = VerificationMeta('frequency');
-  static const VerificationMeta _lastProCleanMeta =
-      VerificationMeta('lastProClean');
-  static const VerificationMeta _statusMeta = VerificationMeta('status');
-  static const VerificationMeta _totalMeta = VerificationMeta('total');
-  static const VerificationMeta _addressMeta = VerificationMeta('address');
-  static const VerificationMeta _totalSqFtMeta = VerificationMeta('totalSqFt');
-  static const VerificationMeta _useTotalSqFtMeta =
-      VerificationMeta('useTotalSqFt');
-  static const VerificationMeta _estimatedSqFtMeta =
-      VerificationMeta('estimatedSqFt');
-  static const VerificationMeta _petsPresentMeta =
-      VerificationMeta('petsPresent');
-  static const VerificationMeta _homeOccupiedMeta =
-      VerificationMeta('homeOccupied');
-  static const VerificationMeta _entryCodeMeta = VerificationMeta('entryCode');
-  static const VerificationMeta _paymentMethodMeta =
-      VerificationMeta('paymentMethod');
-  static const VerificationMeta _feedbackDiscussedMeta =
-      VerificationMeta('feedbackDiscussed');
-  static const VerificationMeta _laborRateMeta = VerificationMeta('laborRate');
-  static const VerificationMeta _taxEnabledMeta =
-      VerificationMeta('taxEnabled');
-  static const VerificationMeta _ccEnabledMeta = VerificationMeta('ccEnabled');
-  static const VerificationMeta _taxRateMeta = VerificationMeta('taxRate');
-  static const VerificationMeta _ccRateMeta = VerificationMeta('ccRate');
-  static const VerificationMeta _defaultRoomTypeMeta =
-      VerificationMeta('defaultRoomType');
-  static const VerificationMeta _defaultLevelMeta =
-      VerificationMeta('defaultLevel');
-  static const VerificationMeta _defaultSizeMeta =
-      VerificationMeta('defaultSize');
-  static const VerificationMeta _defaultComplexityMeta =
-      VerificationMeta('defaultComplexity');
-  static const VerificationMeta _subItemTypeMeta =
-      VerificationMeta('subItemType');
-  static const VerificationMeta _specialNotesMeta =
-      VerificationMeta('specialNotes');
+  $QuoteItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
     'id',
@@ -832,6 +2523,7 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, QuoteRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _orgIdMeta = const VerificationMeta('orgId');
   @override
   late final GeneratedColumn<String> orgId = GeneratedColumn<String>(
     'org_id',
@@ -839,6 +2531,20 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, QuoteRow> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quoteIdMeta = const VerificationMeta(
+    'quoteId',
+  );
+  @override
+  late final GeneratedColumn<String> quoteId = GeneratedColumn<String>(
+    'quote_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
   );
   @override
   late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
@@ -848,6 +2554,9 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, QuoteRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _deletedMeta = const VerificationMeta(
+    'deleted',
+  );
   @override
   late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
     'deleted',
@@ -855,483 +2564,147 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, QuoteRow> {
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("deleted" IN (0, 1))',
+    ),
     defaultValue: const Constant(false),
   );
-  @override
-  late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
-    'client_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
   );
   @override
-  late final GeneratedColumn<String> clientName = GeneratedColumn<String>(
-    'client_name',
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
     aliasedName,
     false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> quoteName = GeneratedColumn<String>(
-    'quote_name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> quoteDate = GeneratedColumn<String>(
-    'quote_date',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> serviceType = GeneratedColumn<String>(
-    'service_type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> frequency = GeneratedColumn<String>(
-    'frequency',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> lastProClean = GeneratedColumn<String>(
-    'last_pro_clean',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> status = GeneratedColumn<String>(
-    'status',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('Draft'),
-  );
-  @override
-  late final GeneratedColumn<double> total = GeneratedColumn<double>(
-    'total',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _payloadMeta = const VerificationMeta(
+    'payload',
+  );
   @override
-  late final GeneratedColumn<String> address = GeneratedColumn<String>(
-    'address',
+  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
+    'payload',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> totalSqFt = GeneratedColumn<String>(
-    'total_sq_ft',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<bool> useTotalSqFt = GeneratedColumn<bool>(
-    'use_total_sq_ft',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(true),
-  );
-  @override
-  late final GeneratedColumn<String> estimatedSqFt = GeneratedColumn<String>(
-    'estimated_sq_ft',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<bool> petsPresent = GeneratedColumn<bool>(
-    'pets_present',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(false),
-  );
-  @override
-  late final GeneratedColumn<bool> homeOccupied = GeneratedColumn<bool>(
-    'home_occupied',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(true),
-  );
-  @override
-  late final GeneratedColumn<String> entryCode = GeneratedColumn<String>(
-    'entry_code',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> paymentMethod = GeneratedColumn<String>(
-    'payment_method',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<bool> feedbackDiscussed = GeneratedColumn<bool>(
-    'feedback_discussed',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(false),
-  );
-  @override
-  late final GeneratedColumn<double> laborRate = GeneratedColumn<double>(
-    'labor_rate',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(40.0),
-  );
-  @override
-  late final GeneratedColumn<bool> taxEnabled = GeneratedColumn<bool>(
-    'tax_enabled',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(false),
-  );
-  @override
-  late final GeneratedColumn<bool> ccEnabled = GeneratedColumn<bool>(
-    'cc_enabled',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(false),
-  );
-  @override
-  late final GeneratedColumn<double> taxRate = GeneratedColumn<double>(
-    'tax_rate',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0.07),
-  );
-  @override
-  late final GeneratedColumn<double> ccRate = GeneratedColumn<double>(
-    'cc_rate',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0.03),
-  );
-  @override
-  late final GeneratedColumn<String> defaultRoomType = GeneratedColumn<String>(
-    'default_room_type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> defaultLevel = GeneratedColumn<String>(
-    'default_level',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> defaultSize = GeneratedColumn<String>(
-    'default_size',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> defaultComplexity =
-      GeneratedColumn<String>(
-    'default_complexity',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> subItemType = GeneratedColumn<String>(
-    'sub_item_type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
-  );
-  @override
-  late final GeneratedColumn<String> specialNotes = GeneratedColumn<String>(
-    'special_notes',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(''),
+    defaultValue: const Constant('{}'),
   );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        orgId,
-        updatedAt,
-        deleted,
-        clientId,
-        clientName,
-        quoteName,
-        quoteDate,
-        serviceType,
-        frequency,
-        lastProClean,
-        status,
-        total,
-        address,
-        totalSqFt,
-        useTotalSqFt,
-        estimatedSqFt,
-        petsPresent,
-        homeOccupied,
-        entryCode,
-        paymentMethod,
-        feedbackDiscussed,
-        laborRate,
-        taxEnabled,
-        ccEnabled,
-        taxRate,
-        ccRate,
-        defaultRoomType,
-        defaultLevel,
-        defaultSize,
-        defaultComplexity,
-        subItemType,
-        specialNotes,
-      ];
+    id,
+    orgId,
+    quoteId,
+    updatedAt,
+    deleted,
+    sortOrder,
+    payload,
+  ];
   @override
-  String get aliasedName => _alias ?? 'quotes';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'quotes';
+  String get actualTableName => $name;
+  static const String $name = 'quote_items';
   @override
-  VerificationContext validateIntegrity(Insertable<QuoteRow> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<QuoteItemRow> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('org_id')) {
       context.handle(
-          _orgIdMeta, orgId.isAcceptableOrUnknown(data['org_id']!, _orgIdMeta));
+        _orgIdMeta,
+        orgId.isAcceptableOrUnknown(data['org_id']!, _orgIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orgIdMeta);
+    }
+    if (data.containsKey('quote_id')) {
+      context.handle(
+        _quoteIdMeta,
+        quoteId.isAcceptableOrUnknown(data['quote_id']!, _quoteIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_quoteIdMeta);
     }
     if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
     }
     if (data.containsKey('deleted')) {
-      context.handle(_deletedMeta,
-          deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta));
-    }
-    if (data.containsKey('client_id')) {
-      context.handle(_clientIdMeta,
-          clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta));
-    }
-    if (data.containsKey('client_name')) {
       context.handle(
-          _clientNameMeta,
-          clientName.isAcceptableOrUnknown(
-              data['client_name']!, _clientNameMeta));
+        _deletedMeta,
+        deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta),
+      );
     }
-    if (data.containsKey('quote_name')) {
-      context.handle(_quoteNameMeta,
-          quoteName.isAcceptableOrUnknown(data['quote_name']!, _quoteNameMeta));
-    }
-    if (data.containsKey('quote_date')) {
-      context.handle(_quoteDateMeta,
-          quoteDate.isAcceptableOrUnknown(data['quote_date']!, _quoteDateMeta));
-    }
-    if (data.containsKey('service_type')) {
+    if (data.containsKey('sort_order')) {
       context.handle(
-          _serviceTypeMeta,
-          serviceType.isAcceptableOrUnknown(
-              data['service_type']!, _serviceTypeMeta));
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
     }
-    if (data.containsKey('frequency')) {
-      context.handle(_frequencyMeta,
-          frequency.isAcceptableOrUnknown(data['frequency']!, _frequencyMeta));
-    }
-    if (data.containsKey('last_pro_clean')) {
+    if (data.containsKey('payload')) {
       context.handle(
-          _lastProCleanMeta,
-          lastProClean.isAcceptableOrUnknown(
-              data['last_pro_clean']!, _lastProCleanMeta));
-    }
-    if (data.containsKey('status')) {
-      context.handle(_statusMeta,
-          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
-    }
-    if (data.containsKey('total')) {
-      context.handle(
-          _totalMeta, total.isAcceptableOrUnknown(data['total']!, _totalMeta));
-    }
-    if (data.containsKey('address')) {
-      context.handle(_addressMeta,
-          address.isAcceptableOrUnknown(data['address']!, _addressMeta));
-    }
-    if (data.containsKey('total_sq_ft')) {
-      context.handle(
-          _totalSqFtMeta,
-          totalSqFt.isAcceptableOrUnknown(
-              data['total_sq_ft']!, _totalSqFtMeta));
-    }
-    if (data.containsKey('use_total_sq_ft')) {
-      context.handle(
-          _useTotalSqFtMeta,
-          useTotalSqFt.isAcceptableOrUnknown(
-              data['use_total_sq_ft']!, _useTotalSqFtMeta));
-    }
-    if (data.containsKey('estimated_sq_ft')) {
-      context.handle(
-          _estimatedSqFtMeta,
-          estimatedSqFt.isAcceptableOrUnknown(
-              data['estimated_sq_ft']!, _estimatedSqFtMeta));
-    }
-    if (data.containsKey('pets_present')) {
-      context.handle(
-          _petsPresentMeta,
-          petsPresent.isAcceptableOrUnknown(
-              data['pets_present']!, _petsPresentMeta));
-    }
-    if (data.containsKey('home_occupied')) {
-      context.handle(
-          _homeOccupiedMeta,
-          homeOccupied.isAcceptableOrUnknown(
-              data['home_occupied']!, _homeOccupiedMeta));
-    }
-    if (data.containsKey('entry_code')) {
-      context.handle(_entryCodeMeta,
-          entryCode.isAcceptableOrUnknown(data['entry_code']!, _entryCodeMeta));
-    }
-    if (data.containsKey('payment_method')) {
-      context.handle(
-          _paymentMethodMeta,
-          paymentMethod.isAcceptableOrUnknown(
-              data['payment_method']!, _paymentMethodMeta));
-    }
-    if (data.containsKey('feedback_discussed')) {
-      context.handle(
-          _feedbackDiscussedMeta,
-          feedbackDiscussed.isAcceptableOrUnknown(
-              data['feedback_discussed']!, _feedbackDiscussedMeta));
-    }
-    if (data.containsKey('labor_rate')) {
-      context.handle(_laborRateMeta,
-          laborRate.isAcceptableOrUnknown(data['labor_rate']!, _laborRateMeta));
-    }
-    if (data.containsKey('tax_enabled')) {
-      context.handle(_taxEnabledMeta,
-          taxEnabled.isAcceptableOrUnknown(data['tax_enabled']!, _taxEnabledMeta));
-    }
-    if (data.containsKey('cc_enabled')) {
-      context.handle(_ccEnabledMeta,
-          ccEnabled.isAcceptableOrUnknown(data['cc_enabled']!, _ccEnabledMeta));
-    }
-    if (data.containsKey('tax_rate')) {
-      context.handle(_taxRateMeta,
-          taxRate.isAcceptableOrUnknown(data['tax_rate']!, _taxRateMeta));
-    }
-    if (data.containsKey('cc_rate')) {
-      context.handle(_ccRateMeta,
-          ccRate.isAcceptableOrUnknown(data['cc_rate']!, _ccRateMeta));
-    }
-    if (data.containsKey('default_room_type')) {
-      context.handle(
-          _defaultRoomTypeMeta,
-          defaultRoomType.isAcceptableOrUnknown(
-              data['default_room_type']!, _defaultRoomTypeMeta));
-    }
-    if (data.containsKey('default_level')) {
-      context.handle(
-          _defaultLevelMeta,
-          defaultLevel.isAcceptableOrUnknown(
-              data['default_level']!, _defaultLevelMeta));
-    }
-    if (data.containsKey('default_size')) {
-      context.handle(_defaultSizeMeta,
-          defaultSize.isAcceptableOrUnknown(data['default_size']!, _defaultSizeMeta));
-    }
-    if (data.containsKey('default_complexity')) {
-      context.handle(
-          _defaultComplexityMeta,
-          defaultComplexity.isAcceptableOrUnknown(
-              data['default_complexity']!, _defaultComplexityMeta));
-    }
-    if (data.containsKey('sub_item_type')) {
-      context.handle(_subItemTypeMeta,
-          subItemType.isAcceptableOrUnknown(data['sub_item_type']!, _subItemTypeMeta));
-    }
-    if (data.containsKey('special_notes')) {
-      context.handle(_specialNotesMeta,
-          specialNotes.isAcceptableOrUnknown(data['special_notes']!, _specialNotesMeta));
+        _payloadMeta,
+        payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta),
+      );
     }
     return context;
   }
 
   @override
-  QuoteRow map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return QuoteRow.fromData(data, prefix: tablePrefix);
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  QuoteItemRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuoteItemRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      orgId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}org_id'],
+      )!,
+      quoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quote_id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}deleted'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      payload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload'],
+      )!,
+    );
   }
 
   @override
-  $QuotesTable createAlias(String alias) {
-    return $QuotesTable(attachedDatabase, alias);
+  $QuoteItemsTable createAlias(String alias) {
+    return $QuoteItemsTable(attachedDatabase, alias);
   }
 }
 
@@ -1352,37 +2725,117 @@ class QuoteItemRow extends DataClass implements Insertable<QuoteItemRow> {
     required this.sortOrder,
     required this.payload,
   });
-  factory QuoteItemRow.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['org_id'] = Variable<String>(orgId);
+    map['quote_id'] = Variable<String>(quoteId);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['deleted'] = Variable<bool>(deleted);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['payload'] = Variable<String>(payload);
+    return map;
+  }
+
+  QuoteItemsCompanion toCompanion(bool nullToAbsent) {
+    return QuoteItemsCompanion(
+      id: Value(id),
+      orgId: Value(orgId),
+      quoteId: Value(quoteId),
+      updatedAt: Value(updatedAt),
+      deleted: Value(deleted),
+      sortOrder: Value(sortOrder),
+      payload: Value(payload),
+    );
+  }
+
+  factory QuoteItemRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return QuoteItemRow(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      orgId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}org_id'])!,
-      quoteId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}quote_id'])!,
-      updatedAt: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      deleted: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}deleted'])!,
-      sortOrder: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}sort_order'])!,
-      payload: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}payload'])!,
+      id: serializer.fromJson<String>(json['id']),
+      orgId: serializer.fromJson<String>(json['orgId']),
+      quoteId: serializer.fromJson<String>(json['quoteId']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      payload: serializer.fromJson<String>(json['payload']),
     );
   }
   @override
-  Map<String, Expression<Object>> toColumns(bool nullToAbsent) {
-    return {
-      'id': Variable<String>(id),
-      'org_id': Variable<String>(orgId),
-      'quote_id': Variable<String>(quoteId),
-      'updated_at': Variable<int>(updatedAt),
-      'deleted': Variable<bool>(deleted),
-      'sort_order': Variable<int>(sortOrder),
-      'payload': Variable<String>(payload),
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'orgId': serializer.toJson<String>(orgId),
+      'quoteId': serializer.toJson<String>(quoteId),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deleted': serializer.toJson<bool>(deleted),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'payload': serializer.toJson<String>(payload),
     };
   }
+
+  QuoteItemRow copyWith({
+    String? id,
+    String? orgId,
+    String? quoteId,
+    int? updatedAt,
+    bool? deleted,
+    int? sortOrder,
+    String? payload,
+  }) => QuoteItemRow(
+    id: id ?? this.id,
+    orgId: orgId ?? this.orgId,
+    quoteId: quoteId ?? this.quoteId,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deleted: deleted ?? this.deleted,
+    sortOrder: sortOrder ?? this.sortOrder,
+    payload: payload ?? this.payload,
+  );
+  QuoteItemRow copyWithCompanion(QuoteItemsCompanion data) {
+    return QuoteItemRow(
+      id: data.id.present ? data.id.value : this.id,
+      orgId: data.orgId.present ? data.orgId.value : this.orgId,
+      quoteId: data.quoteId.present ? data.quoteId.value : this.quoteId,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      payload: data.payload.present ? data.payload.value : this.payload,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuoteItemRow(')
+          ..write('id: $id, ')
+          ..write('orgId: $orgId, ')
+          ..write('quoteId: $quoteId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deleted: $deleted, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('payload: $payload')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, orgId, quoteId, updatedAt, deleted, sortOrder, payload);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuoteItemRow &&
+          other.id == this.id &&
+          other.orgId == this.orgId &&
+          other.quoteId == this.quoteId &&
+          other.updatedAt == this.updatedAt &&
+          other.deleted == this.deleted &&
+          other.sortOrder == this.sortOrder &&
+          other.payload == this.payload);
 }
 
 class QuoteItemsCompanion extends UpdateCompanion<QuoteItemRow> {
@@ -1393,6 +2846,7 @@ class QuoteItemsCompanion extends UpdateCompanion<QuoteItemRow> {
   final Value<bool> deleted;
   final Value<int> sortOrder;
   final Value<String> payload;
+  final Value<int> rowid;
   const QuoteItemsCompanion({
     this.id = const Value.absent(),
     this.orgId = const Value.absent(),
@@ -1401,23 +2855,118 @@ class QuoteItemsCompanion extends UpdateCompanion<QuoteItemRow> {
     this.deleted = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.payload = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
+  QuoteItemsCompanion.insert({
+    required String id,
+    required String orgId,
+    required String quoteId,
+    required int updatedAt,
+    this.deleted = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.payload = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       orgId = Value(orgId),
+       quoteId = Value(quoteId),
+       updatedAt = Value(updatedAt);
+  static Insertable<QuoteItemRow> custom({
+    Expression<String>? id,
+    Expression<String>? orgId,
+    Expression<String>? quoteId,
+    Expression<int>? updatedAt,
+    Expression<bool>? deleted,
+    Expression<int>? sortOrder,
+    Expression<String>? payload,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (orgId != null) 'org_id': orgId,
+      if (quoteId != null) 'quote_id': quoteId,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deleted != null) 'deleted': deleted,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (payload != null) 'payload': payload,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  QuoteItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? orgId,
+    Value<String>? quoteId,
+    Value<int>? updatedAt,
+    Value<bool>? deleted,
+    Value<int>? sortOrder,
+    Value<String>? payload,
+    Value<int>? rowid,
+  }) {
+    return QuoteItemsCompanion(
+      id: id ?? this.id,
+      orgId: orgId ?? this.orgId,
+      quoteId: quoteId ?? this.quoteId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deleted: deleted ?? this.deleted,
+      sortOrder: sortOrder ?? this.sortOrder,
+      payload: payload ?? this.payload,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (orgId.present) {
+      map['org_id'] = Variable<String>(orgId.value);
+    }
+    if (quoteId.present) {
+      map['quote_id'] = Variable<String>(quoteId.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (payload.present) {
+      map['payload'] = Variable<String>(payload.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuoteItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('orgId: $orgId, ')
+          ..write('quoteId: $quoteId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deleted: $deleted, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('payload: $payload, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
 }
 
-class $QuoteItemsTable extends QuoteItems
-    with TableInfo<$QuoteItemsTable, QuoteItemRow> {
+class $OrgSettingsTableTable extends OrgSettingsTable
+    with TableInfo<$OrgSettingsTableTable, OrgSettingsRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $QuoteItemsTable(this.attachedDatabase, [this._alias]);
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  $OrgSettingsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _orgIdMeta = const VerificationMeta('orgId');
   @override
   late final GeneratedColumn<String> orgId = GeneratedColumn<String>(
     'org_id',
@@ -1426,13 +2975,8 @@ class $QuoteItemsTable extends QuoteItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  @override
-  late final GeneratedColumn<String> quoteId = GeneratedColumn<String>(
-    'quote_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
   );
   @override
   late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
@@ -1442,6 +2986,9 @@ class $QuoteItemsTable extends QuoteItems
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _deletedMeta = const VerificationMeta(
+    'deleted',
+  );
   @override
   late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
     'deleted',
@@ -1449,46 +2996,197 @@ class $QuoteItemsTable extends QuoteItems
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("deleted" IN (0, 1))',
+    ),
     defaultValue: const Constant(false),
   );
-  @override
-  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
-    'sort_order',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
+  static const VerificationMeta _laborRateMeta = const VerificationMeta(
+    'laborRate',
   );
   @override
-  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
-    'payload',
+  late final GeneratedColumn<double> laborRate = GeneratedColumn<double>(
+    'labor_rate',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.double,
     requiredDuringInsert: false,
-    defaultValue: const Constant('{}'),
+    defaultValue: const Constant(40.0),
+  );
+  static const VerificationMeta _taxEnabledMeta = const VerificationMeta(
+    'taxEnabled',
   );
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, orgId, quoteId, updatedAt, deleted, sortOrder, payload];
+  late final GeneratedColumn<bool> taxEnabled = GeneratedColumn<bool>(
+    'tax_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("tax_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _taxRateMeta = const VerificationMeta(
+    'taxRate',
+  );
   @override
-  String get aliasedName => _alias ?? 'quote_items';
+  late final GeneratedColumn<double> taxRate = GeneratedColumn<double>(
+    'tax_rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.07),
+  );
+  static const VerificationMeta _ccEnabledMeta = const VerificationMeta(
+    'ccEnabled',
+  );
   @override
-  String get actualTableName => 'quote_items';
+  late final GeneratedColumn<bool> ccEnabled = GeneratedColumn<bool>(
+    'cc_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("cc_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _ccRateMeta = const VerificationMeta('ccRate');
   @override
-  VerificationContext validateIntegrity(Insertable<QuoteItemRow> instance,
-      {bool isInserting = false}) {
-    return VerificationContext();
-  }
+  late final GeneratedColumn<double> ccRate = GeneratedColumn<double>(
+    'cc_rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.03),
+  );
   @override
-  QuoteItemRow map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return QuoteItemRow.fromData(data, prefix: tablePrefix);
+  List<GeneratedColumn> get $columns => [
+    orgId,
+    updatedAt,
+    deleted,
+    laborRate,
+    taxEnabled,
+    taxRate,
+    ccEnabled,
+    ccRate,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'org_settings_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OrgSettingsRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('org_id')) {
+      context.handle(
+        _orgIdMeta,
+        orgId.isAcceptableOrUnknown(data['org_id']!, _orgIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orgIdMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted')) {
+      context.handle(
+        _deletedMeta,
+        deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta),
+      );
+    }
+    if (data.containsKey('labor_rate')) {
+      context.handle(
+        _laborRateMeta,
+        laborRate.isAcceptableOrUnknown(data['labor_rate']!, _laborRateMeta),
+      );
+    }
+    if (data.containsKey('tax_enabled')) {
+      context.handle(
+        _taxEnabledMeta,
+        taxEnabled.isAcceptableOrUnknown(data['tax_enabled']!, _taxEnabledMeta),
+      );
+    }
+    if (data.containsKey('tax_rate')) {
+      context.handle(
+        _taxRateMeta,
+        taxRate.isAcceptableOrUnknown(data['tax_rate']!, _taxRateMeta),
+      );
+    }
+    if (data.containsKey('cc_enabled')) {
+      context.handle(
+        _ccEnabledMeta,
+        ccEnabled.isAcceptableOrUnknown(data['cc_enabled']!, _ccEnabledMeta),
+      );
+    }
+    if (data.containsKey('cc_rate')) {
+      context.handle(
+        _ccRateMeta,
+        ccRate.isAcceptableOrUnknown(data['cc_rate']!, _ccRateMeta),
+      );
+    }
+    return context;
   }
 
   @override
-  $QuoteItemsTable createAlias(String alias) {
-    return $QuoteItemsTable(attachedDatabase, alias);
+  Set<GeneratedColumn> get $primaryKey => {orgId};
+  @override
+  OrgSettingsRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OrgSettingsRow(
+      orgId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}org_id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}deleted'],
+      )!,
+      laborRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}labor_rate'],
+      )!,
+      taxEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}tax_enabled'],
+      )!,
+      taxRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}tax_rate'],
+      )!,
+      ccEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}cc_enabled'],
+      )!,
+      ccRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}cc_rate'],
+      )!,
+    );
+  }
+
+  @override
+  $OrgSettingsTableTable createAlias(String alias) {
+    return $OrgSettingsTableTable(attachedDatabase, alias);
   }
 }
 
@@ -1511,40 +3209,136 @@ class OrgSettingsRow extends DataClass implements Insertable<OrgSettingsRow> {
     required this.ccEnabled,
     required this.ccRate,
   });
-  factory OrgSettingsRow.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['org_id'] = Variable<String>(orgId);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['deleted'] = Variable<bool>(deleted);
+    map['labor_rate'] = Variable<double>(laborRate);
+    map['tax_enabled'] = Variable<bool>(taxEnabled);
+    map['tax_rate'] = Variable<double>(taxRate);
+    map['cc_enabled'] = Variable<bool>(ccEnabled);
+    map['cc_rate'] = Variable<double>(ccRate);
+    return map;
+  }
+
+  OrgSettingsTableCompanion toCompanion(bool nullToAbsent) {
+    return OrgSettingsTableCompanion(
+      orgId: Value(orgId),
+      updatedAt: Value(updatedAt),
+      deleted: Value(deleted),
+      laborRate: Value(laborRate),
+      taxEnabled: Value(taxEnabled),
+      taxRate: Value(taxRate),
+      ccEnabled: Value(ccEnabled),
+      ccRate: Value(ccRate),
+    );
+  }
+
+  factory OrgSettingsRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return OrgSettingsRow(
-      orgId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}org_id'])!,
-      updatedAt: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      deleted: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}deleted'])!,
-      laborRate: const RealType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}labor_rate'])!,
-      taxEnabled: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}tax_enabled'])!,
-      taxRate: const RealType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}tax_rate'])!,
-      ccEnabled: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}cc_enabled'])!,
-      ccRate: const RealType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}cc_rate'])!,
+      orgId: serializer.fromJson<String>(json['orgId']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
+      laborRate: serializer.fromJson<double>(json['laborRate']),
+      taxEnabled: serializer.fromJson<bool>(json['taxEnabled']),
+      taxRate: serializer.fromJson<double>(json['taxRate']),
+      ccEnabled: serializer.fromJson<bool>(json['ccEnabled']),
+      ccRate: serializer.fromJson<double>(json['ccRate']),
     );
   }
   @override
-  Map<String, Expression<Object>> toColumns(bool nullToAbsent) {
-    return {
-      'org_id': Variable<String>(orgId),
-      'updated_at': Variable<int>(updatedAt),
-      'deleted': Variable<bool>(deleted),
-      'labor_rate': Variable<double>(laborRate),
-      'tax_enabled': Variable<bool>(taxEnabled),
-      'tax_rate': Variable<double>(taxRate),
-      'cc_enabled': Variable<bool>(ccEnabled),
-      'cc_rate': Variable<double>(ccRate),
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'orgId': serializer.toJson<String>(orgId),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deleted': serializer.toJson<bool>(deleted),
+      'laborRate': serializer.toJson<double>(laborRate),
+      'taxEnabled': serializer.toJson<bool>(taxEnabled),
+      'taxRate': serializer.toJson<double>(taxRate),
+      'ccEnabled': serializer.toJson<bool>(ccEnabled),
+      'ccRate': serializer.toJson<double>(ccRate),
     };
   }
+
+  OrgSettingsRow copyWith({
+    String? orgId,
+    int? updatedAt,
+    bool? deleted,
+    double? laborRate,
+    bool? taxEnabled,
+    double? taxRate,
+    bool? ccEnabled,
+    double? ccRate,
+  }) => OrgSettingsRow(
+    orgId: orgId ?? this.orgId,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deleted: deleted ?? this.deleted,
+    laborRate: laborRate ?? this.laborRate,
+    taxEnabled: taxEnabled ?? this.taxEnabled,
+    taxRate: taxRate ?? this.taxRate,
+    ccEnabled: ccEnabled ?? this.ccEnabled,
+    ccRate: ccRate ?? this.ccRate,
+  );
+  OrgSettingsRow copyWithCompanion(OrgSettingsTableCompanion data) {
+    return OrgSettingsRow(
+      orgId: data.orgId.present ? data.orgId.value : this.orgId,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
+      laborRate: data.laborRate.present ? data.laborRate.value : this.laborRate,
+      taxEnabled: data.taxEnabled.present
+          ? data.taxEnabled.value
+          : this.taxEnabled,
+      taxRate: data.taxRate.present ? data.taxRate.value : this.taxRate,
+      ccEnabled: data.ccEnabled.present ? data.ccEnabled.value : this.ccEnabled,
+      ccRate: data.ccRate.present ? data.ccRate.value : this.ccRate,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OrgSettingsRow(')
+          ..write('orgId: $orgId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deleted: $deleted, ')
+          ..write('laborRate: $laborRate, ')
+          ..write('taxEnabled: $taxEnabled, ')
+          ..write('taxRate: $taxRate, ')
+          ..write('ccEnabled: $ccEnabled, ')
+          ..write('ccRate: $ccRate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    orgId,
+    updatedAt,
+    deleted,
+    laborRate,
+    taxEnabled,
+    taxRate,
+    ccEnabled,
+    ccRate,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OrgSettingsRow &&
+          other.orgId == this.orgId &&
+          other.updatedAt == this.updatedAt &&
+          other.deleted == this.deleted &&
+          other.laborRate == this.laborRate &&
+          other.taxEnabled == this.taxEnabled &&
+          other.taxRate == this.taxRate &&
+          other.ccEnabled == this.ccEnabled &&
+          other.ccRate == this.ccRate);
 }
 
 class OrgSettingsTableCompanion extends UpdateCompanion<OrgSettingsRow> {
@@ -1556,6 +3350,7 @@ class OrgSettingsTableCompanion extends UpdateCompanion<OrgSettingsRow> {
   final Value<double> taxRate;
   final Value<bool> ccEnabled;
   final Value<double> ccRate;
+  final Value<int> rowid;
   const OrgSettingsTableCompanion({
     this.orgId = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1565,22 +3360,176 @@ class OrgSettingsTableCompanion extends UpdateCompanion<OrgSettingsRow> {
     this.taxRate = const Value.absent(),
     this.ccEnabled = const Value.absent(),
     this.ccRate = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
+  OrgSettingsTableCompanion.insert({
+    required String orgId,
+    required int updatedAt,
+    this.deleted = const Value.absent(),
+    this.laborRate = const Value.absent(),
+    this.taxEnabled = const Value.absent(),
+    this.taxRate = const Value.absent(),
+    this.ccEnabled = const Value.absent(),
+    this.ccRate = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : orgId = Value(orgId),
+       updatedAt = Value(updatedAt);
+  static Insertable<OrgSettingsRow> custom({
+    Expression<String>? orgId,
+    Expression<int>? updatedAt,
+    Expression<bool>? deleted,
+    Expression<double>? laborRate,
+    Expression<bool>? taxEnabled,
+    Expression<double>? taxRate,
+    Expression<bool>? ccEnabled,
+    Expression<double>? ccRate,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (orgId != null) 'org_id': orgId,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deleted != null) 'deleted': deleted,
+      if (laborRate != null) 'labor_rate': laborRate,
+      if (taxEnabled != null) 'tax_enabled': taxEnabled,
+      if (taxRate != null) 'tax_rate': taxRate,
+      if (ccEnabled != null) 'cc_enabled': ccEnabled,
+      if (ccRate != null) 'cc_rate': ccRate,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  OrgSettingsTableCompanion copyWith({
+    Value<String>? orgId,
+    Value<int>? updatedAt,
+    Value<bool>? deleted,
+    Value<double>? laborRate,
+    Value<bool>? taxEnabled,
+    Value<double>? taxRate,
+    Value<bool>? ccEnabled,
+    Value<double>? ccRate,
+    Value<int>? rowid,
+  }) {
+    return OrgSettingsTableCompanion(
+      orgId: orgId ?? this.orgId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deleted: deleted ?? this.deleted,
+      laborRate: laborRate ?? this.laborRate,
+      taxEnabled: taxEnabled ?? this.taxEnabled,
+      taxRate: taxRate ?? this.taxRate,
+      ccEnabled: ccEnabled ?? this.ccEnabled,
+      ccRate: ccRate ?? this.ccRate,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (orgId.present) {
+      map['org_id'] = Variable<String>(orgId.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
+    if (laborRate.present) {
+      map['labor_rate'] = Variable<double>(laborRate.value);
+    }
+    if (taxEnabled.present) {
+      map['tax_enabled'] = Variable<bool>(taxEnabled.value);
+    }
+    if (taxRate.present) {
+      map['tax_rate'] = Variable<double>(taxRate.value);
+    }
+    if (ccEnabled.present) {
+      map['cc_enabled'] = Variable<bool>(ccEnabled.value);
+    }
+    if (ccRate.present) {
+      map['cc_rate'] = Variable<double>(ccRate.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OrgSettingsTableCompanion(')
+          ..write('orgId: $orgId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deleted: $deleted, ')
+          ..write('laborRate: $laborRate, ')
+          ..write('taxEnabled: $taxEnabled, ')
+          ..write('taxRate: $taxRate, ')
+          ..write('ccEnabled: $ccEnabled, ')
+          ..write('ccRate: $ccRate, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
 }
 
-class $OrgSettingsTableTable extends OrgSettingsTable
-    with TableInfo<$OrgSettingsTableTable, OrgSettingsRow> {
+class $OutboxTable extends Outbox with TableInfo<$OutboxTable, OutboxRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $OrgSettingsTableTable(this.attachedDatabase, [this._alias]);
+  $OutboxTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> orgId = GeneratedColumn<String>(
-    'org_id',
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityTypeMeta = const VerificationMeta(
+    'entityType',
+  );
+  @override
+  late final GeneratedColumn<String> entityType = GeneratedColumn<String>(
+    'entity_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityIdMeta = const VerificationMeta(
+    'entityId',
+  );
+  @override
+  late final GeneratedColumn<String> entityId = GeneratedColumn<String>(
+    'entity_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _opTypeMeta = const VerificationMeta('opType');
+  @override
+  late final GeneratedColumn<String> opType = GeneratedColumn<String>(
+    'op_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _payloadMeta = const VerificationMeta(
+    'payload',
+  );
+  @override
+  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
+    'payload',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
   );
   @override
   late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
@@ -1590,80 +3539,154 @@ class $OrgSettingsTableTable extends OrgSettingsTable
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _orgIdMeta = const VerificationMeta('orgId');
   @override
-  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
-    'deleted',
+  late final GeneratedColumn<String> orgId = GeneratedColumn<String>(
+    'org_id',
     aliasedName,
     false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(false),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
   );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
-  late final GeneratedColumn<double> laborRate = GeneratedColumn<double>(
-    'labor_rate',
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant(40.0),
+    defaultValue: const Constant('pending'),
   );
   @override
-  late final GeneratedColumn<bool> taxEnabled = GeneratedColumn<bool>(
-    'tax_enabled',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(false),
-  );
+  List<GeneratedColumn> get $columns => [
+    id,
+    entityType,
+    entityId,
+    opType,
+    payload,
+    updatedAt,
+    orgId,
+    status,
+  ];
   @override
-  late final GeneratedColumn<double> taxRate = GeneratedColumn<double>(
-    'tax_rate',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0.07),
-  );
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  late final GeneratedColumn<bool> ccEnabled = GeneratedColumn<bool>(
-    'cc_enabled',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(false),
-  );
+  String get actualTableName => $name;
+  static const String $name = 'outbox';
   @override
-  late final GeneratedColumn<double> ccRate = GeneratedColumn<double>(
-    'cc_rate',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0.03),
-  );
-  @override
-  List<GeneratedColumn> get $columns =>
-      [orgId, updatedAt, deleted, laborRate, taxEnabled, taxRate, ccEnabled, ccRate];
-  @override
-  String get aliasedName => _alias ?? 'org_settings_table';
-  @override
-  String get actualTableName => 'org_settings_table';
-  @override
-  VerificationContext validateIntegrity(Insertable<OrgSettingsRow> instance,
-      {bool isInserting = false}) {
-    return VerificationContext();
-  }
-  @override
-  OrgSettingsRow map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return OrgSettingsRow.fromData(data, prefix: tablePrefix);
+  VerificationContext validateIntegrity(
+    Insertable<OutboxRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('entity_type')) {
+      context.handle(
+        _entityTypeMeta,
+        entityType.isAcceptableOrUnknown(data['entity_type']!, _entityTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityTypeMeta);
+    }
+    if (data.containsKey('entity_id')) {
+      context.handle(
+        _entityIdMeta,
+        entityId.isAcceptableOrUnknown(data['entity_id']!, _entityIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityIdMeta);
+    }
+    if (data.containsKey('op_type')) {
+      context.handle(
+        _opTypeMeta,
+        opType.isAcceptableOrUnknown(data['op_type']!, _opTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_opTypeMeta);
+    }
+    if (data.containsKey('payload')) {
+      context.handle(
+        _payloadMeta,
+        payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_payloadMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('org_id')) {
+      context.handle(
+        _orgIdMeta,
+        orgId.isAcceptableOrUnknown(data['org_id']!, _orgIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orgIdMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    return context;
   }
 
   @override
-  $OrgSettingsTableTable createAlias(String alias) {
-    return $OrgSettingsTableTable(attachedDatabase, alias);
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  OutboxRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OutboxRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      entityType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_type'],
+      )!,
+      entityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_id'],
+      )!,
+      opType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}op_type'],
+      )!,
+      payload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      orgId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}org_id'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+    );
+  }
+
+  @override
+  $OutboxTable createAlias(String alias) {
+    return $OutboxTable(attachedDatabase, alias);
   }
 }
 
@@ -1686,40 +3709,136 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
     required this.orgId,
     required this.status,
   });
-  factory OutboxRow.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['entity_type'] = Variable<String>(entityType);
+    map['entity_id'] = Variable<String>(entityId);
+    map['op_type'] = Variable<String>(opType);
+    map['payload'] = Variable<String>(payload);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['org_id'] = Variable<String>(orgId);
+    map['status'] = Variable<String>(status);
+    return map;
+  }
+
+  OutboxCompanion toCompanion(bool nullToAbsent) {
+    return OutboxCompanion(
+      id: Value(id),
+      entityType: Value(entityType),
+      entityId: Value(entityId),
+      opType: Value(opType),
+      payload: Value(payload),
+      updatedAt: Value(updatedAt),
+      orgId: Value(orgId),
+      status: Value(status),
+    );
+  }
+
+  factory OutboxRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return OutboxRow(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      entityType: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}entity_type'])!,
-      entityId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}entity_id'])!,
-      opType: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}op_type'])!,
-      payload: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}payload'])!,
-      updatedAt: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      orgId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}org_id'])!,
-      status: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}status'])!,
+      id: serializer.fromJson<String>(json['id']),
+      entityType: serializer.fromJson<String>(json['entityType']),
+      entityId: serializer.fromJson<String>(json['entityId']),
+      opType: serializer.fromJson<String>(json['opType']),
+      payload: serializer.fromJson<String>(json['payload']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      orgId: serializer.fromJson<String>(json['orgId']),
+      status: serializer.fromJson<String>(json['status']),
     );
   }
   @override
-  Map<String, Expression<Object>> toColumns(bool nullToAbsent) {
-    return {
-      'id': Variable<String>(id),
-      'entity_type': Variable<String>(entityType),
-      'entity_id': Variable<String>(entityId),
-      'op_type': Variable<String>(opType),
-      'payload': Variable<String>(payload),
-      'updated_at': Variable<int>(updatedAt),
-      'org_id': Variable<String>(orgId),
-      'status': Variable<String>(status),
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'entityType': serializer.toJson<String>(entityType),
+      'entityId': serializer.toJson<String>(entityId),
+      'opType': serializer.toJson<String>(opType),
+      'payload': serializer.toJson<String>(payload),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'orgId': serializer.toJson<String>(orgId),
+      'status': serializer.toJson<String>(status),
     };
   }
+
+  OutboxRow copyWith({
+    String? id,
+    String? entityType,
+    String? entityId,
+    String? opType,
+    String? payload,
+    int? updatedAt,
+    String? orgId,
+    String? status,
+  }) => OutboxRow(
+    id: id ?? this.id,
+    entityType: entityType ?? this.entityType,
+    entityId: entityId ?? this.entityId,
+    opType: opType ?? this.opType,
+    payload: payload ?? this.payload,
+    updatedAt: updatedAt ?? this.updatedAt,
+    orgId: orgId ?? this.orgId,
+    status: status ?? this.status,
+  );
+  OutboxRow copyWithCompanion(OutboxCompanion data) {
+    return OutboxRow(
+      id: data.id.present ? data.id.value : this.id,
+      entityType: data.entityType.present
+          ? data.entityType.value
+          : this.entityType,
+      entityId: data.entityId.present ? data.entityId.value : this.entityId,
+      opType: data.opType.present ? data.opType.value : this.opType,
+      payload: data.payload.present ? data.payload.value : this.payload,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      orgId: data.orgId.present ? data.orgId.value : this.orgId,
+      status: data.status.present ? data.status.value : this.status,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OutboxRow(')
+          ..write('id: $id, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityId: $entityId, ')
+          ..write('opType: $opType, ')
+          ..write('payload: $payload, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('orgId: $orgId, ')
+          ..write('status: $status')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    entityType,
+    entityId,
+    opType,
+    payload,
+    updatedAt,
+    orgId,
+    status,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OutboxRow &&
+          other.id == this.id &&
+          other.entityType == this.entityType &&
+          other.entityId == this.entityId &&
+          other.opType == this.opType &&
+          other.payload == this.payload &&
+          other.updatedAt == this.updatedAt &&
+          other.orgId == this.orgId &&
+          other.status == this.status);
 }
 
 class OutboxCompanion extends UpdateCompanion<OutboxRow> {
@@ -1731,6 +3850,7 @@ class OutboxCompanion extends UpdateCompanion<OutboxRow> {
   final Value<int> updatedAt;
   final Value<String> orgId;
   final Value<String> status;
+  final Value<int> rowid;
   const OutboxCompanion({
     this.id = const Value.absent(),
     this.entityType = const Value.absent(),
@@ -1740,148 +3860,121 @@ class OutboxCompanion extends UpdateCompanion<OutboxRow> {
     this.updatedAt = const Value.absent(),
     this.orgId = const Value.absent(),
     this.status = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
-}
-
-class $OutboxTable extends Outbox with TableInfo<$OutboxTable, OutboxRow> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $OutboxTable(this.attachedDatabase, [this._alias]);
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  @override
-  late final GeneratedColumn<String> entityType = GeneratedColumn<String>(
-    'entity_type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  @override
-  late final GeneratedColumn<String> entityId = GeneratedColumn<String>(
-    'entity_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  @override
-  late final GeneratedColumn<String> opType = GeneratedColumn<String>(
-    'op_type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  @override
-  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
-    'payload',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  @override
-  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
-    'updated_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  @override
-  late final GeneratedColumn<String> orgId = GeneratedColumn<String>(
-    'org_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  @override
-  late final GeneratedColumn<String> status = GeneratedColumn<String>(
-    'status',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('pending'),
-  );
-  @override
-  List<GeneratedColumn> get $columns =>
-      [id, entityType, entityId, opType, payload, updatedAt, orgId, status];
-  @override
-  String get aliasedName => _alias ?? 'outbox';
-  @override
-  String get actualTableName => 'outbox';
-  @override
-  VerificationContext validateIntegrity(Insertable<OutboxRow> instance,
-      {bool isInserting = false}) {
-    return VerificationContext();
-  }
-  @override
-  OutboxRow map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return OutboxRow.fromData(data, prefix: tablePrefix);
+  OutboxCompanion.insert({
+    required String id,
+    required String entityType,
+    required String entityId,
+    required String opType,
+    required String payload,
+    required int updatedAt,
+    required String orgId,
+    this.status = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       entityType = Value(entityType),
+       entityId = Value(entityId),
+       opType = Value(opType),
+       payload = Value(payload),
+       updatedAt = Value(updatedAt),
+       orgId = Value(orgId);
+  static Insertable<OutboxRow> custom({
+    Expression<String>? id,
+    Expression<String>? entityType,
+    Expression<String>? entityId,
+    Expression<String>? opType,
+    Expression<String>? payload,
+    Expression<int>? updatedAt,
+    Expression<String>? orgId,
+    Expression<String>? status,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (entityType != null) 'entity_type': entityType,
+      if (entityId != null) 'entity_id': entityId,
+      if (opType != null) 'op_type': opType,
+      if (payload != null) 'payload': payload,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (orgId != null) 'org_id': orgId,
+      if (status != null) 'status': status,
+      if (rowid != null) 'rowid': rowid,
+    });
   }
 
-  @override
-  $OutboxTable createAlias(String alias) {
-    return $OutboxTable(attachedDatabase, alias);
-  }
-}
-
-class SyncStateRow extends DataClass implements Insertable<SyncStateRow> {
-  final String id;
-  final String orgId;
-  final int lastSyncAt;
-  const SyncStateRow({
-    required this.id,
-    required this.orgId,
-    required this.lastSyncAt,
-  });
-  factory SyncStateRow.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return SyncStateRow(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      orgId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}org_id'])!,
-      lastSyncAt: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}last_sync_at'])!,
+  OutboxCompanion copyWith({
+    Value<String>? id,
+    Value<String>? entityType,
+    Value<String>? entityId,
+    Value<String>? opType,
+    Value<String>? payload,
+    Value<int>? updatedAt,
+    Value<String>? orgId,
+    Value<String>? status,
+    Value<int>? rowid,
+  }) {
+    return OutboxCompanion(
+      id: id ?? this.id,
+      entityType: entityType ?? this.entityType,
+      entityId: entityId ?? this.entityId,
+      opType: opType ?? this.opType,
+      payload: payload ?? this.payload,
+      updatedAt: updatedAt ?? this.updatedAt,
+      orgId: orgId ?? this.orgId,
+      status: status ?? this.status,
+      rowid: rowid ?? this.rowid,
     );
   }
-  @override
-  Map<String, Expression<Object>> toColumns(bool nullToAbsent) {
-    return {
-      'id': Variable<String>(id),
-      'org_id': Variable<String>(orgId),
-      'last_sync_at': Variable<int>(lastSyncAt),
-    };
-  }
-}
 
-class SyncStateCompanion extends UpdateCompanion<SyncStateRow> {
-  final Value<String> id;
-  final Value<String> orgId;
-  final Value<int> lastSyncAt;
-  const SyncStateCompanion({
-    this.id = const Value.absent(),
-    this.orgId = const Value.absent(),
-    this.lastSyncAt = const Value.absent(),
-  });
-  SyncStateCompanion.insert({
-    required String id,
-    required String orgId,
-    Value<int> lastSyncAt = const Value.absent(),
-  })  : id = Value(id),
-        orgId = Value(orgId),
-        lastSyncAt = lastSyncAt;
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (entityType.present) {
+      map['entity_type'] = Variable<String>(entityType.value);
+    }
+    if (entityId.present) {
+      map['entity_id'] = Variable<String>(entityId.value);
+    }
+    if (opType.present) {
+      map['op_type'] = Variable<String>(opType.value);
+    }
+    if (payload.present) {
+      map['payload'] = Variable<String>(payload.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (orgId.present) {
+      map['org_id'] = Variable<String>(orgId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OutboxCompanion(')
+          ..write('id: $id, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityId: $entityId, ')
+          ..write('opType: $opType, ')
+          ..write('payload: $payload, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('orgId: $orgId, ')
+          ..write('status: $status, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
 }
 
 class $SyncStateTable extends SyncState
@@ -1890,6 +3983,7 @@ class $SyncStateTable extends SyncState
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $SyncStateTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
     'id',
@@ -1898,6 +3992,7 @@ class $SyncStateTable extends SyncState
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _orgIdMeta = const VerificationMeta('orgId');
   @override
   late final GeneratedColumn<String> orgId = GeneratedColumn<String>(
     'org_id',
@@ -1905,6 +4000,9 @@ class $SyncStateTable extends SyncState
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastSyncAtMeta = const VerificationMeta(
+    'lastSyncAt',
   );
   @override
   late final GeneratedColumn<int> lastSyncAt = GeneratedColumn<int>(
@@ -1918,17 +4016,61 @@ class $SyncStateTable extends SyncState
   @override
   List<GeneratedColumn> get $columns => [id, orgId, lastSyncAt];
   @override
-  String get aliasedName => _alias ?? 'sync_state';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'sync_state';
+  String get actualTableName => $name;
+  static const String $name = 'sync_state';
   @override
-  VerificationContext validateIntegrity(Insertable<SyncStateRow> instance,
-      {bool isInserting = false}) {
-    return VerificationContext();
+  VerificationContext validateIntegrity(
+    Insertable<SyncStateRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('org_id')) {
+      context.handle(
+        _orgIdMeta,
+        orgId.isAcceptableOrUnknown(data['org_id']!, _orgIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orgIdMeta);
+    }
+    if (data.containsKey('last_sync_at')) {
+      context.handle(
+        _lastSyncAtMeta,
+        lastSyncAt.isAcceptableOrUnknown(
+          data['last_sync_at']!,
+          _lastSyncAtMeta,
+        ),
+      );
+    }
+    return context;
   }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id, orgId};
   @override
   SyncStateRow map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return SyncStateRow.fromData(data, prefix: tablePrefix);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncStateRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      orgId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}org_id'],
+      )!,
+      lastSyncAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_sync_at'],
+      )!,
+    );
   }
 
   @override
@@ -1937,22 +4079,2248 @@ class $SyncStateTable extends SyncState
   }
 }
 
+class SyncStateRow extends DataClass implements Insertable<SyncStateRow> {
+  final String id;
+  final String orgId;
+  final int lastSyncAt;
+  const SyncStateRow({
+    required this.id,
+    required this.orgId,
+    required this.lastSyncAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['org_id'] = Variable<String>(orgId);
+    map['last_sync_at'] = Variable<int>(lastSyncAt);
+    return map;
+  }
+
+  SyncStateCompanion toCompanion(bool nullToAbsent) {
+    return SyncStateCompanion(
+      id: Value(id),
+      orgId: Value(orgId),
+      lastSyncAt: Value(lastSyncAt),
+    );
+  }
+
+  factory SyncStateRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncStateRow(
+      id: serializer.fromJson<String>(json['id']),
+      orgId: serializer.fromJson<String>(json['orgId']),
+      lastSyncAt: serializer.fromJson<int>(json['lastSyncAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'orgId': serializer.toJson<String>(orgId),
+      'lastSyncAt': serializer.toJson<int>(lastSyncAt),
+    };
+  }
+
+  SyncStateRow copyWith({String? id, String? orgId, int? lastSyncAt}) =>
+      SyncStateRow(
+        id: id ?? this.id,
+        orgId: orgId ?? this.orgId,
+        lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      );
+  SyncStateRow copyWithCompanion(SyncStateCompanion data) {
+    return SyncStateRow(
+      id: data.id.present ? data.id.value : this.id,
+      orgId: data.orgId.present ? data.orgId.value : this.orgId,
+      lastSyncAt: data.lastSyncAt.present
+          ? data.lastSyncAt.value
+          : this.lastSyncAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncStateRow(')
+          ..write('id: $id, ')
+          ..write('orgId: $orgId, ')
+          ..write('lastSyncAt: $lastSyncAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, orgId, lastSyncAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncStateRow &&
+          other.id == this.id &&
+          other.orgId == this.orgId &&
+          other.lastSyncAt == this.lastSyncAt);
+}
+
+class SyncStateCompanion extends UpdateCompanion<SyncStateRow> {
+  final Value<String> id;
+  final Value<String> orgId;
+  final Value<int> lastSyncAt;
+  final Value<int> rowid;
+  const SyncStateCompanion({
+    this.id = const Value.absent(),
+    this.orgId = const Value.absent(),
+    this.lastSyncAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncStateCompanion.insert({
+    required String id,
+    required String orgId,
+    this.lastSyncAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       orgId = Value(orgId);
+  static Insertable<SyncStateRow> custom({
+    Expression<String>? id,
+    Expression<String>? orgId,
+    Expression<int>? lastSyncAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (orgId != null) 'org_id': orgId,
+      if (lastSyncAt != null) 'last_sync_at': lastSyncAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncStateCompanion copyWith({
+    Value<String>? id,
+    Value<String>? orgId,
+    Value<int>? lastSyncAt,
+    Value<int>? rowid,
+  }) {
+    return SyncStateCompanion(
+      id: id ?? this.id,
+      orgId: orgId ?? this.orgId,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (orgId.present) {
+      map['org_id'] = Variable<String>(orgId.value);
+    }
+    if (lastSyncAt.present) {
+      map['last_sync_at'] = Variable<int>(lastSyncAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncStateCompanion(')
+          ..write('id: $id, ')
+          ..write('orgId: $orgId, ')
+          ..write('lastSyncAt: $lastSyncAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
+  $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ClientsTable clients = $ClientsTable(this);
   late final $QuotesTable quotes = $QuotesTable(this);
   late final $QuoteItemsTable quoteItems = $QuoteItemsTable(this);
-  late final $OrgSettingsTableTable orgSettingsTable =
-      $OrgSettingsTableTable(this);
+  late final $OrgSettingsTableTable orgSettingsTable = $OrgSettingsTableTable(
+    this,
+  );
   late final $OutboxTable outbox = $OutboxTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
   @override
-  Iterable<TableInfo<Table, Object?>> get allTables => [
-        clients,
-        quotes,
-        quoteItems,
-        orgSettingsTable,
-        outbox,
-        syncState,
-      ];
+  Iterable<TableInfo<Table, Object?>> get allTables =>
+      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  @override
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    clients,
+    quotes,
+    quoteItems,
+    orgSettingsTable,
+    outbox,
+    syncState,
+  ];
+}
+
+typedef $$ClientsTableCreateCompanionBuilder =
+    ClientsCompanion Function({
+      required String id,
+      required String orgId,
+      required int updatedAt,
+      Value<bool> deleted,
+      Value<String> firstName,
+      Value<String> lastName,
+      Value<String> street1,
+      Value<String> street2,
+      Value<String> city,
+      Value<String> state,
+      Value<String> zip,
+      Value<String> phone,
+      Value<String> email,
+      Value<String> notes,
+      Value<int> rowid,
+    });
+typedef $$ClientsTableUpdateCompanionBuilder =
+    ClientsCompanion Function({
+      Value<String> id,
+      Value<String> orgId,
+      Value<int> updatedAt,
+      Value<bool> deleted,
+      Value<String> firstName,
+      Value<String> lastName,
+      Value<String> street1,
+      Value<String> street2,
+      Value<String> city,
+      Value<String> state,
+      Value<String> zip,
+      Value<String> phone,
+      Value<String> email,
+      Value<String> notes,
+      Value<int> rowid,
+    });
+
+class $$ClientsTableFilterComposer
+    extends Composer<_$AppDatabase, $ClientsTable> {
+  $$ClientsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firstName => $composableBuilder(
+    column: $table.firstName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastName => $composableBuilder(
+    column: $table.lastName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get street1 => $composableBuilder(
+    column: $table.street1,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get street2 => $composableBuilder(
+    column: $table.street2,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get city => $composableBuilder(
+    column: $table.city,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get zip => $composableBuilder(
+    column: $table.zip,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ClientsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ClientsTable> {
+  $$ClientsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get firstName => $composableBuilder(
+    column: $table.firstName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastName => $composableBuilder(
+    column: $table.lastName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get street1 => $composableBuilder(
+    column: $table.street1,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get street2 => $composableBuilder(
+    column: $table.street2,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get city => $composableBuilder(
+    column: $table.city,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get zip => $composableBuilder(
+    column: $table.zip,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ClientsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ClientsTable> {
+  $$ClientsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+
+  GeneratedColumn<String> get firstName =>
+      $composableBuilder(column: $table.firstName, builder: (column) => column);
+
+  GeneratedColumn<String> get lastName =>
+      $composableBuilder(column: $table.lastName, builder: (column) => column);
+
+  GeneratedColumn<String> get street1 =>
+      $composableBuilder(column: $table.street1, builder: (column) => column);
+
+  GeneratedColumn<String> get street2 =>
+      $composableBuilder(column: $table.street2, builder: (column) => column);
+
+  GeneratedColumn<String> get city =>
+      $composableBuilder(column: $table.city, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get zip =>
+      $composableBuilder(column: $table.zip, builder: (column) => column);
+
+  GeneratedColumn<String> get phone =>
+      $composableBuilder(column: $table.phone, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+}
+
+class $$ClientsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ClientsTable,
+          ClientRow,
+          $$ClientsTableFilterComposer,
+          $$ClientsTableOrderingComposer,
+          $$ClientsTableAnnotationComposer,
+          $$ClientsTableCreateCompanionBuilder,
+          $$ClientsTableUpdateCompanionBuilder,
+          (ClientRow, BaseReferences<_$AppDatabase, $ClientsTable, ClientRow>),
+          ClientRow,
+          PrefetchHooks Function()
+        > {
+  $$ClientsTableTableManager(_$AppDatabase db, $ClientsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ClientsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ClientsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ClientsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<String> firstName = const Value.absent(),
+                Value<String> lastName = const Value.absent(),
+                Value<String> street1 = const Value.absent(),
+                Value<String> street2 = const Value.absent(),
+                Value<String> city = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String> zip = const Value.absent(),
+                Value<String> phone = const Value.absent(),
+                Value<String> email = const Value.absent(),
+                Value<String> notes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ClientsCompanion(
+                id: id,
+                orgId: orgId,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                firstName: firstName,
+                lastName: lastName,
+                street1: street1,
+                street2: street2,
+                city: city,
+                state: state,
+                zip: zip,
+                phone: phone,
+                email: email,
+                notes: notes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orgId,
+                required int updatedAt,
+                Value<bool> deleted = const Value.absent(),
+                Value<String> firstName = const Value.absent(),
+                Value<String> lastName = const Value.absent(),
+                Value<String> street1 = const Value.absent(),
+                Value<String> street2 = const Value.absent(),
+                Value<String> city = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String> zip = const Value.absent(),
+                Value<String> phone = const Value.absent(),
+                Value<String> email = const Value.absent(),
+                Value<String> notes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ClientsCompanion.insert(
+                id: id,
+                orgId: orgId,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                firstName: firstName,
+                lastName: lastName,
+                street1: street1,
+                street2: street2,
+                city: city,
+                state: state,
+                zip: zip,
+                phone: phone,
+                email: email,
+                notes: notes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ClientsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ClientsTable,
+      ClientRow,
+      $$ClientsTableFilterComposer,
+      $$ClientsTableOrderingComposer,
+      $$ClientsTableAnnotationComposer,
+      $$ClientsTableCreateCompanionBuilder,
+      $$ClientsTableUpdateCompanionBuilder,
+      (ClientRow, BaseReferences<_$AppDatabase, $ClientsTable, ClientRow>),
+      ClientRow,
+      PrefetchHooks Function()
+    >;
+typedef $$QuotesTableCreateCompanionBuilder =
+    QuotesCompanion Function({
+      required String id,
+      required String orgId,
+      required int updatedAt,
+      Value<bool> deleted,
+      Value<String> clientId,
+      Value<String> clientName,
+      Value<String> quoteName,
+      Value<String> quoteDate,
+      Value<String> serviceType,
+      Value<String> frequency,
+      Value<String> lastProClean,
+      Value<String> status,
+      Value<double> total,
+      Value<String> address,
+      Value<String> totalSqFt,
+      Value<bool> useTotalSqFt,
+      Value<String> estimatedSqFt,
+      Value<bool> petsPresent,
+      Value<bool> homeOccupied,
+      Value<String> entryCode,
+      Value<String> paymentMethod,
+      Value<bool> feedbackDiscussed,
+      Value<double> laborRate,
+      Value<bool> taxEnabled,
+      Value<bool> ccEnabled,
+      Value<double> taxRate,
+      Value<double> ccRate,
+      Value<String> defaultRoomType,
+      Value<String> defaultLevel,
+      Value<String> defaultSize,
+      Value<String> defaultComplexity,
+      Value<String> subItemType,
+      Value<String> specialNotes,
+      Value<int> rowid,
+    });
+typedef $$QuotesTableUpdateCompanionBuilder =
+    QuotesCompanion Function({
+      Value<String> id,
+      Value<String> orgId,
+      Value<int> updatedAt,
+      Value<bool> deleted,
+      Value<String> clientId,
+      Value<String> clientName,
+      Value<String> quoteName,
+      Value<String> quoteDate,
+      Value<String> serviceType,
+      Value<String> frequency,
+      Value<String> lastProClean,
+      Value<String> status,
+      Value<double> total,
+      Value<String> address,
+      Value<String> totalSqFt,
+      Value<bool> useTotalSqFt,
+      Value<String> estimatedSqFt,
+      Value<bool> petsPresent,
+      Value<bool> homeOccupied,
+      Value<String> entryCode,
+      Value<String> paymentMethod,
+      Value<bool> feedbackDiscussed,
+      Value<double> laborRate,
+      Value<bool> taxEnabled,
+      Value<bool> ccEnabled,
+      Value<double> taxRate,
+      Value<double> ccRate,
+      Value<String> defaultRoomType,
+      Value<String> defaultLevel,
+      Value<String> defaultSize,
+      Value<String> defaultComplexity,
+      Value<String> subItemType,
+      Value<String> specialNotes,
+      Value<int> rowid,
+    });
+
+class $$QuotesTableFilterComposer
+    extends Composer<_$AppDatabase, $QuotesTable> {
+  $$QuotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get clientId => $composableBuilder(
+    column: $table.clientId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get clientName => $composableBuilder(
+    column: $table.clientName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quoteName => $composableBuilder(
+    column: $table.quoteName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quoteDate => $composableBuilder(
+    column: $table.quoteDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get serviceType => $composableBuilder(
+    column: $table.serviceType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get frequency => $composableBuilder(
+    column: $table.frequency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastProClean => $composableBuilder(
+    column: $table.lastProClean,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get total => $composableBuilder(
+    column: $table.total,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get address => $composableBuilder(
+    column: $table.address,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get totalSqFt => $composableBuilder(
+    column: $table.totalSqFt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get useTotalSqFt => $composableBuilder(
+    column: $table.useTotalSqFt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get estimatedSqFt => $composableBuilder(
+    column: $table.estimatedSqFt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get petsPresent => $composableBuilder(
+    column: $table.petsPresent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get homeOccupied => $composableBuilder(
+    column: $table.homeOccupied,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entryCode => $composableBuilder(
+    column: $table.entryCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get feedbackDiscussed => $composableBuilder(
+    column: $table.feedbackDiscussed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get laborRate => $composableBuilder(
+    column: $table.laborRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get taxEnabled => $composableBuilder(
+    column: $table.taxEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get ccEnabled => $composableBuilder(
+    column: $table.ccEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get taxRate => $composableBuilder(
+    column: $table.taxRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get ccRate => $composableBuilder(
+    column: $table.ccRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get defaultRoomType => $composableBuilder(
+    column: $table.defaultRoomType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get defaultLevel => $composableBuilder(
+    column: $table.defaultLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get defaultSize => $composableBuilder(
+    column: $table.defaultSize,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get defaultComplexity => $composableBuilder(
+    column: $table.defaultComplexity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subItemType => $composableBuilder(
+    column: $table.subItemType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get specialNotes => $composableBuilder(
+    column: $table.specialNotes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$QuotesTableOrderingComposer
+    extends Composer<_$AppDatabase, $QuotesTable> {
+  $$QuotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get clientId => $composableBuilder(
+    column: $table.clientId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get clientName => $composableBuilder(
+    column: $table.clientName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quoteName => $composableBuilder(
+    column: $table.quoteName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quoteDate => $composableBuilder(
+    column: $table.quoteDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get serviceType => $composableBuilder(
+    column: $table.serviceType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get frequency => $composableBuilder(
+    column: $table.frequency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastProClean => $composableBuilder(
+    column: $table.lastProClean,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get total => $composableBuilder(
+    column: $table.total,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get address => $composableBuilder(
+    column: $table.address,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get totalSqFt => $composableBuilder(
+    column: $table.totalSqFt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get useTotalSqFt => $composableBuilder(
+    column: $table.useTotalSqFt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get estimatedSqFt => $composableBuilder(
+    column: $table.estimatedSqFt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get petsPresent => $composableBuilder(
+    column: $table.petsPresent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get homeOccupied => $composableBuilder(
+    column: $table.homeOccupied,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entryCode => $composableBuilder(
+    column: $table.entryCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get feedbackDiscussed => $composableBuilder(
+    column: $table.feedbackDiscussed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get laborRate => $composableBuilder(
+    column: $table.laborRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get taxEnabled => $composableBuilder(
+    column: $table.taxEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get ccEnabled => $composableBuilder(
+    column: $table.ccEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get taxRate => $composableBuilder(
+    column: $table.taxRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get ccRate => $composableBuilder(
+    column: $table.ccRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get defaultRoomType => $composableBuilder(
+    column: $table.defaultRoomType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get defaultLevel => $composableBuilder(
+    column: $table.defaultLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get defaultSize => $composableBuilder(
+    column: $table.defaultSize,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get defaultComplexity => $composableBuilder(
+    column: $table.defaultComplexity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subItemType => $composableBuilder(
+    column: $table.subItemType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get specialNotes => $composableBuilder(
+    column: $table.specialNotes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$QuotesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuotesTable> {
+  $$QuotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+
+  GeneratedColumn<String> get clientId =>
+      $composableBuilder(column: $table.clientId, builder: (column) => column);
+
+  GeneratedColumn<String> get clientName => $composableBuilder(
+    column: $table.clientName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get quoteName =>
+      $composableBuilder(column: $table.quoteName, builder: (column) => column);
+
+  GeneratedColumn<String> get quoteDate =>
+      $composableBuilder(column: $table.quoteDate, builder: (column) => column);
+
+  GeneratedColumn<String> get serviceType => $composableBuilder(
+    column: $table.serviceType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get frequency =>
+      $composableBuilder(column: $table.frequency, builder: (column) => column);
+
+  GeneratedColumn<String> get lastProClean => $composableBuilder(
+    column: $table.lastProClean,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<double> get total =>
+      $composableBuilder(column: $table.total, builder: (column) => column);
+
+  GeneratedColumn<String> get address =>
+      $composableBuilder(column: $table.address, builder: (column) => column);
+
+  GeneratedColumn<String> get totalSqFt =>
+      $composableBuilder(column: $table.totalSqFt, builder: (column) => column);
+
+  GeneratedColumn<bool> get useTotalSqFt => $composableBuilder(
+    column: $table.useTotalSqFt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get estimatedSqFt => $composableBuilder(
+    column: $table.estimatedSqFt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get petsPresent => $composableBuilder(
+    column: $table.petsPresent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get homeOccupied => $composableBuilder(
+    column: $table.homeOccupied,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get entryCode =>
+      $composableBuilder(column: $table.entryCode, builder: (column) => column);
+
+  GeneratedColumn<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get feedbackDiscussed => $composableBuilder(
+    column: $table.feedbackDiscussed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get laborRate =>
+      $composableBuilder(column: $table.laborRate, builder: (column) => column);
+
+  GeneratedColumn<bool> get taxEnabled => $composableBuilder(
+    column: $table.taxEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get ccEnabled =>
+      $composableBuilder(column: $table.ccEnabled, builder: (column) => column);
+
+  GeneratedColumn<double> get taxRate =>
+      $composableBuilder(column: $table.taxRate, builder: (column) => column);
+
+  GeneratedColumn<double> get ccRate =>
+      $composableBuilder(column: $table.ccRate, builder: (column) => column);
+
+  GeneratedColumn<String> get defaultRoomType => $composableBuilder(
+    column: $table.defaultRoomType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get defaultLevel => $composableBuilder(
+    column: $table.defaultLevel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get defaultSize => $composableBuilder(
+    column: $table.defaultSize,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get defaultComplexity => $composableBuilder(
+    column: $table.defaultComplexity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get subItemType => $composableBuilder(
+    column: $table.subItemType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get specialNotes => $composableBuilder(
+    column: $table.specialNotes,
+    builder: (column) => column,
+  );
+}
+
+class $$QuotesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuotesTable,
+          QuoteRow,
+          $$QuotesTableFilterComposer,
+          $$QuotesTableOrderingComposer,
+          $$QuotesTableAnnotationComposer,
+          $$QuotesTableCreateCompanionBuilder,
+          $$QuotesTableUpdateCompanionBuilder,
+          (QuoteRow, BaseReferences<_$AppDatabase, $QuotesTable, QuoteRow>),
+          QuoteRow,
+          PrefetchHooks Function()
+        > {
+  $$QuotesTableTableManager(_$AppDatabase db, $QuotesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QuotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuotesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<String> clientId = const Value.absent(),
+                Value<String> clientName = const Value.absent(),
+                Value<String> quoteName = const Value.absent(),
+                Value<String> quoteDate = const Value.absent(),
+                Value<String> serviceType = const Value.absent(),
+                Value<String> frequency = const Value.absent(),
+                Value<String> lastProClean = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<double> total = const Value.absent(),
+                Value<String> address = const Value.absent(),
+                Value<String> totalSqFt = const Value.absent(),
+                Value<bool> useTotalSqFt = const Value.absent(),
+                Value<String> estimatedSqFt = const Value.absent(),
+                Value<bool> petsPresent = const Value.absent(),
+                Value<bool> homeOccupied = const Value.absent(),
+                Value<String> entryCode = const Value.absent(),
+                Value<String> paymentMethod = const Value.absent(),
+                Value<bool> feedbackDiscussed = const Value.absent(),
+                Value<double> laborRate = const Value.absent(),
+                Value<bool> taxEnabled = const Value.absent(),
+                Value<bool> ccEnabled = const Value.absent(),
+                Value<double> taxRate = const Value.absent(),
+                Value<double> ccRate = const Value.absent(),
+                Value<String> defaultRoomType = const Value.absent(),
+                Value<String> defaultLevel = const Value.absent(),
+                Value<String> defaultSize = const Value.absent(),
+                Value<String> defaultComplexity = const Value.absent(),
+                Value<String> subItemType = const Value.absent(),
+                Value<String> specialNotes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => QuotesCompanion(
+                id: id,
+                orgId: orgId,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                clientId: clientId,
+                clientName: clientName,
+                quoteName: quoteName,
+                quoteDate: quoteDate,
+                serviceType: serviceType,
+                frequency: frequency,
+                lastProClean: lastProClean,
+                status: status,
+                total: total,
+                address: address,
+                totalSqFt: totalSqFt,
+                useTotalSqFt: useTotalSqFt,
+                estimatedSqFt: estimatedSqFt,
+                petsPresent: petsPresent,
+                homeOccupied: homeOccupied,
+                entryCode: entryCode,
+                paymentMethod: paymentMethod,
+                feedbackDiscussed: feedbackDiscussed,
+                laborRate: laborRate,
+                taxEnabled: taxEnabled,
+                ccEnabled: ccEnabled,
+                taxRate: taxRate,
+                ccRate: ccRate,
+                defaultRoomType: defaultRoomType,
+                defaultLevel: defaultLevel,
+                defaultSize: defaultSize,
+                defaultComplexity: defaultComplexity,
+                subItemType: subItemType,
+                specialNotes: specialNotes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orgId,
+                required int updatedAt,
+                Value<bool> deleted = const Value.absent(),
+                Value<String> clientId = const Value.absent(),
+                Value<String> clientName = const Value.absent(),
+                Value<String> quoteName = const Value.absent(),
+                Value<String> quoteDate = const Value.absent(),
+                Value<String> serviceType = const Value.absent(),
+                Value<String> frequency = const Value.absent(),
+                Value<String> lastProClean = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<double> total = const Value.absent(),
+                Value<String> address = const Value.absent(),
+                Value<String> totalSqFt = const Value.absent(),
+                Value<bool> useTotalSqFt = const Value.absent(),
+                Value<String> estimatedSqFt = const Value.absent(),
+                Value<bool> petsPresent = const Value.absent(),
+                Value<bool> homeOccupied = const Value.absent(),
+                Value<String> entryCode = const Value.absent(),
+                Value<String> paymentMethod = const Value.absent(),
+                Value<bool> feedbackDiscussed = const Value.absent(),
+                Value<double> laborRate = const Value.absent(),
+                Value<bool> taxEnabled = const Value.absent(),
+                Value<bool> ccEnabled = const Value.absent(),
+                Value<double> taxRate = const Value.absent(),
+                Value<double> ccRate = const Value.absent(),
+                Value<String> defaultRoomType = const Value.absent(),
+                Value<String> defaultLevel = const Value.absent(),
+                Value<String> defaultSize = const Value.absent(),
+                Value<String> defaultComplexity = const Value.absent(),
+                Value<String> subItemType = const Value.absent(),
+                Value<String> specialNotes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => QuotesCompanion.insert(
+                id: id,
+                orgId: orgId,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                clientId: clientId,
+                clientName: clientName,
+                quoteName: quoteName,
+                quoteDate: quoteDate,
+                serviceType: serviceType,
+                frequency: frequency,
+                lastProClean: lastProClean,
+                status: status,
+                total: total,
+                address: address,
+                totalSqFt: totalSqFt,
+                useTotalSqFt: useTotalSqFt,
+                estimatedSqFt: estimatedSqFt,
+                petsPresent: petsPresent,
+                homeOccupied: homeOccupied,
+                entryCode: entryCode,
+                paymentMethod: paymentMethod,
+                feedbackDiscussed: feedbackDiscussed,
+                laborRate: laborRate,
+                taxEnabled: taxEnabled,
+                ccEnabled: ccEnabled,
+                taxRate: taxRate,
+                ccRate: ccRate,
+                defaultRoomType: defaultRoomType,
+                defaultLevel: defaultLevel,
+                defaultSize: defaultSize,
+                defaultComplexity: defaultComplexity,
+                subItemType: subItemType,
+                specialNotes: specialNotes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QuotesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuotesTable,
+      QuoteRow,
+      $$QuotesTableFilterComposer,
+      $$QuotesTableOrderingComposer,
+      $$QuotesTableAnnotationComposer,
+      $$QuotesTableCreateCompanionBuilder,
+      $$QuotesTableUpdateCompanionBuilder,
+      (QuoteRow, BaseReferences<_$AppDatabase, $QuotesTable, QuoteRow>),
+      QuoteRow,
+      PrefetchHooks Function()
+    >;
+typedef $$QuoteItemsTableCreateCompanionBuilder =
+    QuoteItemsCompanion Function({
+      required String id,
+      required String orgId,
+      required String quoteId,
+      required int updatedAt,
+      Value<bool> deleted,
+      Value<int> sortOrder,
+      Value<String> payload,
+      Value<int> rowid,
+    });
+typedef $$QuoteItemsTableUpdateCompanionBuilder =
+    QuoteItemsCompanion Function({
+      Value<String> id,
+      Value<String> orgId,
+      Value<String> quoteId,
+      Value<int> updatedAt,
+      Value<bool> deleted,
+      Value<int> sortOrder,
+      Value<String> payload,
+      Value<int> rowid,
+    });
+
+class $$QuoteItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $QuoteItemsTable> {
+  $$QuoteItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quoteId => $composableBuilder(
+    column: $table.quoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$QuoteItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $QuoteItemsTable> {
+  $$QuoteItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quoteId => $composableBuilder(
+    column: $table.quoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$QuoteItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuoteItemsTable> {
+  $$QuoteItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<String> get quoteId =>
+      $composableBuilder(column: $table.quoteId, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
+}
+
+class $$QuoteItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuoteItemsTable,
+          QuoteItemRow,
+          $$QuoteItemsTableFilterComposer,
+          $$QuoteItemsTableOrderingComposer,
+          $$QuoteItemsTableAnnotationComposer,
+          $$QuoteItemsTableCreateCompanionBuilder,
+          $$QuoteItemsTableUpdateCompanionBuilder,
+          (
+            QuoteItemRow,
+            BaseReferences<_$AppDatabase, $QuoteItemsTable, QuoteItemRow>,
+          ),
+          QuoteItemRow,
+          PrefetchHooks Function()
+        > {
+  $$QuoteItemsTableTableManager(_$AppDatabase db, $QuoteItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QuoteItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuoteItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuoteItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<String> quoteId = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<String> payload = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => QuoteItemsCompanion(
+                id: id,
+                orgId: orgId,
+                quoteId: quoteId,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                sortOrder: sortOrder,
+                payload: payload,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orgId,
+                required String quoteId,
+                required int updatedAt,
+                Value<bool> deleted = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<String> payload = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => QuoteItemsCompanion.insert(
+                id: id,
+                orgId: orgId,
+                quoteId: quoteId,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                sortOrder: sortOrder,
+                payload: payload,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QuoteItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuoteItemsTable,
+      QuoteItemRow,
+      $$QuoteItemsTableFilterComposer,
+      $$QuoteItemsTableOrderingComposer,
+      $$QuoteItemsTableAnnotationComposer,
+      $$QuoteItemsTableCreateCompanionBuilder,
+      $$QuoteItemsTableUpdateCompanionBuilder,
+      (
+        QuoteItemRow,
+        BaseReferences<_$AppDatabase, $QuoteItemsTable, QuoteItemRow>,
+      ),
+      QuoteItemRow,
+      PrefetchHooks Function()
+    >;
+typedef $$OrgSettingsTableTableCreateCompanionBuilder =
+    OrgSettingsTableCompanion Function({
+      required String orgId,
+      required int updatedAt,
+      Value<bool> deleted,
+      Value<double> laborRate,
+      Value<bool> taxEnabled,
+      Value<double> taxRate,
+      Value<bool> ccEnabled,
+      Value<double> ccRate,
+      Value<int> rowid,
+    });
+typedef $$OrgSettingsTableTableUpdateCompanionBuilder =
+    OrgSettingsTableCompanion Function({
+      Value<String> orgId,
+      Value<int> updatedAt,
+      Value<bool> deleted,
+      Value<double> laborRate,
+      Value<bool> taxEnabled,
+      Value<double> taxRate,
+      Value<bool> ccEnabled,
+      Value<double> ccRate,
+      Value<int> rowid,
+    });
+
+class $$OrgSettingsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $OrgSettingsTableTable> {
+  $$OrgSettingsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get laborRate => $composableBuilder(
+    column: $table.laborRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get taxEnabled => $composableBuilder(
+    column: $table.taxEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get taxRate => $composableBuilder(
+    column: $table.taxRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get ccEnabled => $composableBuilder(
+    column: $table.ccEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get ccRate => $composableBuilder(
+    column: $table.ccRate,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OrgSettingsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $OrgSettingsTableTable> {
+  $$OrgSettingsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get laborRate => $composableBuilder(
+    column: $table.laborRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get taxEnabled => $composableBuilder(
+    column: $table.taxEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get taxRate => $composableBuilder(
+    column: $table.taxRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get ccEnabled => $composableBuilder(
+    column: $table.ccEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get ccRate => $composableBuilder(
+    column: $table.ccRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OrgSettingsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OrgSettingsTableTable> {
+  $$OrgSettingsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+
+  GeneratedColumn<double> get laborRate =>
+      $composableBuilder(column: $table.laborRate, builder: (column) => column);
+
+  GeneratedColumn<bool> get taxEnabled => $composableBuilder(
+    column: $table.taxEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get taxRate =>
+      $composableBuilder(column: $table.taxRate, builder: (column) => column);
+
+  GeneratedColumn<bool> get ccEnabled =>
+      $composableBuilder(column: $table.ccEnabled, builder: (column) => column);
+
+  GeneratedColumn<double> get ccRate =>
+      $composableBuilder(column: $table.ccRate, builder: (column) => column);
+}
+
+class $$OrgSettingsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OrgSettingsTableTable,
+          OrgSettingsRow,
+          $$OrgSettingsTableTableFilterComposer,
+          $$OrgSettingsTableTableOrderingComposer,
+          $$OrgSettingsTableTableAnnotationComposer,
+          $$OrgSettingsTableTableCreateCompanionBuilder,
+          $$OrgSettingsTableTableUpdateCompanionBuilder,
+          (
+            OrgSettingsRow,
+            BaseReferences<
+              _$AppDatabase,
+              $OrgSettingsTableTable,
+              OrgSettingsRow
+            >,
+          ),
+          OrgSettingsRow,
+          PrefetchHooks Function()
+        > {
+  $$OrgSettingsTableTableTableManager(
+    _$AppDatabase db,
+    $OrgSettingsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OrgSettingsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OrgSettingsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OrgSettingsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> orgId = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<double> laborRate = const Value.absent(),
+                Value<bool> taxEnabled = const Value.absent(),
+                Value<double> taxRate = const Value.absent(),
+                Value<bool> ccEnabled = const Value.absent(),
+                Value<double> ccRate = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OrgSettingsTableCompanion(
+                orgId: orgId,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                laborRate: laborRate,
+                taxEnabled: taxEnabled,
+                taxRate: taxRate,
+                ccEnabled: ccEnabled,
+                ccRate: ccRate,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String orgId,
+                required int updatedAt,
+                Value<bool> deleted = const Value.absent(),
+                Value<double> laborRate = const Value.absent(),
+                Value<bool> taxEnabled = const Value.absent(),
+                Value<double> taxRate = const Value.absent(),
+                Value<bool> ccEnabled = const Value.absent(),
+                Value<double> ccRate = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OrgSettingsTableCompanion.insert(
+                orgId: orgId,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                laborRate: laborRate,
+                taxEnabled: taxEnabled,
+                taxRate: taxRate,
+                ccEnabled: ccEnabled,
+                ccRate: ccRate,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OrgSettingsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OrgSettingsTableTable,
+      OrgSettingsRow,
+      $$OrgSettingsTableTableFilterComposer,
+      $$OrgSettingsTableTableOrderingComposer,
+      $$OrgSettingsTableTableAnnotationComposer,
+      $$OrgSettingsTableTableCreateCompanionBuilder,
+      $$OrgSettingsTableTableUpdateCompanionBuilder,
+      (
+        OrgSettingsRow,
+        BaseReferences<_$AppDatabase, $OrgSettingsTableTable, OrgSettingsRow>,
+      ),
+      OrgSettingsRow,
+      PrefetchHooks Function()
+    >;
+typedef $$OutboxTableCreateCompanionBuilder =
+    OutboxCompanion Function({
+      required String id,
+      required String entityType,
+      required String entityId,
+      required String opType,
+      required String payload,
+      required int updatedAt,
+      required String orgId,
+      Value<String> status,
+      Value<int> rowid,
+    });
+typedef $$OutboxTableUpdateCompanionBuilder =
+    OutboxCompanion Function({
+      Value<String> id,
+      Value<String> entityType,
+      Value<String> entityId,
+      Value<String> opType,
+      Value<String> payload,
+      Value<int> updatedAt,
+      Value<String> orgId,
+      Value<String> status,
+      Value<int> rowid,
+    });
+
+class $$OutboxTableFilterComposer
+    extends Composer<_$AppDatabase, $OutboxTable> {
+  $$OutboxTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get opType => $composableBuilder(
+    column: $table.opType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OutboxTableOrderingComposer
+    extends Composer<_$AppDatabase, $OutboxTable> {
+  $$OutboxTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get opType => $composableBuilder(
+    column: $table.opType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OutboxTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OutboxTable> {
+  $$OutboxTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get entityId =>
+      $composableBuilder(column: $table.entityId, builder: (column) => column);
+
+  GeneratedColumn<String> get opType =>
+      $composableBuilder(column: $table.opType, builder: (column) => column);
+
+  GeneratedColumn<String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+}
+
+class $$OutboxTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OutboxTable,
+          OutboxRow,
+          $$OutboxTableFilterComposer,
+          $$OutboxTableOrderingComposer,
+          $$OutboxTableAnnotationComposer,
+          $$OutboxTableCreateCompanionBuilder,
+          $$OutboxTableUpdateCompanionBuilder,
+          (OutboxRow, BaseReferences<_$AppDatabase, $OutboxTable, OutboxRow>),
+          OutboxRow,
+          PrefetchHooks Function()
+        > {
+  $$OutboxTableTableManager(_$AppDatabase db, $OutboxTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OutboxTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OutboxTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OutboxTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> entityType = const Value.absent(),
+                Value<String> entityId = const Value.absent(),
+                Value<String> opType = const Value.absent(),
+                Value<String> payload = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OutboxCompanion(
+                id: id,
+                entityType: entityType,
+                entityId: entityId,
+                opType: opType,
+                payload: payload,
+                updatedAt: updatedAt,
+                orgId: orgId,
+                status: status,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String entityType,
+                required String entityId,
+                required String opType,
+                required String payload,
+                required int updatedAt,
+                required String orgId,
+                Value<String> status = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OutboxCompanion.insert(
+                id: id,
+                entityType: entityType,
+                entityId: entityId,
+                opType: opType,
+                payload: payload,
+                updatedAt: updatedAt,
+                orgId: orgId,
+                status: status,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OutboxTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OutboxTable,
+      OutboxRow,
+      $$OutboxTableFilterComposer,
+      $$OutboxTableOrderingComposer,
+      $$OutboxTableAnnotationComposer,
+      $$OutboxTableCreateCompanionBuilder,
+      $$OutboxTableUpdateCompanionBuilder,
+      (OutboxRow, BaseReferences<_$AppDatabase, $OutboxTable, OutboxRow>),
+      OutboxRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SyncStateTableCreateCompanionBuilder =
+    SyncStateCompanion Function({
+      required String id,
+      required String orgId,
+      Value<int> lastSyncAt,
+      Value<int> rowid,
+    });
+typedef $$SyncStateTableUpdateCompanionBuilder =
+    SyncStateCompanion Function({
+      Value<String> id,
+      Value<String> orgId,
+      Value<int> lastSyncAt,
+      Value<int> rowid,
+    });
+
+class $$SyncStateTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncStateTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncStateTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<int> get lastSyncAt => $composableBuilder(
+    column: $table.lastSyncAt,
+    builder: (column) => column,
+  );
+}
+
+class $$SyncStateTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncStateTable,
+          SyncStateRow,
+          $$SyncStateTableFilterComposer,
+          $$SyncStateTableOrderingComposer,
+          $$SyncStateTableAnnotationComposer,
+          $$SyncStateTableCreateCompanionBuilder,
+          $$SyncStateTableUpdateCompanionBuilder,
+          (
+            SyncStateRow,
+            BaseReferences<_$AppDatabase, $SyncStateTable, SyncStateRow>,
+          ),
+          SyncStateRow,
+          PrefetchHooks Function()
+        > {
+  $$SyncStateTableTableManager(_$AppDatabase db, $SyncStateTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncStateTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncStateTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncStateTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<int> lastSyncAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncStateCompanion(
+                id: id,
+                orgId: orgId,
+                lastSyncAt: lastSyncAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orgId,
+                Value<int> lastSyncAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncStateCompanion.insert(
+                id: id,
+                orgId: orgId,
+                lastSyncAt: lastSyncAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncStateTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncStateTable,
+      SyncStateRow,
+      $$SyncStateTableFilterComposer,
+      $$SyncStateTableOrderingComposer,
+      $$SyncStateTableAnnotationComposer,
+      $$SyncStateTableCreateCompanionBuilder,
+      $$SyncStateTableUpdateCompanionBuilder,
+      (
+        SyncStateRow,
+        BaseReferences<_$AppDatabase, $SyncStateTable, SyncStateRow>,
+      ),
+      SyncStateRow,
+      PrefetchHooks Function()
+    >;
+
+class $AppDatabaseManager {
+  final _$AppDatabase _db;
+  $AppDatabaseManager(this._db);
+  $$ClientsTableTableManager get clients =>
+      $$ClientsTableTableManager(_db, _db.clients);
+  $$QuotesTableTableManager get quotes =>
+      $$QuotesTableTableManager(_db, _db.quotes);
+  $$QuoteItemsTableTableManager get quoteItems =>
+      $$QuoteItemsTableTableManager(_db, _db.quoteItems);
+  $$OrgSettingsTableTableTableManager get orgSettingsTable =>
+      $$OrgSettingsTableTableTableManager(_db, _db.orgSettingsTable);
+  $$OutboxTableTableManager get outbox =>
+      $$OutboxTableTableManager(_db, _db.outbox);
+  $$SyncStateTableTableManager get syncState =>
+      $$SyncStateTableTableManager(_db, _db.syncState);
 }
