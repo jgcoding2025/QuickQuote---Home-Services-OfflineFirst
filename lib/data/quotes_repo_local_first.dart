@@ -25,7 +25,7 @@ class QuotesRepositoryLocalFirst {
 
   Stream<List<Quote>> streamQuotes() async* {
     final controller = StreamController<List<Quote>>();
-    StreamSubscription<List<QuoteRow>>? dataSub;
+  StreamSubscription<List<Quote>>? dataSub;
 
     Future<void> listenSession(AppSession? session) async {
       await dataSub?.cancel();
@@ -53,7 +53,7 @@ class QuotesRepositoryLocalFirst {
 
   Stream<List<Quote>> streamQuotesForClient(String clientId) async* {
     final controller = StreamController<List<Quote>>();
-    StreamSubscription<List<QuoteRow>>? dataSub;
+  StreamSubscription<List<Quote>>? dataSub;
 
     Future<void> listenSession(AppSession? session) async {
       await dataSub?.cancel();
