@@ -265,7 +265,7 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
 
   Widget _buildQuotesSection({
     required bool isExisting,
-    required QuotesRepo quotesRepo,
+    required QuotesRepositoryLocalFirst quotesRepo,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -3,7 +3,7 @@ part of '../ui_prototype.dart';
 class ClientEditorPage extends StatefulWidget {
   const ClientEditorPage({super.key, required this.repo, this.existing});
 
-  final ClientsRepo repo;
+  final ClientsRepositoryLocalFirst repo;
   final Client? existing;
 
   @override
@@ -99,7 +99,7 @@ class _ClientEditorPageState extends State<ClientEditorPage>
   @override
   Widget build(BuildContext context) {
     final isExisting = clientId != null;
-    final quotesRepo = QuotesRepo(orgId: ClientsPage._tempOrgId);
+    final quotesRepo = AppDependencies.of(context).quotesRepository;
 
     return PopScope(
       canPop:

@@ -9,14 +9,19 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage>
     with _SettingsStateAccess, _SettingsSectionsMixin {
-  static const orgId = 'demo-org'; // same org id as your shell
-  final repo = OrgSettingsRepo(orgId: orgId);
+  late OrgSettingsRepositoryLocalFirst repo;
   late final Future<_SettingsData> _settingsDataFuture;
 
   @override
   void initState() {
     super.initState();
     _settingsDataFuture = _loadSettingsData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    repo = AppDependencies.of(context).orgSettingsRepository;
   }
 
   @override

@@ -2,7 +2,7 @@ part of '../ui_prototype.dart';
 
 class QuoteEditorPage extends StatefulWidget {
   const QuoteEditorPage({super.key, required this.repo, required this.quote});
-  final QuotesRepo repo;
+  final QuotesRepositoryLocalFirst repo;
   final Quote quote;
 
   @override

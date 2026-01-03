@@ -5,7 +5,7 @@ class QuotesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final quotesRepo = QuotesRepo(orgId: ClientsPage._tempOrgId);
+    final quotesRepo = AppDependencies.of(context).quotesRepository;
 
     return ListView(
       padding: const EdgeInsets.all(16),
