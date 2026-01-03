@@ -24,7 +24,7 @@ class SyncService {
 
   Future<void> start() async {
     _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
-      final isOnline = results.any((r) => r != ConnectivityResult.none);
+      final isOnline = _isOnline(results);
       if (isOnline) {
         sync();
       } else {
@@ -49,7 +49,7 @@ class SyncService {
       return;
     }
     final connectivity = await Connectivity().checkConnectivity();
-    if (connectivity == ConnectivityResult.none) {
+    if (!_isOnline(connectivity)) {
       _statusController.add(SyncStatus.offline);
       return;
     }
@@ -89,6 +89,18 @@ class SyncService {
       await (_db.update(_db.outbox)..where((tbl) => tbl.id.equals(item.id)))
           .write(OutboxCompanion(status: const Value('synced')));
     }
+  }
+
+  bool _isOnline(dynamic value) {
+    if (value is ConnectivityResult) {
+      return value != ConnectivityResult.none;
+    }
+    if (value is List<ConnectivityResult>) {
+      return value.isNotEmpty &&
+          !value.contains(ConnectivityResult.none) &&
+          value.any((result) => result != ConnectivityResult.none);
+    }
+    return false;
   }
 
   Future<void> _downloadChanges(String orgId) async {
