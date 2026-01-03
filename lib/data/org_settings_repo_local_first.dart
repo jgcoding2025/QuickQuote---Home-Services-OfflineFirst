@@ -23,14 +23,15 @@ class OrgSettingsRepositoryLocalFirst {
 
   Stream<OrgSettings> stream() async* {
     final controller = StreamController<OrgSettings>();
-  StreamSubscription<OrgSettings>? dataSub;
+    StreamSubscription<OrgSettings>? dataSub;
 
     void listenSession(AppSession? session) {
       dataSub?.cancel();
-      if (session == null) {
+      if (session == null || session.orgId == null) {
+        controller.add(OrgSettings.defaults);
         return;
       }
-      dataSub = _db.watchOrgSettings(session.orgId).map((row) {
+      dataSub = _db.watchOrgSettings(session.orgId!).map((row) {
         if (row == null) {
           return OrgSettings.defaults;
         }
@@ -60,10 +61,14 @@ class OrgSettingsRepositoryLocalFirst {
 
   Future<void> save(OrgSettings settings) async {
     final session = _sessionController.session;
+    final orgId = session.orgId;
+    if (orgId == null) {
+      throw StateError('Organization is not set yet.');
+    }
     final now = DateTime.now().millisecondsSinceEpoch;
     await _db.upsertOrgSettings(
       OrgSettingsTableCompanion(
-        orgId: Value(session.orgId),
+        orgId: Value(orgId),
         updatedAt: Value(now),
         deleted: const Value(false),
         laborRate: Value(settings.laborRate),
@@ -75,10 +80,10 @@ class OrgSettingsRepositoryLocalFirst {
     );
     await _insertOutbox(
       entityType: 'org_settings',
-      entityId: session.orgId,
+      entityId: orgId,
       opType: 'update',
       payload: settings.toMap(updatedAt: now),
-      orgId: session.orgId,
+      orgId: orgId,
       updatedAt: now,
     );
   }
@@ -92,17 +97,16 @@ class OrgSettingsRepositoryLocalFirst {
     required int updatedAt,
   }) async {
     await _db.into(_db.outbox).insert(
-          OutboxCompanion(
-            id: Value(_uuid.v4()),
-            entityType: Value(entityType),
-            entityId: Value(entityId),
-            opType: Value(opType),
-            payload: Value(jsonEncode(payload)),
-            updatedAt: Value(updatedAt),
-            orgId: Value(orgId),
-            status: const Value('pending'),
-          ),
-        );
+      OutboxCompanion(
+        id: Value(_uuid.v4()),
+        entityType: Value(entityType),
+        entityId: Value(entityId),
+        opType: Value(opType),
+        payload: Value(jsonEncode(payload)),
+        updatedAt: Value(updatedAt),
+        orgId: Value(orgId),
+        status: const Value('pending'),
+      ),
+    );
   }
-
 }

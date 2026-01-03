@@ -48,6 +48,30 @@ class _LoginPageState extends State<LoginPage> {
     await AppDependencies.of(context).appController.continueOffline();
   }
 
+  Future<void> _createAccount() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final deps = AppDependencies.of(context);
+      await deps.appController.createAccount(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,6 +111,14 @@ class _LoginPageState extends State<LoginPage> {
                     child: _isLoading
                         ? const CircularProgressIndicator()
                         : const Text('Sign In'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: _isLoading ? null : _createAccount,
+                    child: const Text('Create Account'),
                   ),
                 ),
                 const SizedBox(height: 12),

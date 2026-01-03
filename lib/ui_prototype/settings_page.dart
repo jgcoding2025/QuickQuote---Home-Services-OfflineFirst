@@ -11,6 +11,9 @@ class _SettingsPageState extends State<SettingsPage>
     with _SettingsStateAccess, _SettingsSectionsMixin {
   late OrgSettingsRepositoryLocalFirst repo;
   late final Future<_SettingsData> _settingsDataFuture;
+  bool _inviteLoading = false;
+  String? _inviteCode;
+  String? _inviteError;
 
   @override
   void initState() {
@@ -75,6 +78,12 @@ class _SettingsPageState extends State<SettingsPage>
                 final rightColumn = Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    _settingsSection(
+                      context,
+                      title: 'Account & Team',
+                      child: _accountCard(context),
+                    ),
+                    const SizedBox(height: 20),
                     _settingsSection(
                       context,
                       title: 'Plan tiers',
@@ -158,6 +167,115 @@ class _SettingsPageState extends State<SettingsPage>
       roomTypes: roomTypes,
       subItems: subItems,
     );
+  }
+
+  Widget _accountCard(BuildContext context) {
+    final deps = AppDependencies.of(context);
+    return ValueListenableBuilder<AppSession?>(
+      valueListenable: deps.sessionController,
+      builder: (context, session, _) {
+        final isOwner = session?.role == 'owner';
+        final isGuest = session?.isGuest ?? true;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Email: ${session?.email ?? 'Offline'}'),
+            const SizedBox(height: 8),
+            Text('Org ID: ${session?.orgId ?? 'None'}'),
+            const SizedBox(height: 8),
+            Text('Role: ${session?.role ?? 'Offline'}'),
+            if (_inviteError != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                _inviteError!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ],
+            const SizedBox(height: 12),
+            if (!isGuest && isOwner)
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _inviteLoading ? null : _createInviteCode,
+                  child: const Text('Create Invite Code'),
+                ),
+              ),
+            if (_inviteCode != null) ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: SelectableText('Invite Code: $_inviteCode'),
+                  ),
+                  IconButton(
+                    tooltip: 'Copy code',
+                    onPressed: () async {
+                      await Clipboard.setData(
+                        ClipboardData(text: _inviteCode ?? ''),
+                      );
+                      if (mounted) _snack(context, 'Invite code copied.');
+                    },
+                    icon: const Icon(Icons.copy),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 12),
+            if (!isGuest)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: _signOut,
+                  child: const Text('Sign Out'),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _createInviteCode() async {
+    setState(() {
+      _inviteLoading = true;
+      _inviteError = null;
+      _inviteCode = null;
+    });
+    try {
+      final deps = AppDependencies.of(context);
+      final code = await deps.appController.createInviteCode();
+      if (mounted) {
+        setState(() {
+          _inviteCode = code;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _inviteError = e.toString();
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _inviteLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _signOut() async {
+    try {
+      final deps = AppDependencies.of(context);
+      await deps.appController.signOut();
+      if (mounted) {
+        _snack(context, 'Signed out. Local data kept offline.');
+      }
+    } catch (e) {
+      if (mounted) {
+        _snack(context, 'Sign out failed: $e');
+      }
+    }
   }
 
   @override

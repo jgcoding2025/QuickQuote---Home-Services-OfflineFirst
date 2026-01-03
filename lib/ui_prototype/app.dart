@@ -27,6 +27,9 @@ class UiPrototypeApp extends StatelessWidget {
           if (session == null) {
             return const LoginPage();
           }
+          if (!session.hasOrg) {
+            return const OnboardingPage();
+          }
           return const PrototypeShell();
         },
       ),

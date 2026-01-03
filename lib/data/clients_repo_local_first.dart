@@ -25,15 +25,16 @@ class ClientsRepositoryLocalFirst {
 
   Stream<List<Client>> streamClients() async* {
     final controller = StreamController<List<Client>>();
-  StreamSubscription<List<Client>>? dataSub;
+    StreamSubscription<List<Client>>? dataSub;
 
     void listenSession(AppSession? session) {
       dataSub?.cancel();
-      if (session == null) {
+      if (session == null || session.orgId == null) {
+        controller.add(const []);
         return;
       }
       dataSub = _db
-          .watchClients(session.orgId)
+          .watchClients(session.orgId!)
           .map((rows) => rows.map(_clientFromRow).toList())
           .listen(
             controller.add,
@@ -58,11 +59,15 @@ class ClientsRepositoryLocalFirst {
     required bool isNew,
   }) async {
     final session = _sessionController.session;
+    final orgId = session.orgId;
+    if (orgId == null) {
+      throw StateError('Organization is not set yet.');
+    }
     final now = DateTime.now().millisecondsSinceEpoch;
     await _db.upsertClient(
       ClientsCompanion(
         id: Value(clientId),
-        orgId: Value(session.orgId),
+        orgId: Value(orgId),
         updatedAt: Value(now),
         deleted: const Value(false),
         firstName: Value(d.firstName.trim()),
@@ -86,13 +91,17 @@ class ClientsRepositoryLocalFirst {
         'updatedAt': now,
         'deleted': false,
       },
-      orgId: session.orgId,
+      orgId: orgId,
       updatedAt: now,
     );
   }
 
   Future<void> deleteClient(String clientId) async {
     final session = _sessionController.session;
+    final orgId = session.orgId;
+    if (orgId == null) {
+      throw StateError('Organization is not set yet.');
+    }
     final now = DateTime.now().millisecondsSinceEpoch;
     await (_db.update(_db.clients)..where((tbl) => tbl.id.equals(clientId)))
         .write(
@@ -106,7 +115,7 @@ class ClientsRepositoryLocalFirst {
       entityId: clientId,
       opType: 'delete',
       payload: {'deleted': true, 'updatedAt': now},
-      orgId: session.orgId,
+      orgId: orgId,
       updatedAt: now,
     );
   }
@@ -131,7 +140,6 @@ class ClientsRepositoryLocalFirst {
     );
   }
 
-
   Future<void> _insertOutbox({
     required String entityType,
     required String entityId,
@@ -141,16 +149,16 @@ class ClientsRepositoryLocalFirst {
     required int updatedAt,
   }) async {
     await _db.into(_db.outbox).insert(
-          OutboxCompanion(
-            id: Value(_uuid.v4()),
-            entityType: Value(entityType),
-            entityId: Value(entityId),
-            opType: Value(opType),
-            payload: Value(jsonEncode(payload)),
-            updatedAt: Value(updatedAt),
-            orgId: Value(orgId),
-            status: const Value('pending'),
-          ),
-        );
+      OutboxCompanion(
+        id: Value(_uuid.v4()),
+        entityType: Value(entityType),
+        entityId: Value(entityId),
+        opType: Value(opType),
+        payload: Value(jsonEncode(payload)),
+        updatedAt: Value(updatedAt),
+        orgId: Value(orgId),
+        status: const Value('pending'),
+      ),
+    );
   }
 }
