@@ -3,11 +3,9 @@ part of '../ui_prototype.dart';
 class ClientsPage extends StatelessWidget {
   const ClientsPage({super.key});
 
-  static const _tempOrgId = 'demo-org'; // temporary until auth/org
-
   @override
   Widget build(BuildContext context) {
-    final repo = ClientsRepo(orgId: _tempOrgId);
+    final repo = AppDependencies.of(context).clientsRepository;
 
     return ListView(
       padding: const EdgeInsets.all(16),

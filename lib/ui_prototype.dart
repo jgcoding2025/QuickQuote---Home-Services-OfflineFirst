@@ -1,17 +1,23 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'data/clients_repo.dart';
-import 'data/org_settings_repo.dart';
-import 'data/quotes_repo.dart';
+import 'app_dependencies.dart';
+import 'data/client_models.dart';
+import 'data/clients_repo_local_first.dart';
+import 'data/org_settings_models.dart';
+import 'data/org_settings_repo_local_first.dart';
+import 'data/quote_models.dart';
+import 'data/quotes_repo_local_first.dart';
+import 'data/session_controller.dart';
+import 'data/sync_service.dart';
 
 part 'ui_prototype/app.dart';
 part 'ui_prototype/shell.dart';
 part 'ui_prototype/utils.dart';
+part 'ui_prototype/login_page.dart';
 part 'ui_prototype/clients_page.dart';
 part 'ui_prototype/client_editor_page.dart';
 part 'ui_prototype/client_editor_helpers.dart';

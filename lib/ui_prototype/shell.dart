@@ -12,13 +12,12 @@ class _PrototypeShellState extends State<PrototypeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final deps = AppDependencies.of(context);
     final pages = <Widget>[
       const ClientsPage(),
       const QuotesPage(),
       const SettingsPage(),
     ];
-
-    const orgId = ClientsPage._tempOrgId; // demo for now
 
     return Scaffold(
       appBar: AppBar(
@@ -27,20 +26,16 @@ class _PrototypeShellState extends State<PrototypeShell> {
           preferredSize: const Size.fromHeight(44),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: FirebaseFirestore.instance
-                  .collection('orgs')
-                  .doc(orgId)
-                  .collection('clients')
-                  .snapshots(includeMetadataChanges: true),
+            child: StreamBuilder<SyncStatus>(
+              stream: deps.syncService.statusStream,
+              initialData: SyncStatus.offline,
               builder: (context, snap) {
-                final hasPending =
-                    snap.data?.metadata.hasPendingWrites ?? false;
-
-                final status = hasPending
-                    ? _SyncStatus.syncing
-                    : _SyncStatus.online;
-
+                final status = switch (snap.data) {
+                  SyncStatus.online => _SyncStatus.online,
+                  SyncStatus.syncing => _SyncStatus.syncing,
+                  SyncStatus.error => _SyncStatus.error,
+                  _ => _SyncStatus.offline,
+                };
                 return _SyncBanner(status: status);
               },
             ),

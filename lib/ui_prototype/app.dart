@@ -5,6 +5,7 @@ class UiPrototypeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final deps = AppDependencies.of(context);
     return MaterialApp(
       title: 'QuickQuote',
       theme: ThemeData(
@@ -20,7 +21,15 @@ class UiPrototypeApp extends StatelessWidget {
 
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4DFFDB)),
       ),
-      home: const PrototypeShell(),
+      home: ValueListenableBuilder<AppSession?>(
+        valueListenable: deps.sessionController,
+        builder: (context, session, _) {
+          if (session == null) {
+            return const LoginPage();
+          }
+          return const PrototypeShell();
+        },
+      ),
     );
   }
 }
