@@ -1,0 +1,17 @@
+[
+  {
+    "size": "S",
+    "multiplier": 0.9,
+    "definition": "Small"
+  },
+  {
+    "size": "M",
+    "multiplier": 1,
+    "definition": "Medium (average)"
+  },
+  {
+    "size": "L",
+    "multiplier": 1.1,
+    "definition": "Large"
+  }
+]

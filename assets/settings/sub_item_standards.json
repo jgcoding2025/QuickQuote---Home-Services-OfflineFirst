@@ -1,0 +1,116 @@
+[
+  {
+    "category": "Deep clean",
+    "subItem": "Ceiling Fan",
+    "description": "",
+    "minutes": 10
+  },
+  {
+    "category": "Deep clean",
+    "subItem": "Fridge (inside)",
+    "description": "",
+    "minutes": 60
+  },
+  {
+    "category": "Deep clean",
+    "subItem": "Oven (inside)",
+    "description": "",
+    "minutes": 60
+  },
+  {
+    "category": "Misc",
+    "subItem": "Mirror",
+    "description": "",
+    "minutes": 5
+  },
+  {
+    "category": "Misc",
+    "subItem": "Tub / Jacuzzi Tub",
+    "description": "",
+    "minutes": 25
+  },
+  {
+    "category": "Misc",
+    "subItem": "Stove Top (Gas)",
+    "description": "",
+    "minutes": 30
+  },
+  {
+    "category": "Windows",
+    "subItem": "Window: Standard",
+    "description": "DNU for Pricing",
+    "minutes": 20
+  },
+  {
+    "category": "Windows",
+    "subItem": "Window Pane (inside)",
+    "description": "1st story",
+    "minutes": 5
+  },
+  {
+    "category": "Windows",
+    "subItem": "Window Pane (outside)",
+    "description": "1st story",
+    "minutes": 5
+  },
+  {
+    "category": "Windows",
+    "subItem": "Window Tract",
+    "description": "1st story",
+    "minutes": 5
+  },
+  {
+    "category": "Windows",
+    "subItem": "Window Pane (inside)",
+    "description": "2nd story",
+    "minutes": 10
+  },
+  {
+    "category": "Windows",
+    "subItem": "Window Pane (outside)",
+    "description": "2nd story",
+    "minutes": 10
+  },
+  {
+    "category": "Laundry/Dishes",
+    "subItem": "Dishes",
+    "description": "1 load washed",
+    "minutes": 15
+  },
+  {
+    "category": "Laundry/Dishes",
+    "subItem": "Dishes",
+    "description": "1 load put away",
+    "minutes": 15
+  },
+  {
+    "category": "Laundry/Dishes",
+    "subItem": "Laundry",
+    "description": "1 load washed and dried",
+    "minutes": 15
+  },
+  {
+    "category": "Laundry/Dishes",
+    "subItem": "Laundry",
+    "description": "1 load put away",
+    "minutes": 15
+  },
+  {
+    "category": "Discounts",
+    "subItem": "Shower",
+    "description": "No glass",
+    "minutes": -20
+  },
+  {
+    "category": "Discounts",
+    "subItem": "Shower",
+    "description": "No stone/tile",
+    "minutes": -20
+  },
+  {
+    "category": "Discounts",
+    "subItem": "Sink (-1)",
+    "description": "",
+    "minutes": -10
+  }
+]

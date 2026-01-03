@@ -1,0 +1,17 @@
+[
+  {
+    "level": "Easy",
+    "multiplier": 0.75,
+    "definition": "Light use with minimal buildup"
+  },
+  {
+    "level": "Medium",
+    "multiplier": 1,
+    "definition": "Moderate use with visible buildup (Average)"
+  },
+  {
+    "level": "Hard",
+    "multiplier": 1.25,
+    "definition": "Heavy use with significant buildup"
+  }
+]

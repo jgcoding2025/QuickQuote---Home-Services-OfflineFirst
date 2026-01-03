@@ -1,0 +1,106 @@
+[
+  {
+    "row": 1,
+    "category": "Common Areas",
+    "roomType": "Entry",
+    "description": "",
+    "minutes": 8,
+    "squareFeet": 45
+  },
+  {
+    "row": 2,
+    "category": "Common Areas",
+    "roomType": "Kitchen",
+    "description": "",
+    "minutes": 60,
+    "squareFeet": 175
+  },
+  {
+    "row": 3,
+    "category": "Common Areas",
+    "roomType": "Living Room",
+    "description": "",
+    "minutes": 20,
+    "squareFeet": 300
+  },
+  {
+    "row": 4,
+    "category": "Common Areas",
+    "roomType": "Dining Room",
+    "description": "",
+    "minutes": 20,
+    "squareFeet": 140
+  },
+  {
+    "row": 5,
+    "category": "Common Areas",
+    "roomType": "Family Room",
+    "description": "Entertainment Focused",
+    "minutes": 20,
+    "squareFeet": 300
+  },
+  {
+    "row": 6,
+    "category": "Bathrooms",
+    "roomType": "Bathroom (Half)",
+    "description": "Sink, toilet",
+    "minutes": 20,
+    "squareFeet": 25
+  },
+  {
+    "row": 7,
+    "category": "Bathrooms",
+    "roomType": "Bathroom (Full)",
+    "description": "Sink, toilet, tub/shower",
+    "minutes": 60,
+    "squareFeet": 50
+  },
+  {
+    "row": 8,
+    "category": "Bathrooms",
+    "roomType": "Bathroom (Primary)",
+    "description": "2 Sinks + Glass/Stone Shower",
+    "minutes": 120,
+    "squareFeet": 100
+  },
+  {
+    "row": 9,
+    "category": "Private Rooms",
+    "roomType": "Bedroom",
+    "description": "",
+    "minutes": 15,
+    "squareFeet": 110
+  },
+  {
+    "row": 10,
+    "category": "Private Rooms",
+    "roomType": "Office",
+    "description": "",
+    "minutes": 15,
+    "squareFeet": 120
+  },
+  {
+    "row": 11,
+    "category": "Private Rooms",
+    "roomType": "Bedroom (Primary)",
+    "description": "",
+    "minutes": 20,
+    "squareFeet": 225
+  },
+  {
+    "row": 12,
+    "category": "Other",
+    "roomType": "Hallway",
+    "description": "",
+    "minutes": 6,
+    "squareFeet": 40
+  },
+  {
+    "row": 13,
+    "category": "Other",
+    "roomType": "Laundry",
+    "description": "",
+    "minutes": 10,
+    "squareFeet": 55
+  }
+]

@@ -1,0 +1,66 @@
+[
+  {
+    "row": 1,
+    "category": "Initial",
+    "serviceType": "Initial Clean",
+    "description": "Standard Clean Items Only",
+    "pricePerSqFt": 0.16,
+    "multiplier": 1.0
+  },
+  {
+    "row": 2,
+    "category": "Initial",
+    "serviceType": "Deep Clean",
+    "description": "Post Initial Clean",
+    "pricePerSqFt": 0.2,
+    "multiplier": 1.25
+  },
+  {
+    "row": 3,
+    "category": "Recurring",
+    "serviceType": "Standard Clean",
+    "description": "",
+    "pricePerSqFt": 0.12,
+    "multiplier": 0.75
+  },
+  {
+    "row": 4,
+    "category": "Recurring",
+    "serviceType": "Light Clean",
+    "description": "Dusting and Floors",
+    "pricePerSqFt": 0.06,
+    "multiplier": 0.38
+  },
+  {
+    "row": 5,
+    "category": "Recurring",
+    "serviceType": "Deep Clean",
+    "description": "Annual",
+    "pricePerSqFt": 0.22,
+    "multiplier": 1.38
+  },
+  {
+    "row": 6,
+    "category": "Recurring",
+    "serviceType": "Deep Clean",
+    "description": "Semi-Annual",
+    "pricePerSqFt": 0.22,
+    "multiplier": 1.38
+  },
+  {
+    "row": 7,
+    "category": "One-Time",
+    "serviceType": "Deep Clean",
+    "description": "",
+    "pricePerSqFt": 0.3,
+    "multiplier": 1.88
+  },
+  {
+    "row": 8,
+    "category": "One-Time",
+    "serviceType": "Move In/Out Clean",
+    "description": "",
+    "pricePerSqFt": 0.32,
+    "multiplier": 2.0
+  }
+]

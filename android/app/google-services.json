@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "869002966506",
+    "project_id": "quickquoteapp-c3bfb",
+    "storage_bucket": "quickquoteapp-c3bfb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:869002966506:android:050f3af9c453469134ee93",
+        "android_client_info": {
+          "package_name": "com.example.quote_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCC0w5x9UPeXWoYPp-X1sEkFrwRz586wo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

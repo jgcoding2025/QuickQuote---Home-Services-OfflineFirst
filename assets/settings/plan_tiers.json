@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Bronze",
+    "label": "Basic",
+    "color": "#CD7F32",
+    "multiplier": 0.75,
+    "description": "A quick, affordable option for light upkeep. Ideal for tidy homes needing just a quick refresh."
+  },
+  {
+    "name": "Silver",
+    "label": "Standard",
+    "color": "#C0C0C0",
+    "multiplier": 1,
+    "description": "Great for regular cleaning and upkeep. Balances cost and cleanliness with more time spent than Bronze."
+  },
+  {
+    "name": "Gold",
+    "label": "Premium",
+    "color": "#FFD700",
+    "multiplier": 1.5,
+    "description": "Perfect for deep cleaning, first-time cleans, or clients who want every detail attended to. Expect a spotless shine and the highest attention to detail."
+  }
+]
