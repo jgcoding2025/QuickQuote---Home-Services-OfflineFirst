@@ -18,6 +18,7 @@ part 'ui_prototype/app.dart';
 part 'ui_prototype/shell.dart';
 part 'ui_prototype/utils.dart';
 part 'ui_prototype/login_page.dart';
+part 'ui_prototype/onboarding_page.dart';
 part 'ui_prototype/clients_page.dart';
 part 'ui_prototype/client_editor_page.dart';
 part 'ui_prototype/client_editor_helpers.dart';

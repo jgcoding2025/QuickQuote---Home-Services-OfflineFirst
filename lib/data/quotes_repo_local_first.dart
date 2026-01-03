@@ -25,15 +25,16 @@ class QuotesRepositoryLocalFirst {
 
   Stream<List<Quote>> streamQuotes() async* {
     final controller = StreamController<List<Quote>>();
-  StreamSubscription<List<Quote>>? dataSub;
+    StreamSubscription<List<Quote>>? dataSub;
 
     Future<void> listenSession(AppSession? session) async {
       await dataSub?.cancel();
-      if (session == null) {
+      if (session == null || session.orgId == null) {
+        controller.add(const []);
         return;
       }
       dataSub = _db
-          .watchQuotes(session.orgId)
+          .watchQuotes(session.orgId!)
           .asyncMap(_mapQuotes)
           .listen(
             controller.add,
@@ -53,15 +54,16 @@ class QuotesRepositoryLocalFirst {
 
   Stream<List<Quote>> streamQuotesForClient(String clientId) async* {
     final controller = StreamController<List<Quote>>();
-  StreamSubscription<List<Quote>>? dataSub;
+    StreamSubscription<List<Quote>>? dataSub;
 
     Future<void> listenSession(AppSession? session) async {
       await dataSub?.cancel();
-      if (session == null) {
+      if (session == null || session.orgId == null) {
+        controller.add(const []);
         return;
       }
       dataSub = _db
-          .watchQuotesForClient(session.orgId, clientId)
+          .watchQuotesForClient(session.orgId!, clientId)
           .asyncMap(_mapQuotes)
           .listen(
             controller.add,
@@ -85,9 +87,13 @@ class QuotesRepositoryLocalFirst {
     required bool isNew,
   }) async {
     final session = _sessionController.session;
+    final orgId = session.orgId;
+    if (orgId == null) {
+      throw StateError('Organization is not set yet.');
+    }
     final now = DateTime.now().millisecondsSinceEpoch;
-    await _db.upsertQuote(_quoteCompanion(quoteId, session.orgId, d, now));
-    await _replaceItems(quoteId, session.orgId, d.items, now);
+    await _db.upsertQuote(_quoteCompanion(quoteId, orgId, d, now));
+    await _replaceItems(quoteId, orgId, d.items, now);
     await _insertOutbox(
       entityType: 'quote',
       entityId: quoteId,
@@ -97,7 +103,7 @@ class QuotesRepositoryLocalFirst {
         'updatedAt': now,
         'deleted': false,
       },
-      orgId: session.orgId,
+      orgId: orgId,
       updatedAt: now,
     );
   }
@@ -150,6 +156,10 @@ class QuotesRepositoryLocalFirst {
 
   Future<void> deleteQuote(String quoteId) async {
     final session = _sessionController.session;
+    final orgId = session.orgId;
+    if (orgId == null) {
+      throw StateError('Organization is not set yet.');
+    }
     final now = DateTime.now().millisecondsSinceEpoch;
     await (_db.update(_db.quotes)..where((tbl) => tbl.id.equals(quoteId))).write(
       QuotesCompanion(
@@ -162,7 +172,7 @@ class QuotesRepositoryLocalFirst {
       entityId: quoteId,
       opType: 'delete',
       payload: {'deleted': true, 'updatedAt': now},
-      orgId: session.orgId,
+      orgId: orgId,
       updatedAt: now,
     );
   }
@@ -299,17 +309,17 @@ class QuotesRepositoryLocalFirst {
     required int updatedAt,
   }) async {
     await _db.into(_db.outbox).insert(
-          OutboxCompanion(
-            id: Value(_uuid.v4()),
-            entityType: Value(entityType),
-            entityId: Value(entityId),
-            opType: Value(opType),
-            payload: Value(jsonEncode(payload)),
-            updatedAt: Value(updatedAt),
-            orgId: Value(orgId),
-            status: const Value('pending'),
-          ),
-        );
+      OutboxCompanion(
+        id: Value(_uuid.v4()),
+        entityType: Value(entityType),
+        entityId: Value(entityId),
+        opType: Value(opType),
+        payload: Value(jsonEncode(payload)),
+        updatedAt: Value(updatedAt),
+        orgId: Value(orgId),
+        status: const Value('pending'),
+      ),
+    );
   }
 
 }

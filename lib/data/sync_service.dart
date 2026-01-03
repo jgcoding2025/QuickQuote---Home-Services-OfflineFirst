@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:drift/drift.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'local_db.dart';
 import 'session_controller.dart';
@@ -40,11 +41,15 @@ class SyncService {
 
   Future<void> sync() async {
     final session = _sessionController.value;
-    if (session == null) {
+    if (session == null || session.orgId == null) {
       _statusController.add(SyncStatus.offline);
       return;
     }
     if (session.isGuest) {
+      _statusController.add(SyncStatus.offline);
+      return;
+    }
+    if (FirebaseAuth.instance.currentUser == null) {
       _statusController.add(SyncStatus.offline);
       return;
     }
@@ -55,12 +60,16 @@ class SyncService {
     }
     _statusController.add(SyncStatus.syncing);
     try {
-      await _uploadOutbox(session.orgId);
-      await _downloadChanges(session.orgId);
+      await _uploadOutbox(session.orgId!);
+      await _downloadChanges(session.orgId!);
       _statusController.add(SyncStatus.online);
     } catch (e) {
       _statusController.add(SyncStatus.error);
     }
+  }
+
+  Future<void> runOnce() async {
+    await sync();
   }
 
   Future<void> _uploadOutbox(String orgId) async {
