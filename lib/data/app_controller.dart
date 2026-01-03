@@ -337,9 +337,8 @@ class AppController {
   }
 
   Future<String> _generateUniqueInviteCode() async {
-    final characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     for (var attempt = 0; attempt < 5; attempt++) {
-      final code = _randomCode(characters, length: 8);
+      final code = _randomCode(length: 8);
       final existing = await FirebaseFirestore.instance
           .collection('invites')
           .doc(code)
@@ -351,19 +350,12 @@ class AppController {
     throw StateError('Failed to generate a unique invite code.');
   }
 
-  String _randomCode(String alphabet, {required int length}) {
-    final uuid = const Uuid();
-    final buffer = StringBuffer();
-    while (buffer.length < length) {
-      final bytes = uuid.v4obj().bytes;
-      for (final byte in bytes) {
-        buffer.write(alphabet[byte % alphabet.length]);
-        if (buffer.length >= length) {
-          break;
-        }
-      }
+  String _randomCode({required int length}) {
+    final raw = const Uuid().v4().replaceAll('-', '').toUpperCase();
+    if (raw.length < length) {
+      throw StateError('Failed to generate invite code.');
     }
-    return buffer.toString();
+    return raw.substring(0, length);
   }
 }
 
