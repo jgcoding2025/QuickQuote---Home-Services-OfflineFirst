@@ -20,7 +20,12 @@ class SyncService {
   final SessionController _sessionController;
   final _statusController = StreamController<SyncStatus>.broadcast();
   StreamSubscription<dynamic>? _connectivitySub;
+  StreamSubscription<AppSession?>? _sessionSub;
+  Timer? _pollingTimer;
+  bool _isOnlineState = false;
+  bool _pollingEnabled = true;
   SyncStatus _current = SyncStatus.offline;
+  static const Duration pollingInterval = Duration(seconds: 3);
 
   Stream<SyncStatus> get statusStream => _statusController.stream;
   SyncStatus get currentStatus => _current;
@@ -31,18 +36,28 @@ class SyncService {
   }
 
   Future<void> start() async {
+    final initial = await Connectivity().checkConnectivity();
+    _isOnlineState = _isOnline(initial);
     _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       final isOnline = _isOnline(results);
+      _isOnlineState = isOnline;
       if (isOnline) {
         sync();
       } else {
         _setStatus(SyncStatus.offline);
       }
+      _updatePolling();
     });
+    _sessionSub = _sessionController.stream.listen((_) {
+      _updatePolling();
+    });
+    _updatePolling();
   }
 
   Future<void> dispose() async {
     await _connectivitySub?.cancel();
+    await _sessionSub?.cancel();
+    _pollingTimer?.cancel();
     await _statusController.close();
   }
 
@@ -79,6 +94,55 @@ class SyncService {
 
   Future<void> runOnce() async {
     await sync();
+  }
+
+  bool get canSyncNow => _isOnlineState && _hasValidSession();
+
+  Future<void> flushOutboxNow() async {
+    if (!_canSyncNow()) {
+      return;
+    }
+    final session = _sessionController.value;
+    if (session == null || session.orgId == null) {
+      return;
+    }
+    _setStatus(SyncStatus.syncing);
+    try {
+      await _uploadOutbox(session.orgId!);
+      _setStatus(SyncStatus.online);
+    } catch (e, st) {
+      print('OUTBOX UPLOAD ERROR: $e');
+      print(st);
+      _setStatus(SyncStatus.error);
+    }
+  }
+
+  Future<void> downloadChangesOnce() async {
+    if (!_canSyncNow()) {
+      return;
+    }
+    final session = _sessionController.value;
+    if (session == null || session.orgId == null) {
+      return;
+    }
+    try {
+      await _downloadClients(session.orgId!);
+      await _downloadQuotes(session.orgId!);
+    } catch (e, st) {
+      print('DOWNLOAD ERROR: $e');
+      print(st);
+    }
+  }
+
+  void startPolling() {
+    _pollingEnabled = true;
+    _updatePolling();
+  }
+
+  void stopPolling() {
+    _pollingEnabled = false;
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
   }
 
   Future<void> _uploadOutbox(String orgId) async {
@@ -139,6 +203,14 @@ class SyncService {
     for (final doc in snap.docs) {
       final data = doc.data();
       final updatedAt = (data['updatedAt'] as int?) ?? 0;
+      final hasPending = await _hasPendingOutbox(
+        entityType: 'client',
+        entityId: doc.id,
+        orgId: orgId,
+      );
+      if (hasPending) {
+        continue;
+      }
       if (updatedAt > maxUpdatedAt) {
         maxUpdatedAt = updatedAt;
       }
@@ -185,6 +257,14 @@ class SyncService {
     for (final doc in snap.docs) {
       final data = doc.data();
       final updatedAt = (data['updatedAt'] as int?) ?? 0;
+      final hasPending = await _hasPendingOutbox(
+        entityType: 'quote',
+        entityId: doc.id,
+        orgId: orgId,
+      );
+      if (hasPending) {
+        continue;
+      }
       if (updatedAt > maxUpdatedAt) {
         maxUpdatedAt = updatedAt;
       }
@@ -304,6 +384,58 @@ class SyncService {
     }
     await _db.replaceQuoteItems(quoteId, rows);
   }
+
+  Future<bool> _hasPendingOutbox({
+    required String entityType,
+    required String entityId,
+    required String orgId,
+  }) async {
+    final existing =
+        await (_db.select(_db.outbox)
+              ..where(
+                (tbl) =>
+                    tbl.orgId.equals(orgId) &
+                    tbl.entityType.equals(entityType) &
+                    tbl.entityId.equals(entityId) &
+                    tbl.status.equals('pending'),
+              )
+              ..limit(1))
+            .getSingleOrNull();
+    return existing != null;
+  }
+
+  void _updatePolling() {
+    if (!_pollingEnabled) {
+      return;
+    }
+    if (_shouldPoll()) {
+      _pollingTimer ??= Timer.periodic(pollingInterval, (_) {
+        if (_shouldPoll()) {
+          unawaited(downloadChangesOnce());
+        }
+      });
+    } else {
+      _pollingTimer?.cancel();
+      _pollingTimer = null;
+    }
+  }
+
+  bool _hasValidSession() {
+    final session = _sessionController.value;
+    if (session == null || session.orgId == null) {
+      return false;
+    }
+    if (session.isGuest) {
+      return false;
+    }
+    return FirebaseAuth.instance.currentUser != null;
+  }
+
+  bool _canSyncNow() {
+    return _isOnlineState && _hasValidSession();
+  }
+
+  bool _shouldPoll() => _canSyncNow();
 
   DocumentReference<Map<String, dynamic>>? _docForEntity(
     String orgId,

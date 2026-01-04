@@ -55,6 +55,12 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   double ccRate = 0.03; // 3%
   @override
   bool _isDirty = false;
+  @override
+  final Debouncer _autoSaveDebouncer = Debouncer(
+    const Duration(milliseconds: 800),
+  );
+  @override
+  int _autoSaveGeneration = 0;
 
   @override
   String customerName = '';
@@ -162,6 +168,12 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
     }
     specialNotes = widget.quote.specialNotes;
     items.addAll(widget.quote.items.map((item) => _QuoteItem.fromMap(item)));
+  }
+
+  @override
+  void dispose() {
+    _autoSaveDebouncer.dispose();
+    super.dispose();
   }
 
   @override

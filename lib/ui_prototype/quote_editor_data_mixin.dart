@@ -24,6 +24,10 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   bool get _isDirty;
   set _isDirty(bool value);
 
+  Debouncer get _autoSaveDebouncer;
+  int get _autoSaveGeneration;
+  set _autoSaveGeneration(int value);
+
   double get laborRate;
   set laborRate(double value);
 
@@ -110,6 +114,7 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   Future<bool> _confirmDiscardChanges();
   Future<void> _saveQuote();
   void _markDirty([VoidCallback? update]);
+  Future<void> _autoSaveQuote(int generation, SyncService syncService);
 
   String _resolveOption(String current, List<String> options);
   void _syncOption(String current, String resolved, ValueSetter<String> assign);
@@ -411,13 +416,46 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
     setState(() {
       update?.call();
       _isDirty = true;
+      _autoSaveGeneration += 1;
+    });
+    final syncService = AppDependencies.of(context).syncService;
+    final generation = _autoSaveGeneration;
+    _autoSaveDebouncer.run(() {
+      unawaited(_autoSaveQuote(generation, syncService));
     });
   }
 
   @override
   Future<void> _saveQuote() async {
+    final draft = _buildDraft();
+
+    try {
+      // Capture navigator BEFORE the async gap (avoids context-across-await lint)
+      final navigator = Navigator.of(context);
+
+      await widget.repo.updateQuote(widget.quote.id, draft);
+
+      if (!mounted) return;
+
+      setState(() => _isDirty = false);
+      _snack(context, 'Quote saved');
+
+      // Let the snackbar paint, then pop
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      if (!mounted) return;
+      navigator.pop();
+    } catch (e, s) {
+      debugPrint('Save failed: $e');
+      debugPrintStack(stackTrace: s);
+      if (mounted) _snack(context, 'Save failed');
+      rethrow; // keep during debug
+    }
+  }
+
+  QuoteDraft _buildDraft() {
     final totals = _calcTotals();
-    final draft = QuoteDraft(
+    return QuoteDraft(
       clientId: widget.quote.clientId,
       clientName: customerName,
       quoteName: quoteName,
@@ -449,28 +487,30 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
       specialNotes: specialNotes,
       items: items.map((item) => item.toMap()).toList(),
     );
+  }
 
+  @override
+  Future<void> _autoSaveQuote(
+    int generation,
+    SyncService syncService,
+  ) async {
+    if (!_isDirty) return;
+    final draft = _buildDraft();
+    final draftSnapshot = jsonEncode(draft.toMap());
     try {
-      // Capture navigator BEFORE the async gap (avoids context-across-await lint)
-      final navigator = Navigator.of(context);
-
       await widget.repo.updateQuote(widget.quote.id, draft);
-
       if (!mounted) return;
-
-      setState(() => _isDirty = false);
-      _snack(context, 'Quote saved');
-
-      // Let the snackbar paint, then pop
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-
-      if (!mounted) return;
-      navigator.pop();
+      final currentSnapshot = jsonEncode(_buildDraft().toMap());
+      if (generation == _autoSaveGeneration &&
+          currentSnapshot == draftSnapshot) {
+        setState(() => _isDirty = false);
+      }
+      if (syncService.canSyncNow) {
+        await syncService.flushOutboxNow();
+      }
     } catch (e, s) {
-      debugPrint('Save failed: $e');
+      debugPrint('Auto-save failed: $e');
       debugPrintStack(stackTrace: s);
-      if (mounted) _snack(context, 'Save failed');
-      rethrow; // keep during debug
     }
   }
 

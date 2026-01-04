@@ -100,18 +100,41 @@ class OrgSettingsRepositoryLocalFirst {
     required String orgId,
     required int updatedAt,
   }) async {
-    await _db.into(_db.outbox).insert(
-      OutboxCompanion(
-        id: Value(_uuid.v4()),
-        entityType: Value(entityType),
-        entityId: Value(entityId),
-        opType: Value(opType),
-        payload: Value(jsonEncode(payload)),
-        updatedAt: Value(updatedAt),
-        orgId: Value(orgId),
-        status: const Value('pending'),
-      ),
-    );
+    final existing =
+        await (_db.select(_db.outbox)
+              ..where(
+                (tbl) =>
+                    tbl.orgId.equals(orgId) &
+                    tbl.entityType.equals(entityType) &
+                    tbl.entityId.equals(entityId) &
+                    tbl.status.equals('pending'),
+              )
+              ..limit(1))
+            .getSingleOrNull();
+    if (existing != null) {
+      await (_db.update(_db.outbox)..where((tbl) => tbl.id.equals(existing.id)))
+          .write(
+        OutboxCompanion(
+          opType: Value(opType),
+          payload: Value(jsonEncode(payload)),
+          updatedAt: Value(updatedAt),
+          status: const Value('pending'),
+        ),
+      );
+    } else {
+      await _db.into(_db.outbox).insert(
+        OutboxCompanion(
+          id: Value(_uuid.v4()),
+          entityType: Value(entityType),
+          entityId: Value(entityId),
+          opType: Value(opType),
+          payload: Value(jsonEncode(payload)),
+          updatedAt: Value(updatedAt),
+          orgId: Value(orgId),
+          status: const Value('pending'),
+        ),
+      );
+    }
     unawaited(_syncService.sync());
   }
 }
