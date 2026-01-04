@@ -46,6 +46,7 @@ class QuotesRepo {
       lastProClean: d.lastProClean,
       status: d.status,
       total: d.total,
+      pricingProfileId: d.pricingProfileId,
     );
   }
 
@@ -155,6 +156,8 @@ class QuotesRepo {
       ccEnabled: b('ccEnabled'),
       taxRate: n('taxRate', fallback: 0.07),
       ccRate: n('ccRate', fallback: 0.03),
+      pricingProfileId:
+          s('pricingProfileId').isEmpty ? 'default' : s('pricingProfileId'),
       defaultRoomType: s('defaultRoomType'),
       defaultLevel: s('defaultLevel'),
       defaultSize: s('defaultSize'),

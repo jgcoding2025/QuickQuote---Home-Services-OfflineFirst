@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'data/clients_repo_local_first.dart';
 import 'data/app_controller.dart';
 import 'data/org_settings_repo_local_first.dart';
+import 'data/pricing_profile_catalog_repo_local_first.dart';
+import 'data/pricing_profiles_repo_local_first.dart';
 import 'data/quotes_repo_local_first.dart';
 import 'data/session_controller.dart';
 import 'data/sync_service.dart';
@@ -14,6 +16,8 @@ class AppDependencies extends InheritedWidget {
     required this.clientsRepository,
     required this.quotesRepository,
     required this.orgSettingsRepository,
+    required this.pricingProfilesRepository,
+    required this.pricingProfileCatalogRepository,
     required this.syncService,
     required this.appController,
     required super.child,
@@ -23,6 +27,9 @@ class AppDependencies extends InheritedWidget {
   final ClientsRepositoryLocalFirst clientsRepository;
   final QuotesRepositoryLocalFirst quotesRepository;
   final OrgSettingsRepositoryLocalFirst orgSettingsRepository;
+  final PricingProfilesRepositoryLocalFirst pricingProfilesRepository;
+  final PricingProfileCatalogRepositoryLocalFirst
+      pricingProfileCatalogRepository;
   final SyncService syncService;
   final AppController appController;
 

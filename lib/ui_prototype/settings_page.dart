@@ -8,8 +8,13 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage>
-    with _SettingsStateAccess, _SettingsSectionsMixin {
+    with
+        _SettingsStateAccess,
+        _SettingsSectionsMixin,
+        _SettingsPricingProfilesMixin {
   late OrgSettingsRepositoryLocalFirst repo;
+  late PricingProfilesRepositoryLocalFirst _pricingProfilesRepo;
+  late PricingProfileCatalogRepositoryLocalFirst _pricingCatalogRepo;
   late final Future<_SettingsData> _settingsDataFuture;
   bool _inviteLoading = false;
   String? _inviteCode;
@@ -24,8 +29,19 @@ class _SettingsPageState extends State<SettingsPage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    repo = AppDependencies.of(context).orgSettingsRepository;
+    final deps = AppDependencies.of(context);
+    repo = deps.orgSettingsRepository;
+    _pricingProfilesRepo = deps.pricingProfilesRepository;
+    _pricingCatalogRepo = deps.pricingProfileCatalogRepository;
   }
+
+  @override
+  PricingProfilesRepositoryLocalFirst get pricingProfilesRepo =>
+      _pricingProfilesRepo;
+
+  @override
+  PricingProfileCatalogRepositoryLocalFirst get pricingCatalogRepo =>
+      _pricingCatalogRepo;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +81,12 @@ class _SettingsPageState extends State<SettingsPage>
                       context,
                       title: 'Labor Rate, Taxes, Fees',
                       child: _quoteDefaultsCard(context, s),
+                    ),
+                    const SizedBox(height: 20),
+                    _settingsSection(
+                      context,
+                      title: 'Pricing Profiles',
+                      child: _pricingProfilesCard(context, s),
                     ),
                     const SizedBox(height: 20),
                     _settingsSection(
@@ -168,6 +190,7 @@ class _SettingsPageState extends State<SettingsPage>
       subItems: subItems,
     );
   }
+
 
   Widget _accountCard(BuildContext context) {
     final deps = AppDependencies.of(context);

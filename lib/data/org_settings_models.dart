@@ -4,6 +4,7 @@ class OrgSettings {
   final double taxRate;
   final bool ccEnabled;
   final double ccRate;
+  final String defaultPricingProfileId;
 
   const OrgSettings({
     required this.laborRate,
@@ -11,6 +12,7 @@ class OrgSettings {
     required this.taxRate,
     required this.ccEnabled,
     required this.ccRate,
+    required this.defaultPricingProfileId,
   });
 
   static const defaults = OrgSettings(
@@ -19,6 +21,7 @@ class OrgSettings {
     taxRate: 0.07,
     ccEnabled: false,
     ccRate: 0.03,
+    defaultPricingProfileId: 'default',
   );
 
   Map<String, dynamic> toMap({required int updatedAt}) => {
@@ -27,6 +30,7 @@ class OrgSettings {
         'taxRate': taxRate,
         'ccEnabled': ccEnabled,
         'ccRate': ccRate,
+        'defaultPricingProfileId': defaultPricingProfileId,
         'updatedAt': updatedAt,
         'deleted': false,
       };
@@ -51,6 +55,9 @@ class OrgSettings {
       taxRate: numD('taxRate', defaults.taxRate),
       ccEnabled: boolD('ccEnabled', defaults.ccEnabled),
       ccRate: numD('ccRate', defaults.ccRate),
+      defaultPricingProfileId:
+          (d['defaultPricingProfileId'] as String?) ??
+          defaults.defaultPricingProfileId,
     );
   }
 }

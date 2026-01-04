@@ -28,7 +28,7 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   ];
 
   @override
-  late final Future<_QuoteSettingsData> _settingsFuture;
+  late Future<_QuoteSettingsData> _settingsFuture;
   @override
   List<_ServiceTypeStandard> _serviceTypeStandards = const [];
   @override
@@ -53,6 +53,8 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   double taxRate = 0.07; // IN
   @override
   double ccRate = 0.03; // 3%
+  @override
+  String pricingProfileId = 'default';
   @override
   bool _isDirty = false;
   @override
@@ -122,19 +124,55 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   @override
   final items = <_QuoteItem>[];
 
+  late PricingProfilesRepositoryLocalFirst _pricingProfilesRepo;
+  late OrgSettingsRepositoryLocalFirst _orgSettingsRepo;
+  StreamSubscription<List<PricingProfileHeader>>? _profilesSub;
+  StreamSubscription<OrgSettings>? _orgSettingsSub;
+  List<PricingProfileHeader> _pricingProfiles = const [];
+  OrgSettings _orgSettings = OrgSettings.defaults;
+
+  @override
+  List<PricingProfileHeader> get pricingProfiles => _pricingProfiles;
+
+  @override
+  set pricingProfiles(List<PricingProfileHeader> value) {
+    _pricingProfiles = value;
+  }
+
   @override
   void initState() {
     super.initState();
-    _settingsFuture = _loadQuoteSettingsData();
     _syncFromQuote(widget.quote);
+    _settingsFuture = _loadQuoteSettingsData();
     _startRemoteWatch();
   }
 
   @override
   void dispose() {
     _remoteSubscription?.cancel();
+    _profilesSub?.cancel();
+    _orgSettingsSub?.cancel();
     _autoSaveDebouncer.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final deps = AppDependencies.of(context);
+    _pricingProfilesRepo = deps.pricingProfilesRepository;
+    _orgSettingsRepo = deps.orgSettingsRepository;
+
+    _profilesSub ??= _pricingProfilesRepo.streamProfiles().listen((profiles) {
+      setState(() {
+        _pricingProfiles = profiles;
+      });
+    });
+    _orgSettingsSub ??= _orgSettingsRepo.stream().listen((settings) {
+      setState(() {
+        _orgSettings = settings;
+      });
+    });
   }
 
   void _startRemoteWatch() {
@@ -151,6 +189,44 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
         });
       }
     });
+  }
+
+  @override
+  Future<void> _selectPricingProfile(String profileId) async {
+    if (profileId == pricingProfileId) {
+      return;
+    }
+    setState(() {
+      pricingProfileId = profileId;
+      _settingsFuture = _loadQuoteSettingsData();
+      _isDirty = true;
+      _autoSaveGeneration += 1;
+    });
+    if (profileId == 'default') {
+      setState(() {
+        laborRate = _orgSettings.laborRate;
+        taxEnabled = _orgSettings.taxEnabled;
+        taxRate = _orgSettings.taxRate;
+        ccEnabled = _orgSettings.ccEnabled;
+        ccRate = _orgSettings.ccRate;
+      });
+    } else {
+      final header = await _pricingProfilesRepo.getProfileById(profileId);
+      if (header == null) {
+        return;
+      }
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        laborRate = header.laborRate;
+        taxEnabled = header.taxEnabled;
+        taxRate = header.taxRate;
+        ccEnabled = header.ccEnabled;
+        ccRate = header.ccRate;
+      });
+    }
+    _scheduleAutoSave();
   }
 
   void _applyRemoteQuote(Quote quote) {

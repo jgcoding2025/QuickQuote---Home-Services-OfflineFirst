@@ -129,6 +129,7 @@ class SyncService {
     try {
       await _downloadClients(session.orgId!);
       await _downloadQuotes(session.orgId!);
+      await _downloadPricingProfiles(session.orgId!);
     } catch (e, st) {
       debugPrint('DOWNLOAD ERROR: $e');
       debugPrint('$st');
@@ -159,7 +160,12 @@ class SyncService {
       final updatedAt = payload['updatedAt'] is int
           ? payload['updatedAt'] as int
           : item.updatedAt;
-      final doc = _docForEntity(orgId, item.entityType, item.entityId);
+      final doc = _docForEntity(
+        orgId,
+        item.entityType,
+        item.entityId,
+        payload,
+      );
       if (doc == null) {
         continue;
       }
@@ -190,6 +196,7 @@ class SyncService {
     await _downloadClients(orgId);
     await _downloadQuotes(orgId);
     await _downloadOrgSettings(orgId);
+    await _downloadPricingProfiles(orgId);
   }
 
   Future<void> _downloadClients(String orgId) async {
@@ -307,6 +314,11 @@ class SyncService {
           ccEnabled: Value(_bool(data['ccEnabled'])),
           taxRate: Value(_num(data['taxRate'], fallback: 0.07)),
           ccRate: Value(_num(data['ccRate'], fallback: 0.03)),
+          pricingProfileId: Value(
+            _string(data['pricingProfileId']).isEmpty
+                ? 'default'
+                : _string(data['pricingProfileId']),
+          ),
           defaultRoomType: Value(_string(data['defaultRoomType'])),
           defaultLevel: Value(_string(data['defaultLevel'])),
           defaultSize: Value(_string(data['defaultSize'])),
@@ -358,9 +370,417 @@ class SyncService {
         taxRate: Value(_num(data['taxRate'], fallback: 0.07)),
         ccEnabled: Value(_bool(data['ccEnabled'])),
         ccRate: Value(_num(data['ccRate'], fallback: 0.03)),
+        defaultPricingProfileId: Value(
+          _string(data['defaultPricingProfileId']).isEmpty
+              ? 'default'
+              : _string(data['defaultPricingProfileId']),
+        ),
       ),
     );
     await _db.setSyncState('org_settings', orgId, updatedAt);
+  }
+
+  Future<void> _downloadPricingProfiles(String orgId) async {
+    await _downloadPricingProfileHeaders(orgId);
+    await _downloadPricingProfileServiceTypes(orgId);
+    await _downloadPricingProfileFrequencies(orgId);
+    await _downloadPricingProfileRoomTypes(orgId);
+    await _downloadPricingProfileSubItems(orgId);
+    await _downloadPricingProfileSizes(orgId);
+    await _downloadPricingProfileComplexities(orgId);
+  }
+
+  Future<void> _downloadPricingProfileHeaders(String orgId) async {
+    final lastSync = await _db.getLastSync('pricing_profile', orgId);
+    final snap = await FirebaseFirestore.instance
+        .collection('orgs')
+        .doc(orgId)
+        .collection('pricingProfiles')
+        .where('updatedAt', isGreaterThan: lastSync)
+        .get();
+    var maxUpdatedAt = lastSync;
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final updatedAt = (data['updatedAt'] as int?) ?? 0;
+      final hasPending = await _hasPendingOutbox(
+        entityType: 'pricing_profile',
+        entityId: doc.id,
+        orgId: orgId,
+      );
+      if (hasPending) {
+        continue;
+      }
+      if (updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = updatedAt;
+      }
+      final existing =
+          await (_db.select(_db.pricingProfiles)
+                ..where((tbl) => tbl.id.equals(doc.id))
+                ..limit(1))
+              .getSingleOrNull();
+      if (existing != null && existing.updatedAt >= updatedAt) {
+        continue;
+      }
+      final deleted = data['deleted'] == true;
+      await _db.into(_db.pricingProfiles).insertOnConflictUpdate(
+            PricingProfilesCompanion(
+              id: Value(doc.id),
+              orgId: Value(orgId),
+              name: Value(_string(data['name'])),
+              laborRate: Value(_num(data['laborRate'], fallback: 40.0)),
+              taxEnabled: Value(_bool(data['taxEnabled'])),
+              taxRate: Value(_num(data['taxRate'], fallback: 0.07)),
+              ccEnabled: Value(_bool(data['ccEnabled'])),
+              ccRate: Value(_num(data['ccRate'], fallback: 0.03)),
+              updatedAt: Value(updatedAt),
+              deleted: Value(deleted),
+            ),
+          );
+    }
+    await _db.setSyncState('pricing_profile', orgId, maxUpdatedAt);
+  }
+
+  Future<void> _downloadPricingProfileServiceTypes(String orgId) async {
+    final lastSync =
+        await _db.getLastSync('pricing_profile_service_type', orgId);
+    final snap = await FirebaseFirestore.instance
+        .collectionGroup('serviceTypes')
+        .where('orgId', isEqualTo: orgId)
+        .where('updatedAt', isGreaterThan: lastSync)
+        .get();
+    var maxUpdatedAt = lastSync;
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final profileId = _string(data['profileId']);
+      if (profileId.isEmpty) {
+        continue;
+      }
+      final updatedAt = (data['updatedAt'] as int?) ?? 0;
+      final hasPending = await _hasPendingOutbox(
+        entityType: 'pricing_profile_service_type',
+        entityId: doc.id,
+        orgId: orgId,
+      );
+      if (hasPending) {
+        continue;
+      }
+      if (updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = updatedAt;
+      }
+      final existing =
+          await (_db.select(_db.pricingProfileServiceTypes)
+                ..where((tbl) => tbl.id.equals(doc.id))
+                ..limit(1))
+              .getSingleOrNull();
+      if (existing != null && existing.updatedAt >= updatedAt) {
+        continue;
+      }
+      await _db.into(_db.pricingProfileServiceTypes).insertOnConflictUpdate(
+            PricingProfileServiceTypesCompanion(
+              id: Value(doc.id),
+              orgId: Value(orgId),
+              profileId: Value(profileId),
+              row: Value((data['row'] as num?)?.toInt() ?? 0),
+              category: Value(_string(data['category']).isEmpty
+                  ? 'General'
+                  : _string(data['category'])),
+              serviceType: Value(_string(data['serviceType'])),
+              description: Value(_string(data['description'])),
+              pricePerSqFt: Value(_num(data['pricePerSqFt'])),
+              multiplier: Value(_num(data['multiplier'], fallback: 1)),
+              updatedAt: Value(updatedAt),
+              deleted: Value(data['deleted'] == true),
+            ),
+          );
+    }
+    await _db.setSyncState(
+      'pricing_profile_service_type',
+      orgId,
+      maxUpdatedAt,
+    );
+  }
+
+  Future<void> _downloadPricingProfileFrequencies(String orgId) async {
+    final lastSync =
+        await _db.getLastSync('pricing_profile_frequency', orgId);
+    final snap = await FirebaseFirestore.instance
+        .collectionGroup('frequencies')
+        .where('orgId', isEqualTo: orgId)
+        .where('updatedAt', isGreaterThan: lastSync)
+        .get();
+    var maxUpdatedAt = lastSync;
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final profileId = _string(data['profileId']);
+      if (profileId.isEmpty) {
+        continue;
+      }
+      final updatedAt = (data['updatedAt'] as int?) ?? 0;
+      final hasPending = await _hasPendingOutbox(
+        entityType: 'pricing_profile_frequency',
+        entityId: doc.id,
+        orgId: orgId,
+      );
+      if (hasPending) {
+        continue;
+      }
+      if (updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = updatedAt;
+      }
+      final existing =
+          await (_db.select(_db.pricingProfileFrequencies)
+                ..where((tbl) => tbl.id.equals(doc.id))
+                ..limit(1))
+              .getSingleOrNull();
+      if (existing != null && existing.updatedAt >= updatedAt) {
+        continue;
+      }
+      await _db.into(_db.pricingProfileFrequencies).insertOnConflictUpdate(
+            PricingProfileFrequenciesCompanion(
+              id: Value(doc.id),
+              orgId: Value(orgId),
+              profileId: Value(profileId),
+              serviceType: Value(_string(data['serviceType'])),
+              frequency: Value(_string(data['frequency'])),
+              multiplier: Value(_num(data['multiplier'], fallback: 1)),
+              updatedAt: Value(updatedAt),
+              deleted: Value(data['deleted'] == true),
+            ),
+          );
+    }
+    await _db.setSyncState(
+      'pricing_profile_frequency',
+      orgId,
+      maxUpdatedAt,
+    );
+  }
+
+  Future<void> _downloadPricingProfileRoomTypes(String orgId) async {
+    final lastSync =
+        await _db.getLastSync('pricing_profile_room_type', orgId);
+    final snap = await FirebaseFirestore.instance
+        .collectionGroup('roomTypes')
+        .where('orgId', isEqualTo: orgId)
+        .where('updatedAt', isGreaterThan: lastSync)
+        .get();
+    var maxUpdatedAt = lastSync;
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final profileId = _string(data['profileId']);
+      if (profileId.isEmpty) {
+        continue;
+      }
+      final updatedAt = (data['updatedAt'] as int?) ?? 0;
+      final hasPending = await _hasPendingOutbox(
+        entityType: 'pricing_profile_room_type',
+        entityId: doc.id,
+        orgId: orgId,
+      );
+      if (hasPending) {
+        continue;
+      }
+      if (updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = updatedAt;
+      }
+      final existing =
+          await (_db.select(_db.pricingProfileRoomTypes)
+                ..where((tbl) => tbl.id.equals(doc.id))
+                ..limit(1))
+              .getSingleOrNull();
+      if (existing != null && existing.updatedAt >= updatedAt) {
+        continue;
+      }
+      await _db.into(_db.pricingProfileRoomTypes).insertOnConflictUpdate(
+            PricingProfileRoomTypesCompanion(
+              id: Value(doc.id),
+              orgId: Value(orgId),
+              profileId: Value(profileId),
+              row: Value((data['row'] as num?)?.toInt() ?? 0),
+              category: Value(_string(data['category']).isEmpty
+                  ? 'General'
+                  : _string(data['category'])),
+              roomType: Value(_string(data['roomType'])),
+              description: Value(_string(data['description'])),
+              minutes: Value((data['minutes'] as num?)?.toInt() ?? 0),
+              squareFeet: Value((data['squareFeet'] as num?)?.toInt() ?? 0),
+              updatedAt: Value(updatedAt),
+              deleted: Value(data['deleted'] == true),
+            ),
+          );
+    }
+    await _db.setSyncState(
+      'pricing_profile_room_type',
+      orgId,
+      maxUpdatedAt,
+    );
+  }
+
+  Future<void> _downloadPricingProfileSubItems(String orgId) async {
+    final lastSync =
+        await _db.getLastSync('pricing_profile_sub_item', orgId);
+    final snap = await FirebaseFirestore.instance
+        .collectionGroup('subItems')
+        .where('orgId', isEqualTo: orgId)
+        .where('updatedAt', isGreaterThan: lastSync)
+        .get();
+    var maxUpdatedAt = lastSync;
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final profileId = _string(data['profileId']);
+      if (profileId.isEmpty) {
+        continue;
+      }
+      final updatedAt = (data['updatedAt'] as int?) ?? 0;
+      final hasPending = await _hasPendingOutbox(
+        entityType: 'pricing_profile_sub_item',
+        entityId: doc.id,
+        orgId: orgId,
+      );
+      if (hasPending) {
+        continue;
+      }
+      if (updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = updatedAt;
+      }
+      final existing =
+          await (_db.select(_db.pricingProfileSubItems)
+                ..where((tbl) => tbl.id.equals(doc.id))
+                ..limit(1))
+              .getSingleOrNull();
+      if (existing != null && existing.updatedAt >= updatedAt) {
+        continue;
+      }
+      await _db.into(_db.pricingProfileSubItems).insertOnConflictUpdate(
+            PricingProfileSubItemsCompanion(
+              id: Value(doc.id),
+              orgId: Value(orgId),
+              profileId: Value(profileId),
+              category: Value(_string(data['category']).isEmpty
+                  ? 'General'
+                  : _string(data['category'])),
+              subItem: Value(_string(data['subItem'])),
+              description: Value(_string(data['description'])),
+              minutes: Value((data['minutes'] as num?)?.toInt() ?? 0),
+              updatedAt: Value(updatedAt),
+              deleted: Value(data['deleted'] == true),
+            ),
+          );
+    }
+    await _db.setSyncState(
+      'pricing_profile_sub_item',
+      orgId,
+      maxUpdatedAt,
+    );
+  }
+
+  Future<void> _downloadPricingProfileSizes(String orgId) async {
+    final lastSync =
+        await _db.getLastSync('pricing_profile_size', orgId);
+    final snap = await FirebaseFirestore.instance
+        .collectionGroup('sizes')
+        .where('orgId', isEqualTo: orgId)
+        .where('updatedAt', isGreaterThan: lastSync)
+        .get();
+    var maxUpdatedAt = lastSync;
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final profileId = _string(data['profileId']);
+      if (profileId.isEmpty) {
+        continue;
+      }
+      final updatedAt = (data['updatedAt'] as int?) ?? 0;
+      final hasPending = await _hasPendingOutbox(
+        entityType: 'pricing_profile_size',
+        entityId: doc.id,
+        orgId: orgId,
+      );
+      if (hasPending) {
+        continue;
+      }
+      if (updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = updatedAt;
+      }
+      final existing =
+          await (_db.select(_db.pricingProfileSizes)
+                ..where((tbl) => tbl.id.equals(doc.id))
+                ..limit(1))
+              .getSingleOrNull();
+      if (existing != null && existing.updatedAt >= updatedAt) {
+        continue;
+      }
+      await _db.into(_db.pricingProfileSizes).insertOnConflictUpdate(
+            PricingProfileSizesCompanion(
+              id: Value(doc.id),
+              orgId: Value(orgId),
+              profileId: Value(profileId),
+              size: Value(_string(data['size'])),
+              multiplier: Value(_num(data['multiplier'], fallback: 1)),
+              definition: Value(_string(data['definition'])),
+              updatedAt: Value(updatedAt),
+              deleted: Value(data['deleted'] == true),
+            ),
+          );
+    }
+    await _db.setSyncState(
+      'pricing_profile_size',
+      orgId,
+      maxUpdatedAt,
+    );
+  }
+
+  Future<void> _downloadPricingProfileComplexities(String orgId) async {
+    final lastSync =
+        await _db.getLastSync('pricing_profile_complexity', orgId);
+    final snap = await FirebaseFirestore.instance
+        .collectionGroup('complexities')
+        .where('orgId', isEqualTo: orgId)
+        .where('updatedAt', isGreaterThan: lastSync)
+        .get();
+    var maxUpdatedAt = lastSync;
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final profileId = _string(data['profileId']);
+      if (profileId.isEmpty) {
+        continue;
+      }
+      final updatedAt = (data['updatedAt'] as int?) ?? 0;
+      final hasPending = await _hasPendingOutbox(
+        entityType: 'pricing_profile_complexity',
+        entityId: doc.id,
+        orgId: orgId,
+      );
+      if (hasPending) {
+        continue;
+      }
+      if (updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = updatedAt;
+      }
+      final existing =
+          await (_db.select(_db.pricingProfileComplexities)
+                ..where((tbl) => tbl.id.equals(doc.id))
+                ..limit(1))
+              .getSingleOrNull();
+      if (existing != null && existing.updatedAt >= updatedAt) {
+        continue;
+      }
+      await _db.into(_db.pricingProfileComplexities).insertOnConflictUpdate(
+            PricingProfileComplexitiesCompanion(
+              id: Value(doc.id),
+              orgId: Value(orgId),
+              profileId: Value(profileId),
+              level: Value(_string(data['level'])),
+              multiplier: Value(_num(data['multiplier'], fallback: 1)),
+              definition: Value(_string(data['definition'])),
+              updatedAt: Value(updatedAt),
+              deleted: Value(data['deleted'] == true),
+            ),
+          );
+    }
+    await _db.setSyncState(
+      'pricing_profile_complexity',
+      orgId,
+      maxUpdatedAt,
+    );
   }
 
   Future<void> _replaceQuoteItems(
@@ -442,6 +862,7 @@ class SyncService {
     String orgId,
     String entityType,
     String entityId,
+    Map<String, dynamic> payload,
   ) {
     final firestore = FirebaseFirestore.instance;
     switch (entityType) {
@@ -463,8 +884,82 @@ class SyncService {
             .doc(orgId)
             .collection('settings')
             .doc('defaults');
+      case 'pricing_profile':
+        return firestore
+            .collection('orgs')
+            .doc(orgId)
+            .collection('pricingProfiles')
+            .doc(entityId);
+      case 'pricing_profile_service_type':
+        return _profileSubDoc(
+          firestore,
+          orgId,
+          payload,
+          'serviceTypes',
+          entityId,
+        );
+      case 'pricing_profile_frequency':
+        return _profileSubDoc(
+          firestore,
+          orgId,
+          payload,
+          'frequencies',
+          entityId,
+        );
+      case 'pricing_profile_room_type':
+        return _profileSubDoc(
+          firestore,
+          orgId,
+          payload,
+          'roomTypes',
+          entityId,
+        );
+      case 'pricing_profile_sub_item':
+        return _profileSubDoc(
+          firestore,
+          orgId,
+          payload,
+          'subItems',
+          entityId,
+        );
+      case 'pricing_profile_size':
+        return _profileSubDoc(
+          firestore,
+          orgId,
+          payload,
+          'sizes',
+          entityId,
+        );
+      case 'pricing_profile_complexity':
+        return _profileSubDoc(
+          firestore,
+          orgId,
+          payload,
+          'complexities',
+          entityId,
+        );
     }
     return null;
+  }
+
+  DocumentReference<Map<String, dynamic>>? _profileSubDoc(
+    FirebaseFirestore firestore,
+    String orgId,
+    Map<String, dynamic> payload,
+    String collection,
+    String entityId,
+  ) {
+    final profileId = _string(payload['profileId']);
+    if (profileId.isEmpty) {
+      return null;
+    }
+    return firestore
+        .collection('orgs')
+        .doc(orgId)
+        .collection('pricingProfiles')
+        .doc(profileId)
+        .collection(collection)
+        .doc(entityId);
   }
 
   Map<String, dynamic> _decodePayload(String payload) {

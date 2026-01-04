@@ -24,6 +24,7 @@ class Quote {
     this.ccEnabled = false,
     this.taxRate = 0.07,
     this.ccRate = 0.03,
+    this.pricingProfileId = 'default',
     this.defaultRoomType = '',
     this.defaultLevel = '',
     this.defaultSize = '',
@@ -57,6 +58,7 @@ class Quote {
   final bool ccEnabled;
   final double taxRate;
   final double ccRate;
+  final String pricingProfileId;
   final String defaultRoomType;
   final String defaultLevel;
   final String defaultSize;
@@ -91,6 +93,7 @@ class QuoteDraft {
     this.ccEnabled = false,
     this.taxRate = 0.07,
     this.ccRate = 0.03,
+    this.pricingProfileId = 'default',
     this.defaultRoomType = '',
     this.defaultLevel = '',
     this.defaultSize = '',
@@ -123,6 +126,7 @@ class QuoteDraft {
   final bool ccEnabled;
   final double taxRate;
   final double ccRate;
+  final String pricingProfileId;
   final String defaultRoomType;
   final String defaultLevel;
   final String defaultSize;
@@ -155,6 +159,7 @@ class QuoteDraft {
         'ccEnabled': ccEnabled,
         'taxRate': taxRate,
         'ccRate': ccRate,
+        'pricingProfileId': pricingProfileId.trim(),
         'defaultRoomType': defaultRoomType.trim(),
         'defaultLevel': defaultLevel.trim(),
         'defaultSize': defaultSize.trim(),

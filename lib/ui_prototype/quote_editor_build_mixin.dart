@@ -68,6 +68,23 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
     return items;
   }
 
+  List<DropdownMenuItem<String>> _pricingProfileMenuItems(
+    List<PricingProfileHeader> profiles,
+  ) {
+    return [
+      const DropdownMenuItem(
+        value: 'default',
+        child: Text('Default (locked)'),
+      ),
+      ...profiles.map(
+        (profile) => DropdownMenuItem(
+          value: profile.id,
+          child: Text(profile.name),
+        ),
+      ),
+    ];
+  }
+
   Widget _buildQuoteEditor(BuildContext context) {
     return PopScope(
       canPop: !_isDirty,
@@ -119,6 +136,10 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
                       standard.serviceType,
                   }.toList()
                 : [serviceType];
+            final pricingProfileOptions = [
+              'default',
+              ...pricingProfiles.map((profile) => profile.id),
+            ];
             final roomTypeOptions = data.roomTypes.isNotEmpty
                 ? data.roomTypes.map((room) => room.roomType).toList()
                 : [defaultRoomType];
@@ -146,6 +167,8 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
               data.serviceTypes,
               serviceTypeOptions,
             );
+            final pricingProfileMenuItems =
+                _pricingProfileMenuItems(pricingProfiles);
             final subItemMenuItems = _subItemMenuItems(
               data.subItems,
               subItemOptions,
@@ -154,6 +177,10 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
             final resolvedServiceType = _resolveOption(
               serviceType,
               serviceTypeOptions,
+            );
+            final resolvedPricingProfile = _resolveOption(
+              pricingProfileId,
+              pricingProfileOptions,
             );
             final resolvedRoomType = _resolveOption(
               defaultRoomType,
@@ -188,6 +215,11 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
             );
             _syncOption(subItemType, resolvedSubItem, (v) => subItemType = v);
             _syncOption(frequency, resolvedFrequency, (v) => frequency = v);
+            _syncOption(
+              pricingProfileId,
+              resolvedPricingProfile,
+              (v) => pricingProfileId = v,
+            );
 
             final totals = _calcTotals();
             final roomTitles = items
@@ -222,6 +254,8 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
                 _buildCustomerDetailsSection(),
                 const SizedBox(height: 12),
                 _buildQuoteDetailsSection(
+                  pricingProfileMenuItems: pricingProfileMenuItems,
+                  resolvedPricingProfile: resolvedPricingProfile,
                   serviceTypeMenuItems: serviceTypeMenuItems,
                   frequencyOptions: frequencyOptions,
                   resolvedServiceType: resolvedServiceType,

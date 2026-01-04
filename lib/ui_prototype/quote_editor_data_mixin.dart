@@ -52,6 +52,12 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   double get ccRate;
   set ccRate(double value);
 
+  String get pricingProfileId;
+  set pricingProfileId(String value);
+
+  List<PricingProfileHeader> get pricingProfiles;
+  set pricingProfiles(List<PricingProfileHeader> value);
+
   String get customerName;
   set customerName(String value);
 
@@ -122,6 +128,7 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
 
   Future<bool> _confirmDiscardChanges();
   Future<void> _saveQuote();
+  Future<void> _selectPricingProfile(String profileId);
   void _refreshFromRemote();
   void _markDirty([VoidCallback? update]);
   Future<void> _autoSaveQuote(int generation, SyncService syncService);
@@ -149,6 +156,8 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
 
   Widget _buildCustomerDetailsSection();
   Widget _buildQuoteDetailsSection({
+    required List<DropdownMenuItem<String>> pricingProfileMenuItems,
+    required String resolvedPricingProfile,
     required List<DropdownMenuItem<String>> serviceTypeMenuItems,
     required List<String> frequencyOptions,
     required String resolvedServiceType,
@@ -257,38 +266,108 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
 
 mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
   Future<_QuoteSettingsData> _loadQuoteSettingsData() async {
-    final serviceTypes = await _loadList(
-      'assets/settings/service_type_standards.json',
-      _ServiceTypeStandard.fromJson,
-    );
-    final frequencies = await _loadList(
-      'assets/settings/frequency_standards.json',
-      _FrequencyStandard.fromJson,
-    );
-    final roomTypes = await _loadList(
-      'assets/settings/room_type_standards.json',
-      _RoomTypeStandard.fromJson,
-    );
-    final subItems = await _loadList(
-      'assets/settings/sub_item_standards.json',
-      _SubItemStandard.fromJson,
-    );
-    final sizes = await _loadList(
-      'assets/settings/size_standards.json',
-      _SizeStandard.fromJson,
-    );
-    final complexities = await _loadList(
-      'assets/settings/complexity_standards.json',
-      _ComplexityStandard.fromJson,
-    );
+    if (pricingProfileId == 'default') {
+      final serviceTypes = await _loadList(
+        'assets/settings/service_type_standards.json',
+        _ServiceTypeStandard.fromJson,
+      );
+      final frequencies = await _loadList(
+        'assets/settings/frequency_standards.json',
+        _FrequencyStandard.fromJson,
+      );
+      final roomTypes = await _loadList(
+        'assets/settings/room_type_standards.json',
+        _RoomTypeStandard.fromJson,
+      );
+      final subItems = await _loadList(
+        'assets/settings/sub_item_standards.json',
+        _SubItemStandard.fromJson,
+      );
+      final sizes = await _loadList(
+        'assets/settings/size_standards.json',
+        _SizeStandard.fromJson,
+      );
+      final complexities = await _loadList(
+        'assets/settings/complexity_standards.json',
+        _ComplexityStandard.fromJson,
+      );
+
+      return _QuoteSettingsData(
+        serviceTypes: serviceTypes,
+        frequencies: frequencies,
+        roomTypes: roomTypes,
+        subItems: subItems,
+        sizes: sizes,
+        complexities: complexities,
+      );
+    }
+
+    final repo =
+        AppDependencies.of(context).pricingProfileCatalogRepository;
+    final catalog = await repo.loadCatalog(pricingProfileId);
 
     return _QuoteSettingsData(
-      serviceTypes: serviceTypes,
-      frequencies: frequencies,
-      roomTypes: roomTypes,
-      subItems: subItems,
-      sizes: sizes,
-      complexities: complexities,
+      serviceTypes: catalog.serviceTypes
+          .map(
+            (row) => _ServiceTypeStandard(
+              row: row.row,
+              category: row.category,
+              serviceType: row.serviceType,
+              description: row.description,
+              pricePerSqFt: row.pricePerSqFt,
+              multiplier: row.multiplier,
+            ),
+          )
+          .toList(),
+      frequencies: catalog.frequencies
+          .map(
+            (row) => _FrequencyStandard(
+              serviceType: row.serviceType,
+              multiplier: row.multiplier,
+              frequency: row.frequency,
+            ),
+          )
+          .toList(),
+      roomTypes: catalog.roomTypes
+          .map(
+            (row) => _RoomTypeStandard(
+              row: row.row,
+              category: row.category,
+              roomType: row.roomType,
+              description: row.description,
+              minutes: row.minutes,
+              squareFeet: row.squareFeet,
+            ),
+          )
+          .toList(),
+      subItems: catalog.subItems
+          .map(
+            (row) => _SubItemStandard(
+              category: row.category,
+              subItem: row.subItem,
+              description: row.description,
+              minutes: row.minutes,
+            ),
+          )
+          .toList(),
+      sizes: catalog.sizes
+          .map(
+            (row) => _SizeStandard(
+              size: row.size,
+              multiplier: row.multiplier,
+              definition: row.definition,
+            ),
+          )
+          .toList(),
+      complexities: catalog.complexities
+          .map(
+            (row) => _ComplexityStandard(
+              level: row.level,
+              multiplier: row.multiplier,
+              definition: row.definition,
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -445,6 +524,8 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
       ccEnabled = quote.ccEnabled;
       taxRate = quote.taxRate;
       ccRate = quote.ccRate;
+      pricingProfileId =
+          quote.pricingProfileId.isEmpty ? 'default' : quote.pricingProfileId;
       if (quote.defaultRoomType.isNotEmpty) {
         defaultRoomType = quote.defaultRoomType;
       }
@@ -544,6 +625,7 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
       ccEnabled: ccEnabled,
       taxRate: taxRate,
       ccRate: ccRate,
+      pricingProfileId: pricingProfileId,
       defaultRoomType: defaultRoomType,
       defaultLevel: defaultLevel,
       defaultSize: defaultSize,
