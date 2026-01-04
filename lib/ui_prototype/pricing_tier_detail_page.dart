@@ -1,0 +1,844 @@
+part of '../ui_prototype.dart';
+
+class PricingTierDetailPage extends StatefulWidget {
+  const PricingTierDetailPage({
+    super.key,
+    required this.profileId,
+    required this.initialProfile,
+    required this.isDefault,
+    required this.orgSettings,
+    required this.pricingProfilesRepo,
+    required this.pricingCatalogRepo,
+    required this.settingsData,
+  });
+
+  final String profileId;
+  final PricingProfileHeader initialProfile;
+  final bool isDefault;
+  final OrgSettings orgSettings;
+  final PricingProfilesRepositoryLocalFirst pricingProfilesRepo;
+  final PricingProfileCatalogRepositoryLocalFirst pricingCatalogRepo;
+  final _SettingsData settingsData;
+
+  @override
+  State<PricingTierDetailPage> createState() => _PricingTierDetailPageState();
+}
+
+class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isDefault) {
+      unawaited(widget.pricingProfilesRepo.ensureDefaultCatalogSeeded());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEditable = !widget.isDefault;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.initialProfile.name),
+      ),
+      body: StreamBuilder<List<PricingProfileHeader>>(
+        stream: widget.pricingProfilesRepo.streamProfiles(),
+        builder: (context, snapshot) {
+          final profiles = snapshot.data ?? const [];
+          final profile = profiles.firstWhere(
+            (p) => p.id == widget.profileId,
+            orElse: () => widget.initialProfile,
+          );
+          return StreamBuilder<PricingProfileCatalog>(
+            stream: widget.pricingCatalogRepo.streamCatalog(widget.profileId),
+            builder: (context, catalogSnap) {
+              final catalog = catalogSnap.data ?? PricingProfileCatalog.empty();
+              return ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _sectionTile(
+                    context,
+                    title: 'Labor Rate, Taxes, and Fees',
+                    child: _laborAndFeesSection(profile, isEditable),
+                  ),
+                  const SizedBox(height: 16),
+                  _sectionTile(
+                    context,
+                    title: 'Plan Tiers',
+                    child: _planTiersSection(context),
+                  ),
+                  const SizedBox(height: 16),
+                  _sectionTile(
+                    context,
+                    title: 'Service Types',
+                    child: _serviceTypeSection(catalog, isEditable),
+                  ),
+                  const SizedBox(height: 16),
+                  _sectionTile(
+                    context,
+                    title: 'Room Type Standards',
+                    child: _roomTypeSection(catalog, isEditable),
+                  ),
+                  const SizedBox(height: 16),
+                  _sectionTile(
+                    context,
+                    title: 'Add-on Items',
+                    child: _subItemSection(catalog, isEditable),
+                  ),
+                  const SizedBox(height: 16),
+                  _sectionTile(
+                    context,
+                    title: 'Complexity, Size, and Frequency',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _complexitySection(catalog, isEditable),
+                        const SizedBox(height: 16),
+                        _sizeSection(catalog, isEditable),
+                        const SizedBox(height: 16),
+                        _frequencySection(catalog, isEditable),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _sectionTile(
+    BuildContext context, {
+    required String title,
+    required Widget child,
+  }) {
+    return Card(
+      child: ExpansionTile(
+        title: Text(title, style: Theme.of(context).textTheme.titleMedium),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        children: [
+          const SizedBox(height: 8),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _laborAndFeesSection(PricingProfileHeader profile, bool isEditable) {
+    final nameController = TextEditingController(text: profile.name);
+    final laborController = TextEditingController(
+      text: profile.laborRate.toStringAsFixed(2),
+    );
+    final taxController = TextEditingController(
+      text: profile.taxRate.toStringAsFixed(2),
+    );
+    final ccController = TextEditingController(
+      text: profile.ccRate.toStringAsFixed(2),
+    );
+    var taxEnabled = profile.taxEnabled;
+    var ccEnabled = profile.ccEnabled;
+
+    return StatefulBuilder(
+      builder: (context, setLocalState) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: nameController,
+              enabled: isEditable,
+              decoration: const InputDecoration(labelText: 'Profile name'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: laborController,
+              enabled: isEditable,
+              decoration: const InputDecoration(
+                labelText: 'Labor rate (\$/hr)',
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              value: taxEnabled,
+              onChanged: isEditable
+                  ? (value) => setLocalState(() => taxEnabled = value)
+                  : null,
+              title: const Text('Tax enabled'),
+            ),
+            if (taxEnabled)
+              TextField(
+                controller: taxController,
+                enabled: isEditable,
+                decoration: const InputDecoration(
+                  labelText: 'Tax rate (decimal)',
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              value: ccEnabled,
+              onChanged: isEditable
+                  ? (value) => setLocalState(() => ccEnabled = value)
+                  : null,
+              title: const Text('Credit card fee enabled'),
+            ),
+            if (ccEnabled)
+              TextField(
+                controller: ccController,
+                enabled: isEditable,
+                decoration: const InputDecoration(
+                  labelText: 'CC rate (decimal)',
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            if (isEditable)
+              Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton(
+                  onPressed: () async {
+                    final laborRate =
+                        double.tryParse(laborController.text.trim());
+                    final taxRate =
+                        double.tryParse(taxController.text.trim());
+                    final ccRate = double.tryParse(ccController.text.trim());
+                    await widget.pricingProfilesRepo.updateProfileHeader(
+                      widget.profileId,
+                      name: nameController.text.trim(),
+                      laborRate: laborRate ?? profile.laborRate,
+                      taxEnabled: taxEnabled,
+                      taxRate: taxRate ?? profile.taxRate,
+                      ccEnabled: ccEnabled,
+                      ccRate: ccRate ?? profile.ccRate,
+                    );
+                    if (context.mounted) {
+                      _snack(context, 'Profile updated.');
+                    }
+                  },
+                  child: const Text('Save'),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _planTiersSection(BuildContext context) {
+    final tiers = widget.settingsData.planTiers;
+    if (tiers.isEmpty) {
+      return const Text('No plan tiers available.');
+    }
+    final theme = Theme.of(context);
+    return Table(
+      border: TableBorder.all(color: Colors.grey.shade400, width: 1),
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      columnWidths: const {
+        0: FlexColumnWidth(1.2),
+        1: FlexColumnWidth(1.2),
+        2: FlexColumnWidth(2.6),
+      },
+      children: [
+        _tableRow(
+          const ['Tier', 'Multiplier', 'Description'],
+          isHeader: true,
+          headerColor: theme.colorScheme.surfaceContainerHighest,
+          headerTextColor: theme.colorScheme.onSurfaceVariant,
+        ),
+        ...tiers.map(
+          (tier) => _tableRow([
+            '${tier.name} (${tier.label})',
+            tier.multiplier.toStringAsFixed(2),
+            tier.description,
+          ], rowColor: tier.color),
+        ),
+      ],
+    );
+  }
+
+  Widget _serviceTypeSection(
+    PricingProfileCatalog catalog,
+    bool isEditable,
+  ) {
+    if (catalog.serviceTypes.isEmpty) {
+      return const Text('No service types found.');
+    }
+    final sorted = catalog.serviceTypes.toList()
+      ..sort((a, b) => a.row.compareTo(b.row));
+    return _buildTable(
+      context,
+      headers: [
+        'Service type',
+        'Description',
+        '\$/Sq.Ft.',
+        'Multiplier',
+        if (isEditable) 'Edit',
+      ],
+      rows: sorted.map((service) {
+        return [
+          service.serviceType,
+          service.description,
+          service.pricePerSqFt.toStringAsFixed(2),
+          service.multiplier.toStringAsFixed(2),
+          if (isEditable)
+            _editCell(
+              context,
+              onTap: () => _editServiceType(context, service),
+            ),
+        ];
+      }).toList(),
+    );
+  }
+
+  Widget _frequencySection(
+    PricingProfileCatalog catalog,
+    bool isEditable,
+  ) {
+    if (catalog.frequencies.isEmpty) {
+      return const Text('No frequencies found.');
+    }
+    return _buildTable(
+      context,
+      headers: [
+        'Service type',
+        'Frequency',
+        'Multiplier',
+        if (isEditable) 'Edit',
+      ],
+      rows: catalog.frequencies.map((freq) {
+        return [
+          freq.serviceType,
+          freq.frequency,
+          freq.multiplier.toStringAsFixed(2),
+          if (isEditable)
+            _editCell(
+              context,
+              onTap: () => _editFrequency(context, freq),
+            ),
+        ];
+      }).toList(),
+    );
+  }
+
+  Widget _roomTypeSection(
+    PricingProfileCatalog catalog,
+    bool isEditable,
+  ) {
+    if (catalog.roomTypes.isEmpty) {
+      return const Text('No room types found.');
+    }
+    final sorted = catalog.roomTypes.toList()
+      ..sort((a, b) => a.row.compareTo(b.row));
+    return _buildTable(
+      context,
+      headers: [
+        'Room type',
+        'Description',
+        'Minutes',
+        'Sq.Ft.',
+        if (isEditable) 'Edit',
+      ],
+      rows: sorted.map((room) {
+        return [
+          room.roomType,
+          room.description,
+          room.minutes.toString(),
+          room.squareFeet.toString(),
+          if (isEditable)
+            _editCell(
+              context,
+              onTap: () => _editRoomType(context, room),
+            ),
+        ];
+      }).toList(),
+    );
+  }
+
+  Widget _subItemSection(
+    PricingProfileCatalog catalog,
+    bool isEditable,
+  ) {
+    if (catalog.subItems.isEmpty) {
+      return const Text('No add-on items found.');
+    }
+    return _buildTable(
+      context,
+      headers: [
+        'Add-on item',
+        'Description',
+        'Minutes',
+        if (isEditable) 'Edit',
+      ],
+      rows: catalog.subItems.map((item) {
+        return [
+          item.subItem,
+          item.description,
+          item.minutes.toString(),
+          if (isEditable)
+            _editCell(
+              context,
+              onTap: () => _editSubItem(context, item),
+            ),
+        ];
+      }).toList(),
+    );
+  }
+
+  Widget _sizeSection(
+    PricingProfileCatalog catalog,
+    bool isEditable,
+  ) {
+    if (catalog.sizes.isEmpty) {
+      return const Text('No size standards found.');
+    }
+    return _buildTable(
+      context,
+      headers: [
+        'Size',
+        'Definition',
+        'Multiplier',
+        if (isEditable) 'Edit',
+      ],
+      rows: catalog.sizes.map((item) {
+        return [
+          item.size,
+          item.definition,
+          item.multiplier.toStringAsFixed(2),
+          if (isEditable)
+            _editCell(
+              context,
+              onTap: () => _editSize(context, item),
+            ),
+        ];
+      }).toList(),
+    );
+  }
+
+  Widget _complexitySection(
+    PricingProfileCatalog catalog,
+    bool isEditable,
+  ) {
+    if (catalog.complexities.isEmpty) {
+      return const Text('No complexity standards found.');
+    }
+    return _buildTable(
+      context,
+      headers: [
+        'Complexity',
+        'Definition',
+        'Multiplier',
+        if (isEditable) 'Edit',
+      ],
+      rows: catalog.complexities.map((item) {
+        return [
+          item.level,
+          item.definition,
+          item.multiplier.toStringAsFixed(2),
+          if (isEditable)
+            _editCell(
+              context,
+              onTap: () => _editComplexity(context, item),
+            ),
+        ];
+      }).toList(),
+    );
+  }
+
+  Future<void> _editServiceType(
+    BuildContext context,
+    PricingProfileServiceType service,
+  ) async {
+    final priceController =
+        TextEditingController(text: service.pricePerSqFt.toStringAsFixed(2));
+    final multiplierController =
+        TextEditingController(text: service.multiplier.toStringAsFixed(2));
+    final descriptionController =
+        TextEditingController(text: service.description);
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit ${service.serviceType}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
+            TextField(
+              controller: priceController,
+              decoration: const InputDecoration(labelText: 'Price per sq ft'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: multiplierController,
+              decoration: const InputDecoration(labelText: 'Multiplier'),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final price =
+                  double.tryParse(priceController.text.trim()) ??
+                      service.pricePerSqFt;
+              final multiplier =
+                  double.tryParse(multiplierController.text.trim()) ??
+                      service.multiplier;
+              await widget.pricingCatalogRepo.updateServiceType(
+                id: service.id,
+                description: descriptionController.text.trim(),
+                pricePerSqFt: price,
+                multiplier: multiplier,
+              );
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _editFrequency(
+    BuildContext context,
+    PricingProfileFrequency frequency,
+  ) async {
+    final multiplierController =
+        TextEditingController(text: frequency.multiplier.toStringAsFixed(2));
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit ${frequency.frequency}'),
+        content: TextField(
+          controller: multiplierController,
+          decoration: const InputDecoration(labelText: 'Multiplier'),
+          keyboardType: TextInputType.number,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final multiplier =
+                  double.tryParse(multiplierController.text.trim()) ??
+                      frequency.multiplier;
+              await widget.pricingCatalogRepo.updateFrequency(
+                id: frequency.id,
+                multiplier: multiplier,
+              );
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _editRoomType(
+    BuildContext context,
+    PricingProfileRoomType roomType,
+  ) async {
+    final descriptionController =
+        TextEditingController(text: roomType.description);
+    final minutesController =
+        TextEditingController(text: roomType.minutes.toString());
+    final squareFeetController =
+        TextEditingController(text: roomType.squareFeet.toString());
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit ${roomType.roomType}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
+            TextField(
+              controller: minutesController,
+              decoration: const InputDecoration(labelText: 'Minutes'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: squareFeetController,
+              decoration: const InputDecoration(labelText: 'Square feet'),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final minutes = int.tryParse(minutesController.text.trim());
+              final squareFeet =
+                  int.tryParse(squareFeetController.text.trim());
+              await widget.pricingCatalogRepo.updateRoomType(
+                id: roomType.id,
+                description: descriptionController.text.trim(),
+                minutes: minutes ?? roomType.minutes,
+                squareFeet: squareFeet ?? roomType.squareFeet,
+              );
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _editSubItem(
+    BuildContext context,
+    PricingProfileSubItem subItem,
+  ) async {
+    final descriptionController =
+        TextEditingController(text: subItem.description);
+    final minutesController =
+        TextEditingController(text: subItem.minutes.toString());
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit ${subItem.subItem}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
+            TextField(
+              controller: minutesController,
+              decoration: const InputDecoration(labelText: 'Minutes'),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final minutes = int.tryParse(minutesController.text.trim());
+              await widget.pricingCatalogRepo.updateSubItem(
+                id: subItem.id,
+                description: descriptionController.text.trim(),
+                minutes: minutes ?? subItem.minutes,
+              );
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _editSize(
+    BuildContext context,
+    PricingProfileSize size,
+  ) async {
+    final definitionController =
+        TextEditingController(text: size.definition);
+    final multiplierController =
+        TextEditingController(text: size.multiplier.toStringAsFixed(2));
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit ${size.size}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: definitionController,
+              decoration: const InputDecoration(labelText: 'Definition'),
+            ),
+            TextField(
+              controller: multiplierController,
+              decoration: const InputDecoration(labelText: 'Multiplier'),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final multiplier =
+                  double.tryParse(multiplierController.text.trim()) ??
+                      size.multiplier;
+              await widget.pricingCatalogRepo.updateSize(
+                id: size.id,
+                definition: definitionController.text.trim(),
+                multiplier: multiplier,
+              );
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _editComplexity(
+    BuildContext context,
+    PricingProfileComplexity complexity,
+  ) async {
+    final definitionController =
+        TextEditingController(text: complexity.definition);
+    final multiplierController =
+        TextEditingController(text: complexity.multiplier.toStringAsFixed(2));
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit ${complexity.level}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: definitionController,
+              decoration: const InputDecoration(labelText: 'Definition'),
+            ),
+            TextField(
+              controller: multiplierController,
+              decoration: const InputDecoration(labelText: 'Multiplier'),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final multiplier =
+                  double.tryParse(multiplierController.text.trim()) ??
+                      complexity.multiplier;
+              await widget.pricingCatalogRepo.updateComplexity(
+                id: complexity.id,
+                definition: definitionController.text.trim(),
+                multiplier: multiplier,
+              );
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTable(
+    BuildContext context, {
+    required List<String> headers,
+    required List<List<Object>> rows,
+  }) {
+    final theme = Theme.of(context);
+    return Table(
+      border: TableBorder.all(color: Colors.grey.shade400, width: 1),
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        _tableRow(
+          headers,
+          isHeader: true,
+          headerColor: theme.colorScheme.surfaceContainerHighest,
+          headerTextColor: theme.colorScheme.onSurfaceVariant,
+        ),
+        ...rows.map((cells) => _tableRow(cells)),
+      ],
+    );
+  }
+
+  Widget _editCell(BuildContext context, {required VoidCallback onTap}) {
+    return IconButton(
+      icon: const Icon(Icons.edit),
+      tooltip: 'Edit',
+      onPressed: onTap,
+    );
+  }
+
+  TableRow _tableRow(
+    List<Object> cells, {
+    bool isHeader = false,
+    Color? rowColor,
+    Color? headerColor,
+    Color? headerTextColor,
+  }) {
+    final effectiveHeaderColor = headerColor ?? Colors.grey.shade200;
+    final effectiveHeaderTextColor =
+        headerTextColor ??
+        (ThemeData.estimateBrightnessForColor(effectiveHeaderColor) ==
+                Brightness.dark
+            ? Colors.white
+            : Colors.black);
+    return TableRow(
+      decoration: isHeader
+          ? BoxDecoration(color: effectiveHeaderColor)
+          : rowColor == null
+              ? null
+              : BoxDecoration(color: rowColor),
+      children: cells
+          .map(
+            (cell) => Padding(
+              padding: const EdgeInsets.all(8),
+              child: cell is Widget
+                  ? cell
+                  : Text(
+                      cell.toString(),
+                      softWrap: !isHeader,
+                      overflow: isHeader ? TextOverflow.ellipsis : null,
+                      style: TextStyle(
+                        fontWeight: isHeader
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                        color: isHeader
+                            ? effectiveHeaderTextColor
+                            : rowColor == null
+                                ? null
+                                : ThemeData.estimateBrightnessForColor(
+                                          rowColor,
+                                        ) ==
+                                        Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                      ),
+                    ),
+            ),
+          )
+          .toList(),
+    );
+  }
+}
