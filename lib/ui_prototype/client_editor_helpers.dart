@@ -10,6 +10,9 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
   bool get _isDirty;
   set _isDirty(bool value);
 
+  bool get _applyingRemote;
+  set _applyingRemote(bool value);
+
   ClientDraft get _baseline;
   set _baseline(ClientDraft value);
 
@@ -33,7 +36,7 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
   TextEditingController get email;
   TextEditingController get notes;
   void _handleChanged() {
-    if (_isSaving) return;
+    if (_isSaving || _applyingRemote) return;
     final now = _draft().toMap();
     final base = _baseline.toMap();
     final changed = now.entries.any((e) => (base[e.key] ?? '') != e.value);
@@ -47,7 +50,7 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
     }
   }
 
-  void _load(Client? c) {
+  void _load(Client? c, {bool notify = true}) {
     clientId = c?.id;
     final d = c?.toDraft() ?? ClientDraft();
     firstName.text = d.firstName;
@@ -64,7 +67,9 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
     _baseline = _draft();
     _isDirty = false;
 
-    setState(() {});
+    if (notify) {
+      setState(() {});
+    }
   }
 
   ClientDraft _draft() => ClientDraft(

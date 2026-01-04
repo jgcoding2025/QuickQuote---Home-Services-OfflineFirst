@@ -139,11 +139,35 @@ class AppDatabase extends _$AppDatabase {
         .watch();
   }
 
+  Stream<ClientRow?> watchClientById(String orgId, String clientId) {
+    return (select(clients)
+          ..where(
+            (tbl) =>
+                tbl.orgId.equals(orgId) &
+                tbl.id.equals(clientId) &
+                tbl.deleted.equals(false),
+          )
+          ..limit(1))
+        .watchSingleOrNull();
+  }
+
   Stream<List<QuoteRow>> watchQuotes(String orgId) {
     return (select(quotes)
           ..where((tbl) => tbl.orgId.equals(orgId) & tbl.deleted.equals(false))
           ..orderBy([(tbl) => OrderingTerm.desc(tbl.updatedAt)]))
         .watch();
+  }
+
+  Stream<QuoteRow?> watchQuoteById(String orgId, String quoteId) {
+    return (select(quotes)
+          ..where(
+            (tbl) =>
+                tbl.orgId.equals(orgId) &
+                tbl.id.equals(quoteId) &
+                tbl.deleted.equals(false),
+          )
+          ..limit(1))
+        .watchSingleOrNull();
   }
 
   Stream<List<QuoteRow>> watchQuotesForClient(String orgId, String clientId) {

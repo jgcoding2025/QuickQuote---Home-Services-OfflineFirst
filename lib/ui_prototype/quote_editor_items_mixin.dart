@@ -235,6 +235,7 @@ mixin _QuoteEditorItemsMixin on _QuoteEditorStateAccess {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
+            key: ValueKey('quote-defaultRoomType-$_remoteRevision'),
             initialValue: resolvedRoomType,
             items: roomTypeMenuItems,
             isExpanded: true,
