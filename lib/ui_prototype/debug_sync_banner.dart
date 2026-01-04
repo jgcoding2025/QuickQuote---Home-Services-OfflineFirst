@@ -103,7 +103,6 @@ class DebugSyncBanner extends StatelessWidget {
       case SyncStatus.error:
         return Icons.error_outline;
       case SyncStatus.offline:
-      default:
         return Icons.wifi_off;
     }
   }
@@ -117,7 +116,6 @@ class DebugSyncBanner extends StatelessWidget {
       case SyncStatus.error:
         return scheme.error;
       case SyncStatus.offline:
-      default:
         return scheme.onSurfaceVariant;
     }
   }

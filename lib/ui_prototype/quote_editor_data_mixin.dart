@@ -36,6 +36,8 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   bool get _hasPeerOnline;
   set _hasPeerOnline(bool value);
 
+  void _setLiveMode(bool enabled);
+
   int get _remoteRevision;
   set _remoteRevision(int value);
 

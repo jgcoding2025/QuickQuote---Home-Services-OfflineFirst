@@ -1306,10 +1306,6 @@ class SyncService {
   }
 
   void _notifyDebug() {
-    if (!_debugTick.hasListeners) {
-      _debugTick.value += 1;
-      return;
-    }
     _debugTick.value += 1;
   }
 
