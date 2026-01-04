@@ -88,6 +88,7 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
   }
 
   Widget _buildQuoteEditor(BuildContext context) {
+    final syncService = AppDependencies.of(context).syncService;
     return PopScope(
       canPop: !_isDirty,
       onPopInvokedWithResult: (didPop, result) async {
@@ -102,7 +103,41 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Edit Quote')),
+        appBar: AppBar(
+          title: const Text('Edit Quote'),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Live'),
+                  const SizedBox(width: 4),
+                  Switch(
+                    value: _liveMode,
+                    onChanged: _hasPeerOnline ? _setLiveMode : null,
+                  ),
+                ],
+              ),
+            ),
+          ],
+          bottom: kDebugMode
+              ? PreferredSize(
+                  preferredSize:
+                      const Size.fromHeight(DebugSyncBanner.preferredHeight),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: DebugSyncBanner(
+                      onInfo: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const SettingsPage(),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : null,
+        ),
         body: FutureBuilder<_QuoteSettingsData>(
           future: _settingsFuture,
           builder: (context, snapshot) {
@@ -241,110 +276,116 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
             final sqFt = double.tryParse(totalSqFt) ?? 0.0;
             final sqFtEstimate = sqFt * serviceTypeRate * frequencyMultiplier;
 
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                if (pricingProfileDeleted)
-                  Card(
-                    color: Theme.of(context).colorScheme.errorContainer,
-                    child: ListTile(
-                      title: const Text('Pricing profile deleted'),
-                      subtitle: Text(
-                        missingPricingProfileName == null
-                            ? 'This quote references a deleted profile.'
-                            : 'This quote references the deleted profile "$missingPricingProfileName".',
+            return RefreshIndicator(
+              onRefresh: () => syncService.downloadNow(
+                reason: 'pull_to_refresh:quote_editor',
+              ),
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  if (pricingProfileDeleted)
+                    Card(
+                      color: Theme.of(context).colorScheme.errorContainer,
+                      child: ListTile(
+                        title: const Text('Pricing profile deleted'),
+                        subtitle: Text(
+                          missingPricingProfileName == null
+                              ? 'This quote references a deleted profile.'
+                              : 'This quote references the deleted profile "$missingPricingProfileName".',
+                        ),
+                        trailing: FilledButton(
+                          onPressed: () => _selectPricingProfile('default'),
+                          child: const Text('Switch to Default'),
+                        ),
                       ),
-                      trailing: FilledButton(
-                        onPressed: () => _selectPricingProfile('default'),
-                        child: const Text('Switch to Default'),
+                    )
+                  else if (pricingProfileMissing)
+                    Card(
+                      child: ListTile(
+                        leading: const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        title: const Text('Loading pricing profile...'),
+                        subtitle: const Text(
+                          'Keeping your selection while profiles sync.',
+                        ),
                       ),
                     ),
-                  )
-                else if (pricingProfileMissing)
-                  Card(
-                    child: ListTile(
-                      leading: const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      title: const Text('Loading pricing profile...'),
-                      subtitle: const Text(
-                        'Keeping your selection while profiles sync.',
+                  if (_hasRemoteUpdate)
+                    Card(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      child: ListTile(
+                        leading: const Icon(Icons.sync),
+                        title: const Text('Updated on another device'),
+                        subtitle: const Text(
+                          'Refresh to load the latest changes.',
+                        ),
+                        trailing: TextButton(
+                          onPressed: _refreshFromRemote,
+                          child: const Text('Refresh'),
+                        ),
                       ),
                     ),
+                  if (_hasRemoteUpdate) const SizedBox(height: 12),
+                  Text('Quote', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 12),
+                  _buildCustomerDetailsSection(),
+                  const SizedBox(height: 12),
+                  _buildQuoteDetailsSection(
+                    pricingProfileMenuItems: pricingProfileMenuItems,
+                    resolvedPricingProfile: resolvedPricingProfile,
+                    serviceTypeMenuItems: serviceTypeMenuItems,
+                    frequencyOptions: frequencyOptions,
+                    resolvedServiceType: resolvedServiceType,
+                    resolvedFrequency: resolvedFrequency,
                   ),
-                if (_hasRemoteUpdate)
-                  Card(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    child: ListTile(
-                      leading: const Icon(Icons.sync),
-                      title: const Text('Updated on another device'),
-                      subtitle: const Text(
-                        'Refresh to load the latest changes.',
-                      ),
-                      trailing: TextButton(
-                        onPressed: _refreshFromRemote,
-                        child: const Text('Refresh'),
-                      ),
-                    ),
+                  const SizedBox(height: 12),
+                  _buildDiscussSection(),
+                  const SizedBox(height: 12),
+                  _buildRoomsSection(
+                    resolvedRoomType: resolvedRoomType,
+                    resolvedSize: resolvedSize,
+                    resolvedComplexity: resolvedComplexity,
+                    roomTypeOptions: roomTypeOptions,
+                    subItemOptions: subItemOptions,
+                    roomTypeMenuItems: roomTypeMenuItems,
+                    subItemMenuItems: subItemMenuItems,
+                    sizeOptions: sizeOptions,
+                    complexityOptions: complexityOptions,
+                    subItemStandards: data.subItems,
+                    roomTitles: roomTitles.toList(),
                   ),
-                if (_hasRemoteUpdate) const SizedBox(height: 12),
-                Text('Quote', style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 12),
-                _buildCustomerDetailsSection(),
-                const SizedBox(height: 12),
-                _buildQuoteDetailsSection(
-                  pricingProfileMenuItems: pricingProfileMenuItems,
-                  resolvedPricingProfile: resolvedPricingProfile,
-                  serviceTypeMenuItems: serviceTypeMenuItems,
-                  frequencyOptions: frequencyOptions,
-                  resolvedServiceType: resolvedServiceType,
-                  resolvedFrequency: resolvedFrequency,
-                ),
-                const SizedBox(height: 12),
-                _buildDiscussSection(),
-                const SizedBox(height: 12),
-                _buildRoomsSection(
-                  resolvedRoomType: resolvedRoomType,
-                  resolvedSize: resolvedSize,
-                  resolvedComplexity: resolvedComplexity,
-                  roomTypeOptions: roomTypeOptions,
-                  subItemOptions: subItemOptions,
-                  roomTypeMenuItems: roomTypeMenuItems,
-                  subItemMenuItems: subItemMenuItems,
-                  sizeOptions: sizeOptions,
-                  complexityOptions: complexityOptions,
-                  subItemStandards: data.subItems,
-                  roomTitles: roomTitles.toList(),
-                ),
-                const SizedBox(height: 12),
-                _buildAdditionalItemsSection(
-                  resolvedSubItem: resolvedSubItem,
-                  subItemOptions: subItemOptions,
-                  roomTypeOptions: roomTypeOptions,
-                  roomTypeMenuItems: roomTypeMenuItems,
-                  subItemMenuItems: subItemMenuItems,
-                  sizeOptions: sizeOptions,
-                  complexityOptions: complexityOptions,
-                  roomTitles: roomTitles.toList(),
-                ),
-                const SizedBox(height: 12),
-                _buildSpecialNotesSection(),
-                const SizedBox(height: 12),
-                _buildPricingSection(
-                  totals: totals,
-                  serviceTypeRate: serviceTypeRate,
-                  frequencyMultiplier: frequencyMultiplier,
-                  sqFt: sqFt,
-                  sqFtEstimate: sqFtEstimate,
-                ),
-                const SizedBox(height: 12),
-                _buildActionButtons(),
-                const SizedBox(height: 24),
-                FinalizedDocumentsSection(quoteId: widget.quote.id),
-                const SizedBox(height: 24),
-              ],
+                  const SizedBox(height: 12),
+                  _buildAdditionalItemsSection(
+                    resolvedSubItem: resolvedSubItem,
+                    subItemOptions: subItemOptions,
+                    roomTypeOptions: roomTypeOptions,
+                    roomTypeMenuItems: roomTypeMenuItems,
+                    subItemMenuItems: subItemMenuItems,
+                    sizeOptions: sizeOptions,
+                    complexityOptions: complexityOptions,
+                    roomTitles: roomTitles.toList(),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSpecialNotesSection(),
+                  const SizedBox(height: 12),
+                  _buildPricingSection(
+                    totals: totals,
+                    serviceTypeRate: serviceTypeRate,
+                    frequencyMultiplier: frequencyMultiplier,
+                    sqFt: sqFt,
+                    sqFtEstimate: sqFtEstimate,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildActionButtons(),
+                  const SizedBox(height: 24),
+                  FinalizedDocumentsSection(quoteId: widget.quote.id),
+                  const SizedBox(height: 24),
+                ],
+              ),
             );
           },
         ),

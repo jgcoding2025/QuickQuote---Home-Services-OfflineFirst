@@ -62,8 +62,13 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   bool _applyingRemote = false;
   @override
   bool _hasRemoteUpdate = false;
+  @override
+  bool _liveMode = false;
+  @override
+  bool _hasPeerOnline = false;
   Quote? _pendingRemoteQuote;
   StreamSubscription<Quote?>? _remoteSubscription;
+  StreamSubscription<bool>? _peerSubscription;
   @override
   int _remoteRevision = 0;
   @override
@@ -136,6 +141,7 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   bool _pricingProfileMissing = false;
   bool _pricingProfileDeleted = false;
   String? _missingPricingProfileName;
+  SyncService? _syncService;
 
   @override
   List<PricingProfileHeader> get pricingProfiles => _pricingProfiles;
@@ -180,8 +186,10 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   @override
   void dispose() {
     _remoteSubscription?.cancel();
+    _peerSubscription?.cancel();
     _profilesSub?.cancel();
     _orgSettingsSub?.cancel();
+    _syncService?.stopPolling();
     _autoSaveDebouncer.dispose();
     super.dispose();
   }
@@ -192,6 +200,7 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
     final deps = AppDependencies.of(context);
     _pricingProfilesRepo = deps.pricingProfilesRepository;
     _orgSettingsRepo = deps.orgSettingsRepository;
+    _syncService = deps.syncService;
 
     if (!_settingsFutureReady) {
       _settingsFuture = _loadQuoteSettingsData();
@@ -209,6 +218,42 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
         _orgSettings = settings;
       });
     });
+
+    _hasPeerOnline = _syncService?.hasPeerOnline ?? false;
+    _peerSubscription ??=
+        _syncService?.hasPeerOnlineStream.listen((hasPeer) {
+      if (!mounted) return;
+      setState(() {
+        _hasPeerOnline = hasPeer;
+      });
+      if (_liveMode && hasPeer) {
+        _syncService?.startPolling(
+          interval: const Duration(seconds: 3),
+        );
+      }
+    });
+  }
+
+  void _setLiveMode(bool enabled) {
+    if (_liveMode == enabled) {
+      return;
+    }
+    setState(() {
+      _liveMode = enabled;
+    });
+    if (enabled) {
+      if (_hasPeerOnline) {
+        _syncService?.startPolling(
+          interval: const Duration(seconds: 3),
+        );
+        unawaited(
+          _syncService?.downloadNow(reason: 'live_mode_enabled') ??
+              Future.value(),
+        );
+      }
+    } else {
+      _syncService?.stopPolling();
+    }
   }
 
   void _startRemoteWatch() {

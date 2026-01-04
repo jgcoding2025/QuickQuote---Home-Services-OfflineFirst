@@ -46,6 +46,7 @@ class _SettingsPageState extends State<SettingsPage>
 
   @override
   Widget build(BuildContext context) {
+    final deps = AppDependencies.of(context);
     return FutureBuilder<SettingsData>(
       future: _settingsDataFuture,
       builder: (context, dataSnap) {
@@ -66,6 +67,8 @@ class _SettingsPageState extends State<SettingsPage>
                 final leftColumn = Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (kDebugMode) _debugSyncCard(context),
+                    if (kDebugMode) const SizedBox(height: 24),
                     _settingsSection(
                       context,
                       title: 'Account & Team',
@@ -86,30 +89,107 @@ class _SettingsPageState extends State<SettingsPage>
                 );
 
                 if (isWide) {
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(width: 360, child: leftColumn),
-                        const SizedBox(width: 20),
-                        Expanded(child: rightColumn),
-                      ],
+                  return RefreshIndicator(
+                    onRefresh: () => deps.syncService.downloadNow(
+                      reason: 'pull_to_refresh:settings',
+                    ),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (kDebugMode) const DebugSyncBanner(),
+                          if (kDebugMode) const SizedBox(height: 16),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(width: 360, child: leftColumn),
+                              const SizedBox(width: 20),
+                              Expanded(child: rightColumn),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }
 
-                return ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    leftColumn,
-                    const SizedBox(height: 24),
-                    rightColumn,
-                  ],
+                return RefreshIndicator(
+                  onRefresh: () => deps.syncService.downloadNow(
+                    reason: 'pull_to_refresh:settings',
+                  ),
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      if (kDebugMode) const DebugSyncBanner(),
+                      if (kDebugMode) const SizedBox(height: 16),
+                      leftColumn,
+                      const SizedBox(height: 24),
+                      rightColumn,
+                    ],
+                  ),
                 );
               },
             );
           },
+        );
+      },
+    );
+  }
+
+  Widget _debugSyncCard(BuildContext context) {
+    final syncService = AppDependencies.of(context).syncService;
+    return ValueListenableBuilder<int>(
+      valueListenable: syncService.debugTick,
+      builder: (context, _, __) {
+        final blockers = syncService.debugBlockingReasons();
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Why isn’t this syncing?',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                if (blockers.isEmpty)
+                  const Text('No blockers detected.')
+                else
+                  ...blockers.map(
+                    (reason) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text('• $reason'),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () => syncService.uploadNow(
+                          reason: 'settings_upload_now',
+                        ),
+                        child: const Text('Run Upload Now'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () => syncService.downloadNow(
+                          reason: 'settings_download_now',
+                        ),
+                        child: const Text('Run Download Now'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         );
       },
     );

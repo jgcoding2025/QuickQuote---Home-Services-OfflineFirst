@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:printing/printing.dart';
@@ -25,6 +26,7 @@ import 'util/debouncer.dart';
 part 'ui_prototype/app.dart';
 part 'ui_prototype/shell.dart';
 part 'ui_prototype/utils.dart';
+part 'ui_prototype/debug_sync_banner.dart';
 part 'ui_prototype/login_page.dart';
 part 'ui_prototype/onboarding_page.dart';
 part 'ui_prototype/clients_page.dart';
