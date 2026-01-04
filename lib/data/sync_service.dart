@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'local_db.dart';
@@ -86,8 +87,8 @@ class SyncService {
       await _downloadChanges(session.orgId!);
       _setStatus(SyncStatus.online);
     } catch (e, st) {
-      print('SYNC ERROR: $e');
-      print(st);
+      debugPrint('SYNC ERROR: $e');
+      debugPrint('$st');
       _setStatus(SyncStatus.error);
     }
   }
@@ -111,8 +112,8 @@ class SyncService {
       await _uploadOutbox(session.orgId!);
       _setStatus(SyncStatus.online);
     } catch (e, st) {
-      print('OUTBOX UPLOAD ERROR: $e');
-      print(st);
+      debugPrint('OUTBOX UPLOAD ERROR: $e');
+      debugPrint('$st');
       _setStatus(SyncStatus.error);
     }
   }
@@ -129,8 +130,8 @@ class SyncService {
       await _downloadClients(session.orgId!);
       await _downloadQuotes(session.orgId!);
     } catch (e, st) {
-      print('DOWNLOAD ERROR: $e');
-      print(st);
+      debugPrint('DOWNLOAD ERROR: $e');
+      debugPrint('$st');
     }
   }
 
