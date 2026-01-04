@@ -170,6 +170,7 @@ class SyncService {
               )
               ..orderBy([(tbl) => OrderingTerm.asc(tbl.updatedAt)]))
             .get();
+    debugPrint('OUTBOX: ${pending.length} pending items to upload.');
     for (final item in pending) {
       final payload = _decodePayload(item.payload);
       final updatedAt = payload['updatedAt'] is int
@@ -190,10 +191,12 @@ class SyncService {
         'deleted': payload['deleted'] == true || item.opType == 'delete',
       };
       await doc.set(data, SetOptions(merge: true));
+      debugPrint('OUTBOX: transaction start for item ${item.id}.');
       await _db.transaction(() async {
         await (_db.update(_db.outbox)..where((tbl) => tbl.id.equals(item.id)))
             .write(OutboxCompanion(status: const Value('synced')));
       });
+      debugPrint('OUTBOX: transaction end for item ${item.id}.');
     }
   }
 
@@ -881,7 +884,7 @@ class SyncService {
     if (_shouldPoll()) {
       _pollingTimer ??= Timer.periodic(pollingInterval, (_) {
         if (_shouldPoll()) {
-          unawaited(downloadChangesOnce());
+          unawaited(sync());
         }
       });
     } else {
