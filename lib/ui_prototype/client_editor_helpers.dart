@@ -13,6 +13,11 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
   ClientDraft get _baseline;
   set _baseline(ClientDraft value);
 
+  final Debouncer _autoSaveDebouncer = Debouncer(
+    const Duration(milliseconds: 800),
+  );
+  int _autoSaveGeneration = 0;
+
   // ignore: unused_element
   bool get _allowPopOnce;
   set _allowPopOnce(bool value);
@@ -35,6 +40,10 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
 
     if (changed != _isDirty) {
       setState(() => _isDirty = changed);
+    }
+    if (changed) {
+      _autoSaveGeneration += 1;
+      _scheduleAutoSave();
     }
   }
 
@@ -70,6 +79,43 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
     email: email.text,
     notes: notes.text,
   );
+
+  void _scheduleAutoSave() {
+    final syncService = AppDependencies.of(context).syncService;
+    final generation = _autoSaveGeneration;
+    _autoSaveDebouncer.run(() {
+      unawaited(_autoSave(generation, syncService));
+    });
+  }
+
+  Future<void> _autoSave(int generation, SyncService syncService) async {
+    if (_isSaving || !_isDirty) return;
+    final draft = _draft();
+    final draftSnapshot = jsonEncode(draft.toMap());
+    var isNew = false;
+    if (clientId == null) {
+      clientId = widget.repo.newClientId();
+      isNew = true;
+    }
+    try {
+      await widget.repo.setClient(clientId!, draft, isNew: isNew);
+      if (!mounted) return;
+      final currentSnapshot = jsonEncode(_draft().toMap());
+      if (generation == _autoSaveGeneration &&
+          currentSnapshot == draftSnapshot) {
+        setState(() {
+          _baseline = draft;
+          _isDirty = false;
+        });
+      }
+      if (syncService.canSyncNow) {
+        await syncService.flushOutboxNow();
+      }
+    } catch (e, s) {
+      debugPrint('Auto-save failed: $e');
+      debugPrintStack(stackTrace: s);
+    }
+  }
 
   String _clientDisplayName() {
     final name = ('${firstName.text} ${lastName.text}').trim();

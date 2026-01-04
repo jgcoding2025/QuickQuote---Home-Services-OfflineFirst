@@ -13,6 +13,7 @@ import 'data/quote_models.dart';
 import 'data/quotes_repo_local_first.dart';
 import 'data/session_controller.dart';
 import 'data/sync_service.dart';
+import 'util/debouncer.dart';
 
 part 'ui_prototype/app.dart';
 part 'ui_prototype/shell.dart';

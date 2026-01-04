@@ -83,6 +83,7 @@ class _ClientEditorPageState extends State<ClientEditorPage>
     ]) {
       c.removeListener(_handleChanged);
     }
+    _autoSaveDebouncer.dispose();
     firstName.dispose();
     lastName.dispose();
     street1.dispose();
