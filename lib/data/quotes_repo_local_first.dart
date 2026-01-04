@@ -87,7 +87,7 @@ class QuotesRepositoryLocalFirst {
 
   Stream<Quote?> watchQuoteById(String quoteId) async* {
     final controller = StreamController<Quote?>();
-    StreamSubscription<Quote?>? dataSub;
+    StreamSubscription<QuoteRow?>? dataSub;
 
     Future<void> listenSession(AppSession? session) async {
       await dataSub?.cancel();

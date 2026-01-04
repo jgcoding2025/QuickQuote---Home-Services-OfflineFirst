@@ -12,7 +12,7 @@
     "category": "Initial",
     "serviceType": "Deep Clean",
     "description": "Post Initial Clean",
-    "pricePerSqFt": 0.2,
+    "pricePerSqFt": 0.20,
     "multiplier": 1.25
   },
   {
@@ -52,7 +52,7 @@
     "category": "One-Time",
     "serviceType": "Deep Clean",
     "description": "",
-    "pricePerSqFt": 0.3,
+    "pricePerSqFt": 0.30,
     "multiplier": 1.88
   },
   {
