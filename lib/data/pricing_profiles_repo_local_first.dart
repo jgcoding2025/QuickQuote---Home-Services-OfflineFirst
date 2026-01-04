@@ -31,8 +31,10 @@ class PricingProfilesRepositoryLocalFirst {
     final controller =
         StreamController<List<PricingProfileHeader>>.broadcast();
     StreamSubscription<List<PricingProfileHeader>>? dataSub;
+    List<PricingProfileHeader> last = const [];
 
     void emitProfiles(List<PricingProfileHeader> profiles) {
+      last = profiles;
       if (!controller.isClosed) {
         controller.add(profiles);
       }
@@ -41,7 +43,9 @@ class PricingProfilesRepositoryLocalFirst {
     void listenSession(AppSession? session) {
       dataSub?.cancel();
       if (session == null || session.orgId == null) {
-        emitProfiles(const []);
+        if (last.isEmpty) {
+          emitProfiles(const []);
+        }
         return;
       }
       dataSub =

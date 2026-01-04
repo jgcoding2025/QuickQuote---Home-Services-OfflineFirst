@@ -26,7 +26,10 @@ class SyncService {
   bool _isOnlineState = false;
   bool _pollingEnabled = true;
   SyncStatus _current = SyncStatus.offline;
+  Future<void>? _inFlightSync;
+  DateTime? _nextAllowedSyncAt;
   static const Duration pollingInterval = Duration(seconds: 3);
+  static const Duration syncBackoff = Duration(seconds: 3);
 
   Stream<SyncStatus> get statusStream => _statusController.stream;
   SyncStatus get currentStatus => _current;
@@ -62,7 +65,17 @@ class SyncService {
     await _statusController.close();
   }
 
-  Future<void> sync() async {
+  Future<void> sync() {
+    return _inFlightSync ??=
+        _syncImpl().whenComplete(() => _inFlightSync = null);
+  }
+
+  Future<void> _syncImpl() async {
+    final now = DateTime.now();
+    if (_nextAllowedSyncAt != null &&
+        now.isBefore(_nextAllowedSyncAt!)) {
+      return;
+    }
     final session = _sessionController.value;
     if (session == null || session.orgId == null) {
       _setStatus(SyncStatus.offline);
@@ -86,10 +99,12 @@ class SyncService {
       await _uploadOutbox(session.orgId!);
       await _downloadChanges(session.orgId!);
       _setStatus(SyncStatus.online);
+      _nextAllowedSyncAt = null;
     } catch (e, st) {
       debugPrint('SYNC ERROR: $e');
       debugPrint('$st');
       _setStatus(SyncStatus.error);
+      _nextAllowedSyncAt = DateTime.now().add(syncBackoff);
     }
   }
 
@@ -175,8 +190,10 @@ class SyncService {
         'deleted': payload['deleted'] == true || item.opType == 'delete',
       };
       await doc.set(data, SetOptions(merge: true));
-      await (_db.update(_db.outbox)..where((tbl) => tbl.id.equals(item.id)))
-          .write(OutboxCompanion(status: const Value('synced')));
+      await _db.transaction(() async {
+        await (_db.update(_db.outbox)..where((tbl) => tbl.id.equals(item.id)))
+            .write(OutboxCompanion(status: const Value('synced')));
+      });
     }
   }
 
