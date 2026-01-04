@@ -25,12 +25,15 @@ class PricingTierDetailPage extends StatefulWidget {
 }
 
 class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
+  late List<_PlanTier> _planTiers;
+
   @override
   void initState() {
     super.initState();
     if (widget.isDefault) {
       unawaited(widget.pricingProfilesRepo.ensureDefaultCatalogSeeded());
     }
+    _planTiers = List<_PlanTier>.from(widget.settingsData.planTiers);
   }
 
   @override
@@ -39,6 +42,14 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.initialProfile.name),
+        actions: [
+          if (isEditable)
+            IconButton(
+              tooltip: 'Rename profile',
+              onPressed: () => _renameProfile(context, widget.initialProfile),
+              icon: const Icon(Icons.edit),
+            ),
+        ],
       ),
       body: StreamBuilder<List<PricingProfileHeader>>(
         stream: widget.pricingProfilesRepo.streamProfiles(),
@@ -126,7 +137,6 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   }
 
   Widget _laborAndFeesSection(PricingProfileHeader profile, bool isEditable) {
-    final nameController = TextEditingController(text: profile.name);
     final laborController = TextEditingController(
       text: profile.laborRate.toStringAsFixed(2),
     );
@@ -142,14 +152,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     return StatefulBuilder(
       builder: (context, setLocalState) {
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: nameController,
-              enabled: isEditable,
-              decoration: const InputDecoration(labelText: 'Profile name'),
-            ),
-            const SizedBox(height: 12),
             TextField(
               controller: laborController,
               enabled: isEditable,
@@ -204,7 +207,6 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                     final ccRate = double.tryParse(ccController.text.trim());
                     await widget.pricingProfilesRepo.updateProfileHeader(
                       widget.profileId,
-                      name: nameController.text.trim(),
                       laborRate: laborRate ?? profile.laborRate,
                       taxEnabled: taxEnabled,
                       taxRate: taxRate ?? profile.taxRate,
@@ -225,32 +227,34 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   }
 
   Widget _planTiersSection(BuildContext context) {
-    final tiers = widget.settingsData.planTiers;
-    if (tiers.isEmpty) {
+    if (_planTiers.isEmpty) {
       return const Text('No plan tiers available.');
     }
-    final theme = Theme.of(context);
-    return Table(
-      border: TableBorder.all(color: Colors.grey.shade400, width: 1),
-      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-      columnWidths: const {
-        0: FlexColumnWidth(1.2),
-        1: FlexColumnWidth(1.2),
-        2: FlexColumnWidth(2.6),
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _tableRow(
-          const ['Tier', 'Multiplier', 'Description'],
-          isHeader: true,
-          headerColor: theme.colorScheme.surfaceContainerHighest,
-          headerTextColor: theme.colorScheme.onSurfaceVariant,
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: () => _editPlanTiersTable(context),
+            child: const Text('Edit'),
+          ),
         ),
-        ...tiers.map(
-          (tier) => _tableRow([
-            '${tier.name} (${tier.label})',
-            tier.multiplier.toStringAsFixed(2),
-            tier.description,
-          ], rowColor: tier.color),
+        _buildTable(
+          context,
+          headers: const ['Tier', 'Multiplier', 'Description'],
+          columnWidths: const {
+            0: FlexColumnWidth(1.4),
+            1: FlexColumnWidth(1),
+            2: FlexColumnWidth(3),
+          },
+          rows: _planTiers.map((tier) {
+            return [
+              '${tier.name} (${tier.label})',
+              tier.multiplier.toStringAsFixed(2),
+              tier.description,
+            ];
+          }).toList(),
         ),
       ],
     );
@@ -265,28 +269,41 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     }
     final sorted = catalog.serviceTypes.toList()
       ..sort((a, b) => a.row.compareTo(b.row));
-    return _buildTable(
-      context,
-      headers: [
-        'Service type',
-        'Description',
-        '\$/Sq.Ft.',
-        'Multiplier',
-        if (isEditable) 'Edit',
-      ],
-      rows: sorted.map((service) {
-        return [
-          service.serviceType,
-          service.description,
-          service.pricePerSqFt.toStringAsFixed(2),
-          service.multiplier.toStringAsFixed(2),
-          if (isEditable)
-            _editCell(
-              context,
-              onTap: () => _editServiceType(context, service),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (isEditable)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => _editServiceTypesTable(context, sorted),
+              child: const Text('Edit'),
             ),
-        ];
-      }).toList(),
+          ),
+        _buildTable(
+          context,
+          headers: const [
+            'Service type',
+            'Description',
+            '\$/Sq.Ft.',
+            'Multiplier',
+          ],
+          columnWidths: const {
+            0: FlexColumnWidth(1.6),
+            1: FlexColumnWidth(3.2),
+            2: FlexColumnWidth(1),
+            3: FlexColumnWidth(1),
+          },
+          rows: sorted.map((service) {
+            return [
+              service.serviceType,
+              service.description,
+              service.pricePerSqFt.toStringAsFixed(2),
+              service.multiplier.toStringAsFixed(2),
+            ];
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -297,26 +314,37 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     if (catalog.frequencies.isEmpty) {
       return const Text('No frequencies found.');
     }
-    return _buildTable(
-      context,
-      headers: [
-        'Service type',
-        'Frequency',
-        'Multiplier',
-        if (isEditable) 'Edit',
-      ],
-      rows: catalog.frequencies.map((freq) {
-        return [
-          freq.serviceType,
-          freq.frequency,
-          freq.multiplier.toStringAsFixed(2),
-          if (isEditable)
-            _editCell(
-              context,
-              onTap: () => _editFrequency(context, freq),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (isEditable)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => _editFrequenciesTable(
+                context,
+                catalog.frequencies,
+              ),
+              child: const Text('Edit'),
             ),
-        ];
-      }).toList(),
+          ),
+        _buildTable(
+          context,
+          headers: const ['Service type', 'Frequency', 'Multiplier'],
+          columnWidths: const {
+            0: FlexColumnWidth(1.8),
+            1: FlexColumnWidth(1.6),
+            2: FlexColumnWidth(1),
+          },
+          rows: catalog.frequencies.map((freq) {
+            return [
+              freq.serviceType,
+              freq.frequency,
+              freq.multiplier.toStringAsFixed(2),
+            ];
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -329,28 +357,36 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     }
     final sorted = catalog.roomTypes.toList()
       ..sort((a, b) => a.row.compareTo(b.row));
-    return _buildTable(
-      context,
-      headers: [
-        'Room type',
-        'Description',
-        'Minutes',
-        'Sq.Ft.',
-        if (isEditable) 'Edit',
-      ],
-      rows: sorted.map((room) {
-        return [
-          room.roomType,
-          room.description,
-          room.minutes.toString(),
-          room.squareFeet.toString(),
-          if (isEditable)
-            _editCell(
-              context,
-              onTap: () => _editRoomType(context, room),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (isEditable)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => _editRoomTypesTable(context, sorted),
+              child: const Text('Edit'),
             ),
-        ];
-      }).toList(),
+          ),
+        _buildTable(
+          context,
+          headers: const ['Room type', 'Description', 'Minutes', 'Sq.Ft.'],
+          columnWidths: const {
+            0: FlexColumnWidth(1.6),
+            1: FlexColumnWidth(3),
+            2: FlexColumnWidth(1),
+            3: FlexColumnWidth(1),
+          },
+          rows: sorted.map((room) {
+            return [
+              room.roomType,
+              room.description,
+              room.minutes.toString(),
+              room.squareFeet.toString(),
+            ];
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -361,26 +397,34 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     if (catalog.subItems.isEmpty) {
       return const Text('No add-on items found.');
     }
-    return _buildTable(
-      context,
-      headers: [
-        'Add-on item',
-        'Description',
-        'Minutes',
-        if (isEditable) 'Edit',
-      ],
-      rows: catalog.subItems.map((item) {
-        return [
-          item.subItem,
-          item.description,
-          item.minutes.toString(),
-          if (isEditable)
-            _editCell(
-              context,
-              onTap: () => _editSubItem(context, item),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (isEditable)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => _editSubItemsTable(context, catalog.subItems),
+              child: const Text('Edit'),
             ),
-        ];
-      }).toList(),
+          ),
+        _buildTable(
+          context,
+          headers: const ['Add-on item', 'Description', 'Minutes'],
+          columnWidths: const {
+            0: FlexColumnWidth(1.6),
+            1: FlexColumnWidth(3),
+            2: FlexColumnWidth(1),
+          },
+          rows: catalog.subItems.map((item) {
+            return [
+              item.subItem,
+              item.description,
+              item.minutes.toString(),
+            ];
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -391,26 +435,34 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     if (catalog.sizes.isEmpty) {
       return const Text('No size standards found.');
     }
-    return _buildTable(
-      context,
-      headers: [
-        'Size',
-        'Definition',
-        'Multiplier',
-        if (isEditable) 'Edit',
-      ],
-      rows: catalog.sizes.map((item) {
-        return [
-          item.size,
-          item.definition,
-          item.multiplier.toStringAsFixed(2),
-          if (isEditable)
-            _editCell(
-              context,
-              onTap: () => _editSize(context, item),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (isEditable)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => _editSizesTable(context, catalog.sizes),
+              child: const Text('Edit'),
             ),
-        ];
-      }).toList(),
+          ),
+        _buildTable(
+          context,
+          headers: const ['Size', 'Definition', 'Multiplier'],
+          columnWidths: const {
+            0: FlexColumnWidth(1.2),
+            1: FlexColumnWidth(3),
+            2: FlexColumnWidth(1),
+          },
+          rows: catalog.sizes.map((item) {
+            return [
+              item.size,
+              item.definition,
+              item.multiplier.toStringAsFixed(2),
+            ];
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -421,26 +473,35 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     if (catalog.complexities.isEmpty) {
       return const Text('No complexity standards found.');
     }
-    return _buildTable(
-      context,
-      headers: [
-        'Complexity',
-        'Definition',
-        'Multiplier',
-        if (isEditable) 'Edit',
-      ],
-      rows: catalog.complexities.map((item) {
-        return [
-          item.level,
-          item.definition,
-          item.multiplier.toStringAsFixed(2),
-          if (isEditable)
-            _editCell(
-              context,
-              onTap: () => _editComplexity(context, item),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (isEditable)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () =>
+                  _editComplexitiesTable(context, catalog.complexities),
+              child: const Text('Edit'),
             ),
-        ];
-      }).toList(),
+          ),
+        _buildTable(
+          context,
+          headers: const ['Complexity', 'Definition', 'Multiplier'],
+          columnWidths: const {
+            0: FlexColumnWidth(1.4),
+            1: FlexColumnWidth(3),
+            2: FlexColumnWidth(1),
+          },
+          rows: catalog.complexities.map((item) {
+            return [
+              item.level,
+              item.definition,
+              item.multiplier.toStringAsFixed(2),
+            ];
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -507,6 +568,50 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
+  Future<void> _editServiceTypesTable(
+    BuildContext context,
+    List<PricingProfileServiceType> items,
+  ) async {
+    var selected = items.first;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Edit Service Type'),
+          content: DropdownButtonFormField<String>(
+            value: selected.id,
+            items: items
+                .map(
+                  (item) => DropdownMenuItem(
+                    value: item.id,
+                    child: Text(item.serviceType),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              final next = items.firstWhere((item) => item.id == value);
+              setState(() => selected = next);
+            },
+            decoration: const InputDecoration(labelText: 'Service type'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _editServiceType(this.context, selected);
+              },
+              child: const Text('Edit'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _editFrequency(
     BuildContext context,
     PricingProfileFrequency frequency,
@@ -543,6 +648,50 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             child: const Text('Save'),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _editFrequenciesTable(
+    BuildContext context,
+    List<PricingProfileFrequency> items,
+  ) async {
+    var selected = items.first;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Edit Frequency'),
+          content: DropdownButtonFormField<String>(
+            value: selected.id,
+            items: items
+                .map(
+                  (item) => DropdownMenuItem(
+                    value: item.id,
+                    child: Text('${item.frequency} (${item.serviceType})'),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              final next = items.firstWhere((item) => item.id == value);
+              setState(() => selected = next);
+            },
+            decoration: const InputDecoration(labelText: 'Frequency'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _editFrequency(this.context, selected);
+              },
+              child: const Text('Edit'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -607,6 +756,50 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
+  Future<void> _editRoomTypesTable(
+    BuildContext context,
+    List<PricingProfileRoomType> items,
+  ) async {
+    var selected = items.first;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Edit Room Type'),
+          content: DropdownButtonFormField<String>(
+            value: selected.id,
+            items: items
+                .map(
+                  (item) => DropdownMenuItem(
+                    value: item.id,
+                    child: Text(item.roomType),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              final next = items.firstWhere((item) => item.id == value);
+              setState(() => selected = next);
+            },
+            decoration: const InputDecoration(labelText: 'Room type'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _editRoomType(this.context, selected);
+              },
+              child: const Text('Edit'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _editSubItem(
     BuildContext context,
     PricingProfileSubItem subItem,
@@ -653,6 +846,50 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             child: const Text('Save'),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _editSubItemsTable(
+    BuildContext context,
+    List<PricingProfileSubItem> items,
+  ) async {
+    var selected = items.first;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Edit Add-on Item'),
+          content: DropdownButtonFormField<String>(
+            value: selected.id,
+            items: items
+                .map(
+                  (item) => DropdownMenuItem(
+                    value: item.id,
+                    child: Text(item.subItem),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              final next = items.firstWhere((item) => item.id == value);
+              setState(() => selected = next);
+            },
+            decoration: const InputDecoration(labelText: 'Add-on item'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _editSubItem(this.context, selected);
+              },
+              child: const Text('Edit'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -709,6 +946,50 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
+  Future<void> _editSizesTable(
+    BuildContext context,
+    List<PricingProfileSize> items,
+  ) async {
+    var selected = items.first;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Edit Size'),
+          content: DropdownButtonFormField<String>(
+            value: selected.id,
+            items: items
+                .map(
+                  (item) => DropdownMenuItem(
+                    value: item.id,
+                    child: Text(item.size),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              final next = items.firstWhere((item) => item.id == value);
+              setState(() => selected = next);
+            },
+            decoration: const InputDecoration(labelText: 'Size'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _editSize(this.context, selected);
+              },
+              child: const Text('Edit'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _editComplexity(
     BuildContext context,
     PricingProfileComplexity complexity,
@@ -761,15 +1042,183 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
+  Future<void> _editComplexitiesTable(
+    BuildContext context,
+    List<PricingProfileComplexity> items,
+  ) async {
+    var selected = items.first;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Edit Complexity'),
+          content: DropdownButtonFormField<String>(
+            value: selected.id,
+            items: items
+                .map(
+                  (item) => DropdownMenuItem(
+                    value: item.id,
+                    child: Text(item.level),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              final next = items.firstWhere((item) => item.id == value);
+              setState(() => selected = next);
+            },
+            decoration: const InputDecoration(labelText: 'Complexity'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _editComplexity(this.context, selected);
+              },
+              child: const Text('Edit'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _editPlanTiersTable(BuildContext context) async {
+    var selected = _planTiers.first;
+    final multiplierController =
+        TextEditingController(text: selected.multiplier.toStringAsFixed(2));
+    final descriptionController =
+        TextEditingController(text: selected.description);
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Edit Plan Tier'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                value: selected.name,
+                items: _planTiers
+                    .map(
+                      (tier) => DropdownMenuItem(
+                        value: tier.name,
+                        child: Text('${tier.name} (${tier.label})'),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  final next = _planTiers.firstWhere(
+                    (tier) => tier.name == value,
+                  );
+                  setState(() {
+                    selected = next;
+                    multiplierController.text =
+                        next.multiplier.toStringAsFixed(2);
+                    descriptionController.text = next.description;
+                  });
+                },
+                decoration: const InputDecoration(labelText: 'Tier'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: multiplierController,
+                decoration: const InputDecoration(labelText: 'Multiplier'),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(labelText: 'Description'),
+                maxLines: 2,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final multiplier =
+                    double.tryParse(multiplierController.text.trim()) ??
+                        selected.multiplier;
+                final description = descriptionController.text.trim();
+                setState(() {
+                  _planTiers = _planTiers.map((tier) {
+                    if (tier.name != selected.name) {
+                      return tier;
+                    }
+                    return _PlanTier(
+                      name: tier.name,
+                      label: tier.label,
+                      color: tier.color,
+                      multiplier: multiplier,
+                      description:
+                          description.isEmpty ? tier.description : description,
+                    );
+                  }).toList();
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _renameProfile(
+    BuildContext context,
+    PricingProfileHeader profile,
+  ) async {
+    final controller = TextEditingController(text: profile.name);
+    final nextName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Rename Profile'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Profile name'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (nextName == null || nextName.isEmpty) {
+      return;
+    }
+    await widget.pricingProfilesRepo.updateProfileHeader(
+      widget.profileId,
+      name: nextName,
+    );
+  }
+
   Widget _buildTable(
     BuildContext context, {
     required List<String> headers,
     required List<List<Object>> rows,
+    Map<int, TableColumnWidth>? columnWidths,
   }) {
     final theme = Theme.of(context);
     return Table(
       border: TableBorder.all(color: Colors.grey.shade400, width: 1),
       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      columnWidths: columnWidths,
       children: [
         _tableRow(
           headers,
@@ -779,14 +1228,6 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         ),
         ...rows.map((cells) => _tableRow(cells)),
       ],
-    );
-  }
-
-  Widget _editCell(BuildContext context, {required VoidCallback onTap}) {
-    return IconButton(
-      icon: const Icon(Icons.edit),
-      tooltip: 'Edit',
-      onPressed: onTap,
     );
   }
 
