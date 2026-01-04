@@ -118,31 +118,31 @@ class _SettingsPageState extends State<SettingsPage>
   Future<SettingsData> _loadSettingsData() async {
     final planTiers = await _loadList(
       'assets/settings/plan_tiers.json',
-      _PlanTier.fromJson,
+      PlanTier.fromJson,
     );
     final serviceTypes = await _loadList(
       'assets/settings/service_type_standards.json',
-      _ServiceTypeStandard.fromJson,
+      ServiceTypeStandard.fromJson,
     );
     final complexities = await _loadList(
       'assets/settings/complexity_standards.json',
-      _ComplexityStandard.fromJson,
+      ComplexityStandard.fromJson,
     );
     final sizes = await _loadList(
       'assets/settings/size_standards.json',
-      _SizeStandard.fromJson,
+      SizeStandard.fromJson,
     );
     final frequencies = await _loadList(
       'assets/settings/frequency_standards.json',
-      _FrequencyStandard.fromJson,
+      FrequencyStandard.fromJson,
     );
     final roomTypes = await _loadList(
       'assets/settings/room_type_standards.json',
-      _RoomTypeStandard.fromJson,
+      RoomTypeStandard.fromJson,
     );
     final subItems = await _loadList(
       'assets/settings/sub_item_standards.json',
-      _SubItemStandard.fromJson,
+      SubItemStandard.fromJson,
     );
 
     return SettingsData(
@@ -155,7 +155,6 @@ class _SettingsPageState extends State<SettingsPage>
       subItems: subItems,
     );
   }
-
 
   Widget _accountCard(BuildContext context) {
     final deps = AppDependencies.of(context);
@@ -175,9 +174,9 @@ class _SettingsPageState extends State<SettingsPage>
               stream: orgId == null || orgId.isEmpty
                   ? null
                   : FirebaseFirestore.instance
-                      .collection('orgs')
-                      .doc(orgId)
-                      .snapshots(),
+                        .collection('orgs')
+                        .doc(orgId)
+                        .snapshots(),
               builder: (context, snapshot) {
                 final name = snapshot.data?.data()?['name'] as String?;
                 return Text('Org: ${name ?? orgId ?? 'None'}');
@@ -277,9 +276,7 @@ class _SettingsPageState extends State<SettingsPage>
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(
-                    child: SelectableText('Invite Code: $_inviteCode'),
-                  ),
+                  Expanded(child: SelectableText('Invite Code: $_inviteCode')),
                   IconButton(
                     tooltip: 'Copy code',
                     onPressed: () async {

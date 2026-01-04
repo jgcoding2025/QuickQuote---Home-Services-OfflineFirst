@@ -1,7 +1,7 @@
 part of '../ui_prototype.dart';
 
 mixin _QuoteEditorItemsMixin on _QuoteEditorStateAccess {
-  _RoomTypeStandard? _roomTypeStandardFor(String roomType) {
+  RoomTypeStandard? _roomTypeStandardFor(String roomType) {
     for (final standard in _roomTypeStandards) {
       if (standard.roomType == roomType) {
         return standard;
@@ -10,7 +10,7 @@ mixin _QuoteEditorItemsMixin on _QuoteEditorStateAccess {
     return null;
   }
 
-  _SubItemStandard? _subItemStandardForLabel(String label) {
+  SubItemStandard? _subItemStandardForLabel(String label) {
     for (final standard in _subItemStandards) {
       if (standard.subItem == label || _subItemLabel(standard) == label) {
         return standard;
@@ -65,7 +65,7 @@ mixin _QuoteEditorItemsMixin on _QuoteEditorStateAccess {
 
   @override
   List<DropdownMenuItem<String>> _roomTypeMenuItems(
-    List<_RoomTypeStandard> roomTypes,
+    List<RoomTypeStandard> roomTypes,
     List<String> fallbackOptions,
   ) {
     if (roomTypes.isEmpty) {
@@ -119,7 +119,7 @@ mixin _QuoteEditorItemsMixin on _QuoteEditorStateAccess {
 
   @override
   List<DropdownMenuItem<String>> _subItemMenuItems(
-    List<_SubItemStandard> subItems,
+    List<SubItemStandard> subItems,
     List<String> fallbackOptions,
   ) {
     if (subItems.isEmpty) {
@@ -172,7 +172,7 @@ mixin _QuoteEditorItemsMixin on _QuoteEditorStateAccess {
 
   String _preferredAddonTitle(
     _QuoteItem room,
-    List<_SubItemStandard> subItemStandards,
+    List<SubItemStandard> subItemStandards,
     List<String> fallbackOptions,
   ) {
     final addonTitles = items
@@ -203,7 +203,7 @@ mixin _QuoteEditorItemsMixin on _QuoteEditorStateAccess {
     required List<DropdownMenuItem<String>> subItemMenuItems,
     required List<String> sizeOptions,
     required List<String> complexityOptions,
-    required List<_SubItemStandard> subItemStandards,
+    required List<SubItemStandard> subItemStandards,
     required List<String> roomTitles,
   }) {
     final levelOptions = _QuoteEditorPageState._levelOptions;
@@ -413,7 +413,7 @@ mixin _QuoteEditorItemsMixin on _QuoteEditorStateAccess {
     required List<String> levelOptions,
     required List<String> roomTypeOptions,
     required List<String> subItemOptions,
-    required List<_SubItemStandard> subItemStandards,
+    required List<SubItemStandard> subItemStandards,
     required List<DropdownMenuItem<String>> roomTypeMenuItems,
     required List<DropdownMenuItem<String>> subItemMenuItems,
     required List<String> sizeOptions,

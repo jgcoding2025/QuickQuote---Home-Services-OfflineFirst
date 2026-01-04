@@ -35,7 +35,7 @@ mixin _QuoteEditorUiHelpers on _QuoteEditorStateAccess {
   }
 
   @override
-  String _subItemLabel(_SubItemStandard item) {
+  String _subItemLabel(SubItemStandard item) {
     final description = item.description.trim();
     if (description.isEmpty) {
       return item.subItem;
@@ -44,7 +44,7 @@ mixin _QuoteEditorUiHelpers on _QuoteEditorStateAccess {
   }
 
   @override
-  String? _subItemLabelFor(String name, List<_SubItemStandard> subItems) {
+  String? _subItemLabelFor(String name, List<SubItemStandard> subItems) {
     for (final item in subItems) {
       if (item.subItem == name) {
         return _subItemLabel(item);

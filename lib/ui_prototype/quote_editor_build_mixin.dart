@@ -3,7 +3,7 @@ part of '../ui_prototype.dart';
 mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
   List<DropdownMenuItem<String>> _serviceTypeMenuItems(
     BuildContext context,
-    List<_ServiceTypeStandard> serviceTypes,
+    List<ServiceTypeStandard> serviceTypes,
     List<String> fallbackOptions,
   ) {
     if (serviceTypes.isEmpty) {
@@ -74,15 +74,10 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
     String? missingProfileLabel,
   }) {
     return [
-      const DropdownMenuItem(
-        value: 'default',
-        child: Text('Default (locked)'),
-      ),
+      const DropdownMenuItem(value: 'default', child: Text('Default (locked)')),
       ...profiles.map(
-        (profile) => DropdownMenuItem(
-          value: profile.id,
-          child: Text(profile.name),
-        ),
+        (profile) =>
+            DropdownMenuItem(value: profile.id, child: Text(profile.name)),
       ),
       if (missingProfileId != null)
         DropdownMenuItem(
@@ -107,9 +102,7 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Edit Quote'),
-        ),
+        appBar: AppBar(title: const Text('Edit Quote')),
         body: FutureBuilder<_QuoteSettingsData>(
           future: _settingsFuture,
           builder: (context, snapshot) {
@@ -139,10 +132,11 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
                 : [serviceType];
             final missingProfileId =
                 pricingProfileId != 'default' &&
-                        pricingProfiles
-                            .every((profile) => profile.id != pricingProfileId)
-                    ? pricingProfileId
-                    : null;
+                    pricingProfiles.every(
+                      (profile) => profile.id != pricingProfileId,
+                    )
+                ? pricingProfileId
+                : null;
             final pricingProfileOptions = [
               'default',
               ...pricingProfiles.map((profile) => profile.id),
@@ -181,8 +175,9 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
             final pricingProfileMenuItems = _pricingProfileMenuItems(
               pricingProfiles,
               missingProfileId: missingProfileId,
-              missingProfileLabel:
-                  missingProfileId == null ? null : missingProfileLabel,
+              missingProfileLabel: missingProfileId == null
+                  ? null
+                  : missingProfileLabel,
             );
             final subItemMenuItems = _subItemMenuItems(
               data.subItems,
@@ -285,8 +280,9 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
                     child: ListTile(
                       leading: const Icon(Icons.sync),
                       title: const Text('Updated on another device'),
-                      subtitle:
-                          const Text('Refresh to load the latest changes.'),
+                      subtitle: const Text(
+                        'Refresh to load the latest changes.',
+                      ),
                       trailing: TextButton(
                         onPressed: _refreshFromRemote,
                         child: const Text('Refresh'),

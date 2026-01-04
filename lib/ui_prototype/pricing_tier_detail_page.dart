@@ -25,7 +25,7 @@ class PricingTierDetailPage extends StatefulWidget {
 }
 
 class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
-  late List<_PlanTier> _planTiers;
+  late List<PlanTier> planTiers;
 
   @override
   void initState() {
@@ -33,7 +33,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     if (widget.isDefault) {
       unawaited(widget.pricingProfilesRepo.ensureDefaultCatalogSeeded());
     }
-    _planTiers = List<_PlanTier>.from(widget.settingsData.planTiers);
+    planTiers = List<PlanTier>.from(widget.settingsData.planTiers);
   }
 
   @override
@@ -75,7 +75,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                   _sectionTile(
                     context,
                     title: 'Plan Tiers',
-                    child: _planTiersSection(context),
+                    child: planTiersSection(context),
                   ),
                   const SizedBox(height: 16),
                   _sectionTile(
@@ -128,10 +128,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
       child: ExpansionTile(
         title: Text(title, style: Theme.of(context).textTheme.titleMedium),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        children: [
-          const SizedBox(height: 8),
-          child,
-        ],
+        children: [const SizedBox(height: 8), child],
       ),
     );
   }
@@ -200,10 +197,10 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                 alignment: Alignment.centerRight,
                 child: FilledButton(
                   onPressed: () async {
-                    final laborRate =
-                        double.tryParse(laborController.text.trim());
-                    final taxRate =
-                        double.tryParse(taxController.text.trim());
+                    final laborRate = double.tryParse(
+                      laborController.text.trim(),
+                    );
+                    final taxRate = double.tryParse(taxController.text.trim());
                     final ccRate = double.tryParse(ccController.text.trim());
                     await widget.pricingProfilesRepo.updateProfileHeader(
                       widget.profileId,
@@ -226,8 +223,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
-  Widget _planTiersSection(BuildContext context) {
-    if (_planTiers.isEmpty) {
+  Widget planTiersSection(BuildContext context) {
+    if (planTiers.isEmpty) {
       return const Text('No plan tiers available.');
     }
     return Column(
@@ -248,7 +245,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             1: FlexColumnWidth(1),
             2: FlexColumnWidth(3),
           },
-          rows: _planTiers.map((tier) {
+          rows: planTiers.map((tier) {
             return [
               '${tier.name} (${tier.label})',
               tier.multiplier.toStringAsFixed(2),
@@ -260,10 +257,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
-  Widget _serviceTypeSection(
-    PricingProfileCatalog catalog,
-    bool isEditable,
-  ) {
+  Widget _serviceTypeSection(PricingProfileCatalog catalog, bool isEditable) {
     if (catalog.serviceTypes.isEmpty) {
       return const Text('No service types found.');
     }
@@ -307,10 +301,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
-  Widget _frequencySection(
-    PricingProfileCatalog catalog,
-    bool isEditable,
-  ) {
+  Widget _frequencySection(PricingProfileCatalog catalog, bool isEditable) {
     if (catalog.frequencies.isEmpty) {
       return const Text('No frequencies found.');
     }
@@ -321,10 +312,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: () => _editFrequenciesTable(
-                context,
-                catalog.frequencies,
-              ),
+              onPressed: () =>
+                  _editFrequenciesTable(context, catalog.frequencies),
               child: const Text('Edit'),
             ),
           ),
@@ -348,10 +337,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
-  Widget _roomTypeSection(
-    PricingProfileCatalog catalog,
-    bool isEditable,
-  ) {
+  Widget _roomTypeSection(PricingProfileCatalog catalog, bool isEditable) {
     if (catalog.roomTypes.isEmpty) {
       return const Text('No room types found.');
     }
@@ -390,10 +376,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
-  Widget _subItemSection(
-    PricingProfileCatalog catalog,
-    bool isEditable,
-  ) {
+  Widget _subItemSection(PricingProfileCatalog catalog, bool isEditable) {
     if (catalog.subItems.isEmpty) {
       return const Text('No add-on items found.');
     }
@@ -417,21 +400,14 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             2: FlexColumnWidth(1),
           },
           rows: catalog.subItems.map((item) {
-            return [
-              item.subItem,
-              item.description,
-              item.minutes.toString(),
-            ];
+            return [item.subItem, item.description, item.minutes.toString()];
           }).toList(),
         ),
       ],
     );
   }
 
-  Widget _sizeSection(
-    PricingProfileCatalog catalog,
-    bool isEditable,
-  ) {
+  Widget _sizeSection(PricingProfileCatalog catalog, bool isEditable) {
     if (catalog.sizes.isEmpty) {
       return const Text('No size standards found.');
     }
@@ -466,10 +442,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
-  Widget _complexitySection(
-    PricingProfileCatalog catalog,
-    bool isEditable,
-  ) {
+  Widget _complexitySection(PricingProfileCatalog catalog, bool isEditable) {
     if (catalog.complexities.isEmpty) {
       return const Text('No complexity standards found.');
     }
@@ -509,12 +482,15 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     BuildContext context,
     PricingProfileServiceType service,
   ) async {
-    final priceController =
-        TextEditingController(text: service.pricePerSqFt.toStringAsFixed(2));
-    final multiplierController =
-        TextEditingController(text: service.multiplier.toStringAsFixed(2));
-    final descriptionController =
-        TextEditingController(text: service.description);
+    final priceController = TextEditingController(
+      text: service.pricePerSqFt.toStringAsFixed(2),
+    );
+    final multiplierController = TextEditingController(
+      text: service.multiplier.toStringAsFixed(2),
+    );
+    final descriptionController = TextEditingController(
+      text: service.description,
+    );
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -547,10 +523,10 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             onPressed: () async {
               final price =
                   double.tryParse(priceController.text.trim()) ??
-                      service.pricePerSqFt;
+                  service.pricePerSqFt;
               final multiplier =
                   double.tryParse(multiplierController.text.trim()) ??
-                      service.multiplier;
+                  service.multiplier;
               await widget.pricingCatalogRepo.updateServiceType(
                 id: service.id,
                 description: descriptionController.text.trim(),
@@ -616,8 +592,9 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     BuildContext context,
     PricingProfileFrequency frequency,
   ) async {
-    final multiplierController =
-        TextEditingController(text: frequency.multiplier.toStringAsFixed(2));
+    final multiplierController = TextEditingController(
+      text: frequency.multiplier.toStringAsFixed(2),
+    );
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -636,7 +613,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             onPressed: () async {
               final multiplier =
                   double.tryParse(multiplierController.text.trim()) ??
-                      frequency.multiplier;
+                  frequency.multiplier;
               await widget.pricingCatalogRepo.updateFrequency(
                 id: frequency.id,
                 multiplier: multiplier,
@@ -700,12 +677,15 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     BuildContext context,
     PricingProfileRoomType roomType,
   ) async {
-    final descriptionController =
-        TextEditingController(text: roomType.description);
-    final minutesController =
-        TextEditingController(text: roomType.minutes.toString());
-    final squareFeetController =
-        TextEditingController(text: roomType.squareFeet.toString());
+    final descriptionController = TextEditingController(
+      text: roomType.description,
+    );
+    final minutesController = TextEditingController(
+      text: roomType.minutes.toString(),
+    );
+    final squareFeetController = TextEditingController(
+      text: roomType.squareFeet.toString(),
+    );
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -737,8 +717,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           FilledButton(
             onPressed: () async {
               final minutes = int.tryParse(minutesController.text.trim());
-              final squareFeet =
-                  int.tryParse(squareFeetController.text.trim());
+              final squareFeet = int.tryParse(squareFeetController.text.trim());
               await widget.pricingCatalogRepo.updateRoomType(
                 id: roomType.id,
                 description: descriptionController.text.trim(),
@@ -804,10 +783,12 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     BuildContext context,
     PricingProfileSubItem subItem,
   ) async {
-    final descriptionController =
-        TextEditingController(text: subItem.description);
-    final minutesController =
-        TextEditingController(text: subItem.minutes.toString());
+    final descriptionController = TextEditingController(
+      text: subItem.description,
+    );
+    final minutesController = TextEditingController(
+      text: subItem.minutes.toString(),
+    );
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -894,14 +875,11 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
-  Future<void> _editSize(
-    BuildContext context,
-    PricingProfileSize size,
-  ) async {
-    final definitionController =
-        TextEditingController(text: size.definition);
-    final multiplierController =
-        TextEditingController(text: size.multiplier.toStringAsFixed(2));
+  Future<void> _editSize(BuildContext context, PricingProfileSize size) async {
+    final definitionController = TextEditingController(text: size.definition);
+    final multiplierController = TextEditingController(
+      text: size.multiplier.toStringAsFixed(2),
+    );
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -929,7 +907,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             onPressed: () async {
               final multiplier =
                   double.tryParse(multiplierController.text.trim()) ??
-                      size.multiplier;
+                  size.multiplier;
               await widget.pricingCatalogRepo.updateSize(
                 id: size.id,
                 definition: definitionController.text.trim(),
@@ -960,10 +938,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             initialValue: selected.id,
             items: items
                 .map(
-                  (item) => DropdownMenuItem(
-                    value: item.id,
-                    child: Text(item.size),
-                  ),
+                  (item) =>
+                      DropdownMenuItem(value: item.id, child: Text(item.size)),
                 )
                 .toList(),
             onChanged: (value) {
@@ -994,10 +970,12 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     BuildContext context,
     PricingProfileComplexity complexity,
   ) async {
-    final definitionController =
-        TextEditingController(text: complexity.definition);
-    final multiplierController =
-        TextEditingController(text: complexity.multiplier.toStringAsFixed(2));
+    final definitionController = TextEditingController(
+      text: complexity.definition,
+    );
+    final multiplierController = TextEditingController(
+      text: complexity.multiplier.toStringAsFixed(2),
+    );
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -1025,7 +1003,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             onPressed: () async {
               final multiplier =
                   double.tryParse(multiplierController.text.trim()) ??
-                      complexity.multiplier;
+                  complexity.multiplier;
               await widget.pricingCatalogRepo.updateComplexity(
                 id: complexity.id,
                 definition: definitionController.text.trim(),
@@ -1056,10 +1034,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             initialValue: selected.id,
             items: items
                 .map(
-                  (item) => DropdownMenuItem(
-                    value: item.id,
-                    child: Text(item.level),
-                  ),
+                  (item) =>
+                      DropdownMenuItem(value: item.id, child: Text(item.level)),
                 )
                 .toList(),
             onChanged: (value) {
@@ -1087,11 +1063,13 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   }
 
   Future<void> _editPlanTiersTable(BuildContext context) async {
-    var selected = _planTiers.first;
-    final multiplierController =
-        TextEditingController(text: selected.multiplier.toStringAsFixed(2));
-    final descriptionController =
-        TextEditingController(text: selected.description);
+    var selected = planTiers.first;
+    final multiplierController = TextEditingController(
+      text: selected.multiplier.toStringAsFixed(2),
+    );
+    final descriptionController = TextEditingController(
+      text: selected.description,
+    );
 
     await showDialog<void>(
       context: context,
@@ -1103,7 +1081,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             children: [
               DropdownButtonFormField<String>(
                 initialValue: selected.name,
-                items: _planTiers
+                items: planTiers
                     .map(
                       (tier) => DropdownMenuItem(
                         value: tier.name,
@@ -1112,13 +1090,14 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                     )
                     .toList(),
                 onChanged: (value) {
-                  final next = _planTiers.firstWhere(
+                  final next = planTiers.firstWhere(
                     (tier) => tier.name == value,
                   );
                   setState(() {
                     selected = next;
-                    multiplierController.text =
-                        next.multiplier.toStringAsFixed(2);
+                    multiplierController.text = next.multiplier.toStringAsFixed(
+                      2,
+                    );
                     descriptionController.text = next.description;
                   });
                 },
@@ -1147,20 +1126,21 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
               onPressed: () {
                 final multiplier =
                     double.tryParse(multiplierController.text.trim()) ??
-                        selected.multiplier;
+                    selected.multiplier;
                 final description = descriptionController.text.trim();
                 setState(() {
-                  _planTiers = _planTiers.map((tier) {
+                  planTiers = planTiers.map((tier) {
                     if (tier.name != selected.name) {
                       return tier;
                     }
-                    return _PlanTier(
+                    return PlanTier(
                       name: tier.name,
                       label: tier.label,
                       color: tier.color,
                       multiplier: multiplier,
-                      description:
-                          description.isEmpty ? tier.description : description,
+                      description: description.isEmpty
+                          ? tier.description
+                          : description,
                     );
                   }).toList();
                 });
@@ -1249,8 +1229,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
       decoration: isHeader
           ? BoxDecoration(color: effectiveHeaderColor)
           : rowColor == null
-              ? null
-              : BoxDecoration(color: rowColor),
+          ? null
+          : BoxDecoration(color: rowColor),
       children: cells
           .map(
             (cell) => Padding(
@@ -1268,13 +1248,11 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                         color: isHeader
                             ? effectiveHeaderTextColor
                             : rowColor == null
-                                ? null
-                                : ThemeData.estimateBrightnessForColor(
-                                          rowColor,
-                                        ) ==
-                                        Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
+                            ? null
+                            : ThemeData.estimateBrightnessForColor(rowColor) ==
+                                  Brightness.dark
+                            ? Colors.white
+                            : Colors.black,
                       ),
                     ),
             ),

@@ -17,10 +17,10 @@ class _EditItemDialog extends StatefulWidget {
     required this.roomTitles,
   });
   final _QuoteItem item;
-  final List<_RoomTypeStandard> roomTypeStandards;
-  final List<_SubItemStandard> subItemStandards;
-  final List<_SizeStandard> sizeStandards;
-  final List<_ComplexityStandard> complexityStandards;
+  final List<RoomTypeStandard> roomTypeStandards;
+  final List<SubItemStandard> subItemStandards;
+  final List<SizeStandard> sizeStandards;
+  final List<ComplexityStandard> complexityStandards;
   final List<String> levelOptions;
   final List<String> roomTypeOptions;
   final List<String> subItemOptions;
@@ -56,7 +56,7 @@ class _EditItemDialogState extends State<_EditItemDialog> {
     baseMinutes = _normalizeBaseMinutes(widget.item);
   }
 
-  String _subItemLabel(_SubItemStandard item) {
+  String _subItemLabel(SubItemStandard item) {
     final description = item.description.trim();
     if (description.isEmpty) {
       return item.subItem;
@@ -64,7 +64,7 @@ class _EditItemDialogState extends State<_EditItemDialog> {
     return '${item.subItem} ($description)';
   }
 
-  _RoomTypeStandard? _roomTypeStandardFor(String roomType) {
+  RoomTypeStandard? _roomTypeStandardFor(String roomType) {
     for (final standard in widget.roomTypeStandards) {
       if (standard.roomType == roomType) {
         return standard;
@@ -73,7 +73,7 @@ class _EditItemDialogState extends State<_EditItemDialog> {
     return null;
   }
 
-  _SubItemStandard? _subItemStandardForLabel(String label) {
+  SubItemStandard? _subItemStandardForLabel(String label) {
     for (final standard in widget.subItemStandards) {
       if (standard.subItem == label || _subItemLabel(standard) == label) {
         return standard;
@@ -133,8 +133,7 @@ class _EditItemDialogState extends State<_EditItemDialog> {
     if (type == 'Room') {
       estSqFt = (baseEstSqFt * sizeMultiplier).round();
     }
-    minutes =
-        (baseMinutes * sizeMultiplier * complexityMultiplier).round();
+    minutes = (baseMinutes * sizeMultiplier * complexityMultiplier).round();
   }
 
   void _applyStandardForTitle() {
@@ -246,7 +245,9 @@ class _EditItemDialogState extends State<_EditItemDialog> {
         : [complexity];
     final roomTypeOptions = roomTypeValues.isNotEmpty
         ? roomTypeValues
-        : (widget.roomTypeOptions.isNotEmpty ? widget.roomTypeOptions : [title]);
+        : (widget.roomTypeOptions.isNotEmpty
+              ? widget.roomTypeOptions
+              : [title]);
     final subItemOptions = subItemValues.isNotEmpty
         ? subItemValues
         : (widget.subItemOptions.isNotEmpty ? widget.subItemOptions : [title]);
@@ -263,8 +264,8 @@ class _EditItemDialogState extends State<_EditItemDialog> {
     final resolvedTitle = type == 'Room'
         ? _resolveOption(title, roomTypeOptions)
         : type == 'Addon'
-            ? _resolveOption(title, subItemOptions)
-            : title;
+        ? _resolveOption(title, subItemOptions)
+        : title;
 
     _syncOption(level, resolvedLevel, (v) => level = v);
     _syncOption(size, resolvedSize, (v) => size = v);
@@ -344,14 +345,15 @@ class _EditItemDialogState extends State<_EditItemDialog> {
                   title = v ?? title;
                   _applyStandardForTitle();
                 }),
-                decoration: _dialogDecoration(
-                  type == 'Room' ? 'Room Type' : 'Add-on Item',
-                ).copyWith(
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 18,
-                    horizontal: 12,
-                  ),
-                ),
+                decoration:
+                    _dialogDecoration(
+                      type == 'Room' ? 'Room Type' : 'Add-on Item',
+                    ).copyWith(
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 18,
+                        horizontal: 12,
+                      ),
+                    ),
               ),
             if (type != 'Room') ...[
               const SizedBox(height: 12),

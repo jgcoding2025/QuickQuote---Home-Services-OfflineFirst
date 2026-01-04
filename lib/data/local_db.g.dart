@@ -1110,15 +1110,14 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, QuoteRow> {
     'pricingProfileId',
   );
   @override
-  late final GeneratedColumn<String> pricingProfileId =
-      GeneratedColumn<String>(
-        'pricing_profile_id',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        defaultValue: const Constant('default'),
-      );
+  late final GeneratedColumn<String> pricingProfileId = GeneratedColumn<String>(
+    'pricing_profile_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('default'),
+  );
   static const VerificationMeta _defaultRoomTypeMeta = const VerificationMeta(
     'defaultRoomType',
   );
@@ -1830,9 +1829,7 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
       ccEnabled: serializer.fromJson<bool>(json['ccEnabled']),
       taxRate: serializer.fromJson<double>(json['taxRate']),
       ccRate: serializer.fromJson<double>(json['ccRate']),
-      pricingProfileId: serializer.fromJson<String>(
-        json['pricingProfileId'],
-      ),
+      pricingProfileId: serializer.fromJson<String>(json['pricingProfileId']),
       defaultRoomType: serializer.fromJson<String>(json['defaultRoomType']),
       defaultLevel: serializer.fromJson<String>(json['defaultLevel']),
       defaultSize: serializer.fromJson<String>(json['defaultSize']),
@@ -2321,8 +2318,7 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
       if (ccEnabled != null) 'cc_enabled': ccEnabled,
       if (taxRate != null) 'tax_rate': taxRate,
       if (ccRate != null) 'cc_rate': ccRate,
-      if (pricingProfileId != null)
-        'pricing_profile_id': pricingProfileId,
+      if (pricingProfileId != null) 'pricing_profile_id': pricingProfileId,
       if (defaultRoomType != null) 'default_room_type': defaultRoomType,
       if (defaultLevel != null) 'default_level': defaultLevel,
       if (defaultSize != null) 'default_size': defaultSize,
@@ -3303,8 +3299,9 @@ class OrgSettingsRow extends DataClass implements Insertable<OrgSettingsRow> {
     map['tax_rate'] = Variable<double>(taxRate);
     map['cc_enabled'] = Variable<bool>(ccEnabled);
     map['cc_rate'] = Variable<double>(ccRate);
-    map['default_pricing_profile_id'] =
-        Variable<String>(defaultPricingProfileId);
+    map['default_pricing_profile_id'] = Variable<String>(
+      defaultPricingProfileId,
+    );
     return map;
   }
 
@@ -3560,8 +3557,9 @@ class OrgSettingsTableCompanion extends UpdateCompanion<OrgSettingsRow> {
       map['cc_rate'] = Variable<double>(ccRate.value);
     }
     if (defaultPricingProfileId.present) {
-      map['default_pricing_profile_id'] =
-          Variable<String>(defaultPricingProfileId.value);
+      map['default_pricing_profile_id'] = Variable<String>(
+        defaultPricingProfileId.value,
+      );
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -3587,8 +3585,7 @@ class OrgSettingsTableCompanion extends UpdateCompanion<OrgSettingsRow> {
   }
 }
 
-class $PricingProfilesTable
-    extends PricingProfiles
+class $PricingProfilesTable extends PricingProfiles
     with TableInfo<$PricingProfilesTable, PricingProfileRow> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -3737,10 +3734,7 @@ class $PricingProfilesTable
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
-      context.handle(
-        _idMeta,
-        id.isAcceptableOrUnknown(data['id']!, _idMeta),
-      );
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -4193,10 +4187,12 @@ class PricingProfilesCompanion extends UpdateCompanion<PricingProfileRow> {
   }
 }
 
-class $PricingProfileServiceTypesTable
-    extends PricingProfileServiceTypes
+class $PricingProfileServiceTypesTable extends PricingProfileServiceTypes
     with
-        TableInfo<$PricingProfileServiceTypesTable, PricingProfileServiceTypeRow> {
+        TableInfo<
+          $PricingProfileServiceTypesTable,
+          PricingProfileServiceTypeRow
+        > {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -4352,10 +4348,7 @@ class $PricingProfileServiceTypesTable
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
-      context.handle(
-        _idMeta,
-        id.isAcceptableOrUnknown(data['id']!, _idMeta),
-      );
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -4631,15 +4624,18 @@ class PricingProfileServiceTypeRow extends DataClass
       profileId: data.profileId.present ? data.profileId.value : this.profileId,
       row: data.row.present ? data.row.value : this.row,
       category: data.category.present ? data.category.value : this.category,
-      serviceType:
-          data.serviceType.present ? data.serviceType.value : this.serviceType,
-      description:
-          data.description.present ? data.description.value : this.description,
+      serviceType: data.serviceType.present
+          ? data.serviceType.value
+          : this.serviceType,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       pricePerSqFt: data.pricePerSqFt.present
           ? data.pricePerSqFt.value
           : this.pricePerSqFt,
-      multiplier:
-          data.multiplier.present ? data.multiplier.value : this.multiplier,
+      multiplier: data.multiplier.present
+          ? data.multiplier.value
+          : this.multiplier,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
@@ -4862,8 +4858,7 @@ class PricingProfileServiceTypesCompanion
   }
 }
 
-class $PricingProfileFrequenciesTable
-    extends PricingProfileFrequencies
+class $PricingProfileFrequenciesTable extends PricingProfileFrequencies
     with
         TableInfo<$PricingProfileFrequenciesTable, PricingProfileFrequencyRow> {
   @override
@@ -4983,10 +4978,7 @@ class $PricingProfileFrequenciesTable
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
-      context.handle(
-        _idMeta,
-        id.isAcceptableOrUnknown(data['id']!, _idMeta),
-      );
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -5020,10 +5012,7 @@ class $PricingProfileFrequenciesTable
     if (data.containsKey('frequency')) {
       context.handle(
         _frequencyMeta,
-        frequency.isAcceptableOrUnknown(
-          data['frequency']!,
-          _frequencyMeta,
-        ),
+        frequency.isAcceptableOrUnknown(data['frequency']!, _frequencyMeta),
       );
     } else if (isInserting) {
       context.missing(_frequencyMeta);
@@ -5205,11 +5194,13 @@ class PricingProfileFrequencyRow extends DataClass
       id: data.id.present ? data.id.value : this.id,
       orgId: data.orgId.present ? data.orgId.value : this.orgId,
       profileId: data.profileId.present ? data.profileId.value : this.profileId,
-      serviceType:
-          data.serviceType.present ? data.serviceType.value : this.serviceType,
+      serviceType: data.serviceType.present
+          ? data.serviceType.value
+          : this.serviceType,
       frequency: data.frequency.present ? data.frequency.value : this.frequency,
-      multiplier:
-          data.multiplier.present ? data.multiplier.value : this.multiplier,
+      multiplier: data.multiplier.present
+          ? data.multiplier.value
+          : this.multiplier,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
@@ -5391,8 +5382,7 @@ class PricingProfileFrequenciesCompanion
   }
 }
 
-class $PricingProfileRoomTypesTable
-    extends PricingProfileRoomTypes
+class $PricingProfileRoomTypesTable extends PricingProfileRoomTypes
     with TableInfo<$PricingProfileRoomTypesTable, PricingProfileRoomTypeRow> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -5549,10 +5539,7 @@ class $PricingProfileRoomTypesTable
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
-      context.handle(
-        _idMeta,
-        id.isAcceptableOrUnknown(data['id']!, _idMeta),
-      );
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -5610,10 +5597,7 @@ class $PricingProfileRoomTypesTable
     if (data.containsKey('square_feet')) {
       context.handle(
         _squareFeetMeta,
-        squareFeet.isAcceptableOrUnknown(
-          data['square_feet']!,
-          _squareFeetMeta,
-        ),
+        squareFeet.isAcceptableOrUnknown(data['square_feet']!, _squareFeetMeta),
       );
     }
     if (data.containsKey('updated_at')) {
@@ -5826,11 +5810,13 @@ class PricingProfileRoomTypeRow extends DataClass
       row: data.row.present ? data.row.value : this.row,
       category: data.category.present ? data.category.value : this.category,
       roomType: data.roomType.present ? data.roomType.value : this.roomType,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       minutes: data.minutes.present ? data.minutes.value : this.minutes,
-      squareFeet:
-          data.squareFeet.present ? data.squareFeet.value : this.squareFeet,
+      squareFeet: data.squareFeet.present
+          ? data.squareFeet.value
+          : this.squareFeet,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
@@ -6053,8 +6039,7 @@ class PricingProfileRoomTypesCompanion
   }
 }
 
-class $PricingProfileSubItemsTable
-    extends PricingProfileSubItems
+class $PricingProfileSubItemsTable extends PricingProfileSubItems
     with TableInfo<$PricingProfileSubItemsTable, PricingProfileSubItemRow> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -6187,10 +6172,7 @@ class $PricingProfileSubItemsTable
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
-      context.handle(
-        _idMeta,
-        id.isAcceptableOrUnknown(data['id']!, _idMeta),
-      );
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -6424,8 +6406,9 @@ class PricingProfileSubItemRow extends DataClass
       profileId: data.profileId.present ? data.profileId.value : this.profileId,
       category: data.category.present ? data.category.value : this.category,
       subItem: data.subItem.present ? data.subItem.value : this.subItem,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       minutes: data.minutes.present ? data.minutes.value : this.minutes,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deleted: data.deleted.present ? data.deleted.value : this.deleted,
@@ -6621,8 +6604,7 @@ class PricingProfileSubItemsCompanion
   }
 }
 
-class $PricingProfileSizesTable
-    extends PricingProfileSizes
+class $PricingProfileSizesTable extends PricingProfileSizes
     with TableInfo<$PricingProfileSizesTable, PricingProfileSizeRow> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -6740,10 +6722,7 @@ class $PricingProfileSizesTable
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
-      context.handle(
-        _idMeta,
-        id.isAcceptableOrUnknown(data['id']!, _idMeta),
-      );
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -6780,10 +6759,7 @@ class $PricingProfileSizesTable
     if (data.containsKey('definition')) {
       context.handle(
         _definitionMeta,
-        definition.isAcceptableOrUnknown(
-          data['definition']!,
-          _definitionMeta,
-        ),
+        definition.isAcceptableOrUnknown(data['definition']!, _definitionMeta),
       );
     }
     if (data.containsKey('updated_at')) {
@@ -6806,10 +6782,7 @@ class $PricingProfileSizesTable
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  PricingProfileSizeRow map(
-    Map<String, dynamic> data, {
-    String? tablePrefix,
-  }) {
+  PricingProfileSizeRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return PricingProfileSizeRow(
       id: attachedDatabase.typeMapping.read(
@@ -6950,18 +6923,18 @@ class PricingProfileSizeRow extends DataClass
     updatedAt: updatedAt ?? this.updatedAt,
     deleted: deleted ?? this.deleted,
   );
-  PricingProfileSizeRow copyWithCompanion(
-    PricingProfileSizesCompanion data,
-  ) {
+  PricingProfileSizeRow copyWithCompanion(PricingProfileSizesCompanion data) {
     return PricingProfileSizeRow(
       id: data.id.present ? data.id.value : this.id,
       orgId: data.orgId.present ? data.orgId.value : this.orgId,
       profileId: data.profileId.present ? data.profileId.value : this.profileId,
       size: data.size.present ? data.size.value : this.size,
-      multiplier:
-          data.multiplier.present ? data.multiplier.value : this.multiplier,
-      definition:
-          data.definition.present ? data.definition.value : this.definition,
+      multiplier: data.multiplier.present
+          ? data.multiplier.value
+          : this.multiplier,
+      definition: data.definition.present
+          ? data.definition.value
+          : this.definition,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
@@ -7142,8 +7115,7 @@ class PricingProfileSizesCompanion
   }
 }
 
-class $PricingProfileComplexitiesTable
-    extends PricingProfileComplexities
+class $PricingProfileComplexitiesTable extends PricingProfileComplexities
     with
         TableInfo<
           $PricingProfileComplexitiesTable,
@@ -7265,10 +7237,7 @@ class $PricingProfileComplexitiesTable
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
-      context.handle(
-        _idMeta,
-        id.isAcceptableOrUnknown(data['id']!, _idMeta),
-      );
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -7305,10 +7274,7 @@ class $PricingProfileComplexitiesTable
     if (data.containsKey('definition')) {
       context.handle(
         _definitionMeta,
-        definition.isAcceptableOrUnknown(
-          data['definition']!,
-          _definitionMeta,
-        ),
+        definition.isAcceptableOrUnknown(data['definition']!, _definitionMeta),
       );
     }
     if (data.containsKey('updated_at')) {
@@ -7483,10 +7449,12 @@ class PricingProfileComplexityRow extends DataClass
       orgId: data.orgId.present ? data.orgId.value : this.orgId,
       profileId: data.profileId.present ? data.profileId.value : this.profileId,
       level: data.level.present ? data.level.value : this.level,
-      multiplier:
-          data.multiplier.present ? data.multiplier.value : this.multiplier,
-      definition:
-          data.definition.present ? data.definition.value : this.definition,
+      multiplier: data.multiplier.present
+          ? data.multiplier.value
+          : this.multiplier,
+      definition: data.definition.present
+          ? data.definition.value
+          : this.definition,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deleted: data.deleted.present ? data.deleted.value : this.deleted,
     );
@@ -8799,7 +8767,7 @@ class FinalizedDocumentRow extends DataClass
     map['status'] = Variable<String>(status);
     map['local_path'] = Variable<String>(localPath);
     if (!nullToAbsent || remotePath != null) {
-      map['remote_path'] = Variable<String?>(remotePath);
+      map['remote_path'] = Variable<String>(remotePath!);
     }
     map['quote_snapshot'] = Variable<String>(quoteSnapshot);
     map['pricing_snapshot'] = Variable<String>(pricingSnapshot);
@@ -8904,9 +8872,7 @@ class FinalizedDocumentRow extends DataClass
       updatedAt: data.updatedAt.present ? data.updatedAt.value : updatedAt,
       status: data.status.present ? data.status.value : status,
       localPath: data.localPath.present ? data.localPath.value : localPath,
-      remotePath: data.remotePath.present
-          ? data.remotePath.value
-          : remotePath,
+      remotePath: data.remotePath.present ? data.remotePath.value : remotePath,
       quoteSnapshot: data.quoteSnapshot.present
           ? data.quoteSnapshot.value
           : quoteSnapshot,
@@ -9118,7 +9084,10 @@ class FinalizedDocumentsCompanion
       map['local_path'] = Variable<String>(localPath.value);
     }
     if (remotePath.present) {
-      map['remote_path'] = Variable<String?>(remotePath.value);
+      final v = remotePath.value;
+      if (v != null) {
+        map['remote_path'] = Variable<String>(v);
+      }
     }
     if (quoteSnapshot.present) {
       map['quote_snapshot'] = Variable<String>(quoteSnapshot.value);

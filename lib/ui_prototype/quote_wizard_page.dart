@@ -26,7 +26,7 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
   String lastProClean = '> 1 month';
   bool _isCreatingQuote = false;
   Client? _selectedClient;
-  List<_ServiceTypeStandard> _serviceTypeStandards = const [];
+  List<ServiceTypeStandard> _serviceTypeStandards = const [];
   List<String> _serviceTypeOptions = const [
     'Standard Clean',
     'Deep Clean',
@@ -85,13 +85,13 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
       final serviceTypes = profileId == 'default'
           ? await _loadList(
               'assets/settings/service_type_standards.json',
-              _ServiceTypeStandard.fromJson,
+              ServiceTypeStandard.fromJson,
             )
           : await _loadProfileServiceTypes(profileId);
       final frequencies = profileId == 'default'
           ? await _loadList(
               'assets/settings/frequency_standards.json',
-              _FrequencyStandard.fromJson,
+              FrequencyStandard.fromJson,
             )
           : await _loadProfileFrequencies(profileId);
 
@@ -132,13 +132,13 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
     }
   }
 
-  Future<List<_ServiceTypeStandard>> _loadProfileServiceTypes(
+  Future<List<ServiceTypeStandard>> _loadProfileServiceTypes(
     String profileId,
   ) async {
     final catalog = await _pricingCatalogRepo.loadCatalog(profileId);
     return catalog.serviceTypes
         .map(
-          (row) => _ServiceTypeStandard(
+          (row) => ServiceTypeStandard(
             row: row.row,
             category: row.category,
             serviceType: row.serviceType,
@@ -150,13 +150,13 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
         .toList();
   }
 
-  Future<List<_FrequencyStandard>> _loadProfileFrequencies(
+  Future<List<FrequencyStandard>> _loadProfileFrequencies(
     String profileId,
   ) async {
     final catalog = await _pricingCatalogRepo.loadCatalog(profileId);
     return catalog.frequencies
         .map(
-          (row) => _FrequencyStandard(
+          (row) => FrequencyStandard(
             serviceType: row.serviceType,
             multiplier: row.multiplier,
             frequency: row.frequency,

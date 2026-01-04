@@ -55,34 +55,33 @@ class _QuoteItem {
     bool? include,
     String? notes,
     String? roomAssignment,
-  }) =>
-      _QuoteItem(
-        type ?? this.type,
-        level ?? this.level,
-        title ?? this.title,
-        size ?? this.size,
-        complexity ?? this.complexity,
-        estSqFt ?? this.estSqFt,
-        minutes ?? this.minutes,
-        qty ?? this.qty,
-        include ?? this.include,
-        notes ?? this.notes,
-        roomAssignment ?? this.roomAssignment,
-      );
+  }) => _QuoteItem(
+    type ?? this.type,
+    level ?? this.level,
+    title ?? this.title,
+    size ?? this.size,
+    complexity ?? this.complexity,
+    estSqFt ?? this.estSqFt,
+    minutes ?? this.minutes,
+    qty ?? this.qty,
+    include ?? this.include,
+    notes ?? this.notes,
+    roomAssignment ?? this.roomAssignment,
+  );
 
   Map<String, dynamic> toMap() => {
-        'type': type,
-        'level': level,
-        'title': title,
-        'size': size,
-        'complexity': complexity,
-        'estSqFt': estSqFt,
-        'minutes': minutes,
-        'qty': qty,
-        'include': include,
-        'notes': notes,
-        'roomAssignment': roomAssignment,
-      };
+    'type': type,
+    'level': level,
+    'title': title,
+    'size': size,
+    'complexity': complexity,
+    'estSqFt': estSqFt,
+    'minutes': minutes,
+    'qty': qty,
+    'include': include,
+    'notes': notes,
+    'roomAssignment': roomAssignment,
+  };
 }
 
 class _Totals {
@@ -124,10 +123,10 @@ class _QuoteSettingsData {
     );
   }
 
-  final List<_ServiceTypeStandard> serviceTypes;
-  final List<_FrequencyStandard> frequencies;
-  final List<_RoomTypeStandard> roomTypes;
-  final List<_SubItemStandard> subItems;
-  final List<_SizeStandard> sizes;
-  final List<_ComplexityStandard> complexities;
+  final List<ServiceTypeStandard> serviceTypes;
+  final List<FrequencyStandard> frequencies;
+  final List<RoomTypeStandard> roomTypes;
+  final List<SubItemStandard> subItems;
+  final List<SizeStandard> sizes;
+  final List<ComplexityStandard> complexities;
 }

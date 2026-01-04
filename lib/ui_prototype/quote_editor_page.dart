@@ -31,17 +31,17 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   late Future<_QuoteSettingsData> _settingsFuture;
   bool _settingsFutureReady = false;
   @override
-  List<_ServiceTypeStandard> _serviceTypeStandards = const [];
+  List<ServiceTypeStandard> _serviceTypeStandards = const [];
   @override
-  List<_FrequencyStandard> _frequencyStandards = const [];
+  List<FrequencyStandard> _frequencyStandards = const [];
   @override
-  List<_RoomTypeStandard> _roomTypeStandards = const [];
+  List<RoomTypeStandard> _roomTypeStandards = const [];
   @override
-  List<_SubItemStandard> _subItemStandards = const [];
+  List<SubItemStandard> _subItemStandards = const [];
   @override
-  List<_SizeStandard> _sizeStandards = const [];
+  List<SizeStandard> _sizeStandards = const [];
   @override
-  List<_ComplexityStandard> _complexityStandards = const [];
+  List<ComplexityStandard> _complexityStandards = const [];
 
   // Defaults (generic app defaults; later pulled from org settings)
   @override
@@ -367,9 +367,7 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   }
 
   @override
-  Future<void> _generateFinalizedDocument(
-    FinalizedDocumentType docType,
-  ) async {
+  Future<void> _generateFinalizedDocument(FinalizedDocumentType docType) async {
     if (_isGeneratingDocument) {
       return;
     }

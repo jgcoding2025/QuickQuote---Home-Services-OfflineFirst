@@ -3,23 +3,23 @@ part of '../ui_prototype.dart';
 mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   Future<_QuoteSettingsData> get _settingsFuture;
 
-  List<_ServiceTypeStandard> get _serviceTypeStandards;
-  set _serviceTypeStandards(List<_ServiceTypeStandard> value);
+  List<ServiceTypeStandard> get _serviceTypeStandards;
+  set _serviceTypeStandards(List<ServiceTypeStandard> value);
 
-  List<_FrequencyStandard> get _frequencyStandards;
-  set _frequencyStandards(List<_FrequencyStandard> value);
+  List<FrequencyStandard> get _frequencyStandards;
+  set _frequencyStandards(List<FrequencyStandard> value);
 
-  List<_RoomTypeStandard> get _roomTypeStandards;
-  set _roomTypeStandards(List<_RoomTypeStandard> value);
+  List<RoomTypeStandard> get _roomTypeStandards;
+  set _roomTypeStandards(List<RoomTypeStandard> value);
 
-  List<_SubItemStandard> get _subItemStandards;
-  set _subItemStandards(List<_SubItemStandard> value);
+  List<SubItemStandard> get _subItemStandards;
+  set _subItemStandards(List<SubItemStandard> value);
 
-  List<_SizeStandard> get _sizeStandards;
-  set _sizeStandards(List<_SizeStandard> value);
+  List<SizeStandard> get _sizeStandards;
+  set _sizeStandards(List<SizeStandard> value);
 
-  List<_ComplexityStandard> get _complexityStandards;
-  set _complexityStandards(List<_ComplexityStandard> value);
+  List<ComplexityStandard> get _complexityStandards;
+  set _complexityStandards(List<ComplexityStandard> value);
 
   bool get _isDirty;
   set _isDirty(bool value);
@@ -156,15 +156,15 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   void _syncEstimatedSqFt();
 
   List<DropdownMenuItem<String>> _roomTypeMenuItems(
-    List<_RoomTypeStandard> roomTypes,
+    List<RoomTypeStandard> roomTypes,
     List<String> fallbackOptions,
   );
   List<DropdownMenuItem<String>> _subItemMenuItems(
-    List<_SubItemStandard> subItems,
+    List<SubItemStandard> subItems,
     List<String> fallbackOptions,
   );
-  String _subItemLabel(_SubItemStandard item);
-  String? _subItemLabelFor(String name, List<_SubItemStandard> subItems);
+  String _subItemLabel(SubItemStandard item);
+  String? _subItemLabelFor(String name, List<SubItemStandard> subItems);
 
   Widget _buildCustomerDetailsSection();
   Widget _buildQuoteDetailsSection({
@@ -186,7 +186,7 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
     required List<DropdownMenuItem<String>> subItemMenuItems,
     required List<String> sizeOptions,
     required List<String> complexityOptions,
-    required List<_SubItemStandard> subItemStandards,
+    required List<SubItemStandard> subItemStandards,
     required List<String> roomTitles,
   });
   Widget _buildAdditionalItemsSection({
@@ -240,7 +240,7 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
     required List<String> levelOptions,
     required List<String> roomTypeOptions,
     required List<String> subItemOptions,
-    required List<_SubItemStandard> subItemStandards,
+    required List<SubItemStandard> subItemStandards,
     required List<DropdownMenuItem<String>> roomTypeMenuItems,
     required List<DropdownMenuItem<String>> subItemMenuItems,
     required List<String> sizeOptions,
@@ -265,7 +265,7 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
     required List<String> levelOptions,
     required List<String> roomTypeOptions,
     required List<String> subItemOptions,
-    required List<_SubItemStandard> subItemStandards,
+    required List<SubItemStandard> subItemStandards,
     required List<DropdownMenuItem<String>> roomTypeMenuItems,
     required List<DropdownMenuItem<String>> subItemMenuItems,
     required List<String> sizeOptions,
@@ -281,27 +281,27 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
     if (pricingProfileId == 'default') {
       final serviceTypes = await _loadList(
         'assets/settings/service_type_standards.json',
-        _ServiceTypeStandard.fromJson,
+        ServiceTypeStandard.fromJson,
       );
       final frequencies = await _loadList(
         'assets/settings/frequency_standards.json',
-        _FrequencyStandard.fromJson,
+        FrequencyStandard.fromJson,
       );
       final roomTypes = await _loadList(
         'assets/settings/room_type_standards.json',
-        _RoomTypeStandard.fromJson,
+        RoomTypeStandard.fromJson,
       );
       final subItems = await _loadList(
         'assets/settings/sub_item_standards.json',
-        _SubItemStandard.fromJson,
+        SubItemStandard.fromJson,
       );
       final sizes = await _loadList(
         'assets/settings/size_standards.json',
-        _SizeStandard.fromJson,
+        SizeStandard.fromJson,
       );
       final complexities = await _loadList(
         'assets/settings/complexity_standards.json',
-        _ComplexityStandard.fromJson,
+        ComplexityStandard.fromJson,
       );
 
       return _QuoteSettingsData(
@@ -314,14 +314,13 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
       );
     }
 
-    final repo =
-        AppDependencies.of(context).pricingProfileCatalogRepository;
+    final repo = AppDependencies.of(context).pricingProfileCatalogRepository;
     final catalog = await repo.loadCatalog(pricingProfileId);
 
     return _QuoteSettingsData(
       serviceTypes: catalog.serviceTypes
           .map(
-            (row) => _ServiceTypeStandard(
+            (row) => ServiceTypeStandard(
               row: row.row,
               category: row.category,
               serviceType: row.serviceType,
@@ -333,7 +332,7 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
           .toList(),
       frequencies: catalog.frequencies
           .map(
-            (row) => _FrequencyStandard(
+            (row) => FrequencyStandard(
               serviceType: row.serviceType,
               multiplier: row.multiplier,
               frequency: row.frequency,
@@ -342,7 +341,7 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
           .toList(),
       roomTypes: catalog.roomTypes
           .map(
-            (row) => _RoomTypeStandard(
+            (row) => RoomTypeStandard(
               row: row.row,
               category: row.category,
               roomType: row.roomType,
@@ -354,7 +353,7 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
           .toList(),
       subItems: catalog.subItems
           .map(
-            (row) => _SubItemStandard(
+            (row) => SubItemStandard(
               category: row.category,
               subItem: row.subItem,
               description: row.description,
@@ -364,7 +363,7 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
           .toList(),
       sizes: catalog.sizes
           .map(
-            (row) => _SizeStandard(
+            (row) => SizeStandard(
               size: row.size,
               multiplier: row.multiplier,
               definition: row.definition,
@@ -373,7 +372,7 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
           .toList(),
       complexities: catalog.complexities
           .map(
-            (row) => _ComplexityStandard(
+            (row) => ComplexityStandard(
               level: row.level,
               multiplier: row.multiplier,
               definition: row.definition,
@@ -407,7 +406,7 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
     });
   }
 
-  _ServiceTypeStandard? _serviceTypeStandardFor(String value) {
+  ServiceTypeStandard? _serviceTypeStandardFor(String value) {
     for (final standard in _serviceTypeStandards) {
       if (standard.serviceType == value) {
         return standard;
@@ -536,8 +535,9 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
       ccEnabled = quote.ccEnabled;
       taxRate = quote.taxRate;
       ccRate = quote.ccRate;
-      pricingProfileId =
-          quote.pricingProfileId.isEmpty ? 'default' : quote.pricingProfileId;
+      pricingProfileId = quote.pricingProfileId.isEmpty
+          ? 'default'
+          : quote.pricingProfileId;
       if (quote.defaultRoomType.isNotEmpty) {
         defaultRoomType = quote.defaultRoomType;
       }
@@ -649,10 +649,7 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
   }
 
   @override
-  Future<void> _autoSaveQuote(
-    int generation,
-    SyncService syncService,
-  ) async {
+  Future<void> _autoSaveQuote(int generation, SyncService syncService) async {
     if (!_isDirty) return;
     final draft = _buildDraft();
     final draftSnapshot = jsonEncode(draft.toMap());
@@ -709,8 +706,7 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
         .where((item) => item.type == 'Room')
         .fold<int>(
           0,
-          (runningTotal, item) =>
-              runningTotal + (item.estSqFt * item.qty),
+          (runningTotal, item) => runningTotal + (item.estSqFt * item.qty),
         );
     estimatedSqFt = total == 0 ? '' : total.toString();
   }

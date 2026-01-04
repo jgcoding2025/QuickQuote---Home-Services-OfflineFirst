@@ -1,7 +1,7 @@
 part of '../ui_prototype.dart';
 
-class _PlanTier {
-  const _PlanTier({
+class PlanTier {
+  const PlanTier({
     required this.name,
     required this.label,
     required this.color,
@@ -9,8 +9,8 @@ class _PlanTier {
     required this.description,
   });
 
-  factory _PlanTier.fromJson(Map<String, dynamic> json) {
-    return _PlanTier(
+  factory PlanTier.fromJson(Map<String, dynamic> json) {
+    return PlanTier(
       name: json['name'] as String,
       label: json['label'] as String,
       color: _parseColor(json['color'] as String),
@@ -26,8 +26,8 @@ class _PlanTier {
   final String description;
 }
 
-class _ServiceTypeStandard {
-  const _ServiceTypeStandard({
+class ServiceTypeStandard {
+  const ServiceTypeStandard({
     required this.row,
     required this.category,
     required this.serviceType,
@@ -36,8 +36,8 @@ class _ServiceTypeStandard {
     required this.multiplier,
   });
 
-  factory _ServiceTypeStandard.fromJson(Map<String, dynamic> json) {
-    return _ServiceTypeStandard(
+  factory ServiceTypeStandard.fromJson(Map<String, dynamic> json) {
+    return ServiceTypeStandard(
       row: (json['row'] as num?)?.toInt() ?? 0,
       category: (json['category'] as String?) ?? 'General',
       serviceType: json['serviceType'] as String,
@@ -55,15 +55,15 @@ class _ServiceTypeStandard {
   final double multiplier;
 }
 
-class _ComplexityStandard {
-  const _ComplexityStandard({
+class ComplexityStandard {
+  const ComplexityStandard({
     required this.level,
     required this.multiplier,
     required this.definition,
   });
 
-  factory _ComplexityStandard.fromJson(Map<String, dynamic> json) {
-    return _ComplexityStandard(
+  factory ComplexityStandard.fromJson(Map<String, dynamic> json) {
+    return ComplexityStandard(
       level: json['level'] as String,
       multiplier: (json['multiplier'] as num).toDouble(),
       definition: json['definition'] as String,
@@ -75,15 +75,15 @@ class _ComplexityStandard {
   final String definition;
 }
 
-class _SizeStandard {
-  const _SizeStandard({
+class SizeStandard {
+  const SizeStandard({
     required this.size,
     required this.multiplier,
     required this.definition,
   });
 
-  factory _SizeStandard.fromJson(Map<String, dynamic> json) {
-    return _SizeStandard(
+  factory SizeStandard.fromJson(Map<String, dynamic> json) {
+    return SizeStandard(
       size: json['size'] as String,
       multiplier: (json['multiplier'] as num).toDouble(),
       definition: json['definition'] as String,
@@ -95,15 +95,15 @@ class _SizeStandard {
   final String definition;
 }
 
-class _FrequencyStandard {
-  const _FrequencyStandard({
+class FrequencyStandard {
+  const FrequencyStandard({
     required this.serviceType,
     required this.multiplier,
     required this.frequency,
   });
 
-  factory _FrequencyStandard.fromJson(Map<String, dynamic> json) {
-    return _FrequencyStandard(
+  factory FrequencyStandard.fromJson(Map<String, dynamic> json) {
+    return FrequencyStandard(
       serviceType: json['serviceType'] as String,
       multiplier: (json['multiplier'] as num).toDouble(),
       frequency: json['frequency'] as String,
@@ -115,8 +115,8 @@ class _FrequencyStandard {
   final String frequency;
 }
 
-class _RoomTypeStandard {
-  const _RoomTypeStandard({
+class RoomTypeStandard {
+  const RoomTypeStandard({
     required this.row,
     required this.category,
     required this.roomType,
@@ -125,8 +125,8 @@ class _RoomTypeStandard {
     required this.squareFeet,
   });
 
-  factory _RoomTypeStandard.fromJson(Map<String, dynamic> json) {
-    return _RoomTypeStandard(
+  factory RoomTypeStandard.fromJson(Map<String, dynamic> json) {
+    return RoomTypeStandard(
       row: (json['row'] as num?)?.toInt() ?? 0,
       category: (json['category'] as String?) ?? 'General',
       roomType: json['roomType'] as String,
@@ -144,16 +144,16 @@ class _RoomTypeStandard {
   final int squareFeet;
 }
 
-class _SubItemStandard {
-  const _SubItemStandard({
+class SubItemStandard {
+  const SubItemStandard({
     required this.category,
     required this.subItem,
     required this.description,
     required this.minutes,
   });
 
-  factory _SubItemStandard.fromJson(Map<String, dynamic> json) {
-    return _SubItemStandard(
+  factory SubItemStandard.fromJson(Map<String, dynamic> json) {
+    return SubItemStandard(
       category: (json['category'] as String?) ?? 'General',
       subItem: json['subItem'] as String,
       description: (json['description'] as String?) ?? '',
@@ -190,13 +190,13 @@ class SettingsData {
     );
   }
 
-  final List<_PlanTier> planTiers;
-  final List<_ServiceTypeStandard> serviceTypes;
-  final List<_ComplexityStandard> complexities;
-  final List<_SizeStandard> sizes;
-  final List<_FrequencyStandard> frequencies;
-  final List<_RoomTypeStandard> roomTypes;
-  final List<_SubItemStandard> subItems;
+  final List<PlanTier> planTiers;
+  final List<ServiceTypeStandard> serviceTypes;
+  final List<ComplexityStandard> complexities;
+  final List<SizeStandard> sizes;
+  final List<FrequencyStandard> frequencies;
+  final List<RoomTypeStandard> roomTypes;
+  final List<SubItemStandard> subItems;
 }
 
 Color _parseColor(String value) {
