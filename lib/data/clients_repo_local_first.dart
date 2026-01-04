@@ -59,7 +59,7 @@ class ClientsRepositoryLocalFirst {
 
   Stream<Client?> watchClientById(String clientId) async* {
     final controller = StreamController<Client?>();
-    StreamSubscription<ClientRow?>? dataSub;
+    StreamSubscription<Client?>? dataSub;
 
     void listenSession(AppSession? session) {
       dataSub?.cancel();
