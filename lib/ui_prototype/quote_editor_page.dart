@@ -153,51 +153,7 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
     });
   }
 
-  void _syncFromQuote(Quote quote) {
-    quoteName = quote.quoteName;
-    quoteDate = quote.quoteDate.isEmpty ? _today() : quote.quoteDate;
-    customerName = quote.clientName;
-    serviceType = quote.serviceType;
-    frequency = quote.frequency;
-    lastProClean = quote.lastProClean;
-    status = quote.status;
-    address = quote.address;
-    totalSqFt = quote.totalSqFt;
-    useTotalSqFt = quote.useTotalSqFt;
-    estimatedSqFt = quote.estimatedSqFt;
-    petsPresent = quote.petsPresent;
-    homeOccupied = quote.homeOccupied;
-    entryCode = quote.entryCode;
-    paymentMethod = quote.paymentMethod;
-    feedbackDiscussed = quote.feedbackDiscussed;
-    laborRate = quote.laborRate;
-    taxEnabled = quote.taxEnabled;
-    ccEnabled = quote.ccEnabled;
-    taxRate = quote.taxRate;
-    ccRate = quote.ccRate;
-    if (quote.defaultRoomType.isNotEmpty) {
-      defaultRoomType = quote.defaultRoomType;
-    }
-    if (quote.defaultLevel.isNotEmpty) {
-      defaultLevel = quote.defaultLevel;
-    }
-    if (quote.defaultSize.isNotEmpty) {
-      defaultSize = quote.defaultSize;
-    }
-    if (quote.defaultComplexity.isNotEmpty) {
-      defaultComplexity = quote.defaultComplexity;
-    }
-    if (quote.subItemType.isNotEmpty) {
-      subItemType = quote.subItemType;
-    }
-    specialNotes = quote.specialNotes;
-    items
-      ..clear()
-      ..addAll(quote.items.map((item) => _QuoteItem.fromMap(item)));
-  }
-
   void _applyRemoteQuote(Quote quote) {
-    _applyingRemote = true;
     setState(() {
       _syncFromQuote(quote);
       _isDirty = false;
@@ -205,7 +161,6 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
       _pendingRemoteQuote = null;
       _remoteRevision += 1;
     });
-    _applyingRemote = false;
   }
 
   @override

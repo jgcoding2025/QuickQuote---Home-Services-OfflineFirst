@@ -121,13 +121,11 @@ class _ClientEditorPageState extends State<ClientEditorPage>
   }
 
   void _applyRemoteClient(Client client) {
-    _applyingRemote = true;
-    _load(client, notify: false);
+    _load(client, notify: false, applyingRemote: true);
     setState(() {
       _hasRemoteUpdate = false;
       _pendingRemoteClient = null;
     });
-    _applyingRemote = false;
   }
 
   void _refreshFromRemote() {
