@@ -209,12 +209,10 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   });
   Widget _buildActionButtons();
 
-  // ignore: unused_element_parameter
   Widget _sectionCard(
     BuildContext context,
     String title,
     Widget child, {
-    // ignore: unused_element_parameter
     bool initiallyExpanded,
     bool isComplete,
   });

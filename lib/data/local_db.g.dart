@@ -2,7 +2,6 @@
 
 part of 'local_db.dart';
 
-// ignore_for_file: type=lint
 class $ClientsTable extends Clients with TableInfo<$ClientsTable, ClientRow> {
   @override
   final GeneratedDatabase attachedDatabase;

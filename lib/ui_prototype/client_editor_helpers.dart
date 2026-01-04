@@ -21,7 +21,6 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
   );
   int _autoSaveGeneration = 0;
 
-  // ignore: unused_element
   bool get _allowPopOnce;
   set _allowPopOnce(bool value);
 
@@ -50,11 +49,7 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
     }
   }
 
-  void _load(
-    Client? c, {
-    bool notify = true,
-    bool applyingRemote = false,
-  }) {
+  void _load(Client? c, {bool notify = true, bool applyingRemote = false}) {
     if (applyingRemote) {
       _applyingRemote = true;
     }
@@ -225,10 +220,7 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
 
   List<Widget> _buildClientDetailsForm() {
     return [
-      Text(
-        'Client Details',
-        style: Theme.of(context).textTheme.titleLarge,
-      ),
+      Text('Client Details', style: Theme.of(context).textTheme.titleLarge),
       const SizedBox(height: 12),
       _field('First Name', firstName),
       _field('Last Name', lastName),
@@ -245,20 +237,14 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
       _field('Zip Code', zip),
       const SizedBox(height: 12),
       _field('Phone Number', phone, keyboard: TextInputType.phone),
-      _field(
-        'Email Address',
-        email,
-        keyboard: TextInputType.emailAddress,
-      ),
+      _field('Email Address', email, keyboard: TextInputType.emailAddress),
       const SizedBox(height: 12),
       TextField(
         controller: notes,
         maxLines: 4,
         decoration: InputDecoration(
           labelText: 'Notes',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
         ),
       ),
     ];
@@ -378,8 +364,7 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
                               content: Text('Delete "${q.quoteName}"?'),
                               actions: [
                                 TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(ctx, false),
+                                  onPressed: () => Navigator.pop(ctx, false),
                                   child: const Text('Cancel'),
                                 ),
                                 FilledButton(
@@ -434,11 +419,11 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
                           action: SnackBarAction(
                             label: 'UNDO',
                             onPressed: () {
-                              quotesRepo
-                                  .restoreQuote(q.id, backup)
-                                  .catchError((e) {
-                                    debugPrint('Undo failed: $e');
-                                  });
+                              quotesRepo.restoreQuote(q.id, backup).catchError((
+                                e,
+                              ) {
+                                debugPrint('Undo failed: $e');
+                              });
                             },
                           ),
                         ),
@@ -489,11 +474,11 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
             onPressed: !isExisting
                 ? null
                 : () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            QuoteWizardPage(initialClientId: clientId),
-                      ),
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          QuoteWizardPage(initialClientId: clientId),
                     ),
+                  ),
             child: const Text('New Quote'),
           ),
         ),
