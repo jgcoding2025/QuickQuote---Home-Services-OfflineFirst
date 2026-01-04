@@ -389,6 +389,26 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
   Widget _buildActionButtons() {
     return Column(
       children: [
+        FilledButton.icon(
+          onPressed: _isGeneratingDocument
+              ? null
+              : () => _generateFinalizedDocument(
+                    FinalizedDocumentType.quote,
+                  ),
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+          label: const Text('Generate Quote PDF'),
+        ),
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          onPressed: _isGeneratingDocument
+              ? null
+              : () => _generateFinalizedDocument(
+                    FinalizedDocumentType.invoice,
+                  ),
+          icon: const Icon(Icons.receipt_long),
+          label: const Text('Generate Invoice PDF'),
+        ),
+        const SizedBox(height: 12),
         OutlinedButton.icon(
           onPressed: _saveQuote,
           icon: const Icon(Icons.save_outlined),

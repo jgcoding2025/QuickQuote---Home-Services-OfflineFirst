@@ -240,6 +240,7 @@ class SyncService {
     await _downloadQuotes(orgId);
     await _downloadOrgSettings(orgId);
     await _downloadPricingProfiles(orgId);
+    await _downloadFinalizedDocuments(orgId);
   }
 
   Future<void> _downloadClients(String orgId) async {
@@ -377,6 +378,67 @@ class SyncService {
       await _replaceQuoteItems(orgId, doc.id, items, updatedAt);
     }
     await _db.setSyncState('quote', orgId, maxUpdatedAt);
+  }
+
+  Future<void> _downloadFinalizedDocuments(String orgId) async {
+    final lastSync = await _db.getLastSync('finalized_document', orgId);
+    final snap = await FirebaseFirestore.instance
+        .collection('orgs')
+        .doc(orgId)
+        .collection('finalizedDocuments')
+        .where('updatedAt', isGreaterThan: lastSync)
+        .get();
+    var maxUpdatedAt = lastSync;
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final updatedAt = (data['updatedAt'] as int?) ?? 0;
+      final hasPending = await _hasPendingOutbox(
+        entityType: 'finalized_document',
+        entityId: doc.id,
+        orgId: orgId,
+      );
+      if (hasPending) {
+        continue;
+      }
+      if (updatedAt > maxUpdatedAt) {
+        maxUpdatedAt = updatedAt;
+      }
+      final existing =
+          await (_db.select(_db.finalizedDocuments)
+                ..where((tbl) => tbl.id.equals(doc.id))
+                ..limit(1))
+              .getSingleOrNull();
+      if (existing != null && existing.updatedAt >= updatedAt) {
+        continue;
+      }
+      await _db.into(_db.finalizedDocuments).insertOnConflictUpdate(
+            FinalizedDocumentsCompanion(
+              id: Value(doc.id),
+              orgId: Value(orgId),
+              quoteId: Value(_string(data['quoteId'])),
+              docType: Value(_string(data['docType'])),
+              createdAt: Value((data['createdAt'] as int?) ?? updatedAt),
+              updatedAt: Value(updatedAt),
+              status: Value(_string(data['status'])),
+              localPath: Value(_string(data['localPath'])),
+              remotePath: Value(
+                _string(data['remotePath']).isEmpty
+                    ? null
+                    : _string(data['remotePath']),
+              ),
+              quoteSnapshot: Value(
+                jsonEncode(data['quoteSnapshot'] ?? const {}),
+              ),
+              pricingSnapshot: Value(
+                jsonEncode(data['pricingSnapshot'] ?? const {}),
+              ),
+              totalsSnapshot: Value(
+                jsonEncode(data['totalsSnapshot'] ?? const {}),
+              ),
+            ),
+          );
+    }
+    await _db.setSyncState('finalized_document', orgId, maxUpdatedAt);
   }
 
   Future<void> _downloadOrgSettings(String orgId) async {
@@ -1049,6 +1111,12 @@ class SyncService {
           'complexities',
           entityId,
         );
+      case 'finalized_document':
+        return firestore
+            .collection('orgs')
+            .doc(orgId)
+            .collection('finalizedDocuments')
+            .doc(entityId);
     }
     return null;
   }

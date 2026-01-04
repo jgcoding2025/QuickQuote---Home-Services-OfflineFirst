@@ -72,6 +72,8 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   );
   @override
   int _autoSaveGeneration = 0;
+  @override
+  bool _isGeneratingDocument = false;
 
   @override
   String customerName = '';
@@ -362,6 +364,86 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
       return;
     }
     _applyRemoteQuote(quote);
+  }
+
+  @override
+  Future<void> _generateFinalizedDocument(
+    FinalizedDocumentType docType,
+  ) async {
+    if (_isGeneratingDocument) {
+      return;
+    }
+    final deps = AppDependencies.of(context);
+    final orgId = deps.sessionController.value?.orgId;
+    if (orgId == null) {
+      _snack(context, 'Organization not ready yet.');
+      return;
+    }
+    setState(() => _isGeneratingDocument = true);
+    try {
+      final draft = _buildDraft();
+      final quote = Quote(
+        id: widget.quote.id,
+        clientId: draft.clientId,
+        clientName: draft.clientName,
+        quoteName: draft.quoteName,
+        quoteDate: draft.quoteDate,
+        serviceType: draft.serviceType,
+        frequency: draft.frequency,
+        lastProClean: draft.lastProClean,
+        status: draft.status,
+        total: draft.total,
+        address: draft.address,
+        totalSqFt: draft.totalSqFt,
+        useTotalSqFt: draft.useTotalSqFt,
+        estimatedSqFt: draft.estimatedSqFt,
+        petsPresent: draft.petsPresent,
+        homeOccupied: draft.homeOccupied,
+        entryCode: draft.entryCode,
+        paymentMethod: draft.paymentMethod,
+        feedbackDiscussed: draft.feedbackDiscussed,
+        laborRate: draft.laborRate,
+        taxEnabled: draft.taxEnabled,
+        ccEnabled: draft.ccEnabled,
+        taxRate: draft.taxRate,
+        ccRate: draft.ccRate,
+        pricingProfileId: draft.pricingProfileId,
+        defaultRoomType: draft.defaultRoomType,
+        defaultLevel: draft.defaultLevel,
+        defaultSize: draft.defaultSize,
+        defaultComplexity: draft.defaultComplexity,
+        subItemType: draft.subItemType,
+        specialNotes: draft.specialNotes,
+        items: draft.items,
+      );
+      final document = await deps.pdfService.generateFinalizedDocument(
+        quote: quote,
+        docType: docType,
+        orgId: orgId,
+      );
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${document.title} generated.'),
+          action: SnackBarAction(
+            label: 'Open PDF',
+            onPressed: () => _openFinalizedDocument(context, document),
+          ),
+        ),
+      );
+    } catch (e, s) {
+      debugPrint('PDF generation failed: $e');
+      debugPrintStack(stackTrace: s);
+      if (mounted) {
+        _snack(context, 'Failed to generate PDF.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGeneratingDocument = false);
+      }
+    }
   }
 
   @override

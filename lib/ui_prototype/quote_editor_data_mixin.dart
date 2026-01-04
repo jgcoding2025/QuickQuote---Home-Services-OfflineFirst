@@ -36,6 +36,8 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   Debouncer get _autoSaveDebouncer;
   int get _autoSaveGeneration;
   set _autoSaveGeneration(int value);
+  bool get _isGeneratingDocument;
+  set _isGeneratingDocument(bool value);
 
   double get laborRate;
   set laborRate(double value);
@@ -141,6 +143,7 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   void _refreshFromRemote();
   void _markDirty([VoidCallback? update]);
   Future<void> _autoSaveQuote(int generation, SyncService syncService);
+  Future<void> _generateFinalizedDocument(FinalizedDocumentType docType);
 
   String _resolveOption(String current, List<String> options);
   void _syncOption(String current, String resolved, ValueSetter<String> assign);

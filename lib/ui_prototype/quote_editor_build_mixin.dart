@@ -109,12 +109,6 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Edit Quote'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.picture_as_pdf_outlined),
-              onPressed: () => _snack(context, 'Later: PDF preview/share'),
-            ),
-          ],
         ),
         body: FutureBuilder<_QuoteSettingsData>(
           future: _settingsFuture,
@@ -351,6 +345,8 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
                 ),
                 const SizedBox(height: 12),
                 _buildActionButtons(),
+                const SizedBox(height: 24),
+                FinalizedDocumentsSection(quoteId: widget.quote.id),
                 const SizedBox(height: 24),
               ],
             );

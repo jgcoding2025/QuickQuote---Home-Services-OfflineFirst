@@ -46,6 +46,8 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.41
   path: ^1.9.1
   shared_preferences: ^2.5.3
+  pdf: ^3.11.3
+  printing: ^5.14.2
 
 # dev_dependencies are dependencies that are only needed during development
 # and not included in the app itself.

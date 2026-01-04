@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:printing/printing.dart';
 
 import 'app_dependencies.dart';
 import 'data/client_models.dart';
 import 'data/clients_repo_local_first.dart';
+import 'data/finalized_document_models.dart';
 import 'data/org_settings_models.dart';
 import 'data/org_settings_repo_local_first.dart';
 import 'data/pricing_profile_catalog_repo_local_first.dart';
@@ -17,6 +21,7 @@ import 'data/quote_models.dart';
 import 'data/quotes_repo_local_first.dart';
 import 'data/session_controller.dart';
 import 'data/sync_service.dart';
+import 'pdf/pdf_service.dart';
 import 'util/debouncer.dart';
 
 part 'ui_prototype/app.dart';
@@ -39,6 +44,7 @@ part 'ui_prototype/quote_editor_items_mixin.dart';
 part 'ui_prototype/quote_editor_item_cards_mixin.dart';
 part 'ui_prototype/quote_editor_ui_helpers.dart';
 part 'ui_prototype/quote_edit_item_dialog.dart';
+part 'ui_prototype/finalized_docs_widgets.dart';
 part 'ui_prototype/settings_page.dart';
 part 'ui_prototype/settings_sections_mixin.dart';
 part 'ui_prototype/settings_pricing_profiles_mixin.dart';
