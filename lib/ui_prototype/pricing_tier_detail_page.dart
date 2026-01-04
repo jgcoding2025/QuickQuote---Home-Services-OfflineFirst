@@ -39,6 +39,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   @override
   Widget build(BuildContext context) {
     final isEditable = !widget.isDefault;
+    final syncService = AppDependencies.of(context).syncService;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.initialProfile.name),
@@ -50,6 +51,20 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
               icon: const Icon(Icons.edit),
             ),
         ],
+        bottom: kDebugMode
+            ? PreferredSize(
+                preferredSize:
+                    const Size.fromHeight(DebugSyncBanner.preferredHeight),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: DebugSyncBanner(
+                    onInfo: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const SettingsPage()),
+                    ),
+                  ),
+                ),
+              )
+            : null,
       ),
       body: StreamBuilder<List<PricingProfileHeader>>(
         stream: widget.pricingProfilesRepo.streamProfiles(),
@@ -63,54 +78,60 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             stream: widget.pricingCatalogRepo.streamCatalog(widget.profileId),
             builder: (context, catalogSnap) {
               final catalog = catalogSnap.data ?? PricingProfileCatalog.empty();
-              return ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _sectionTile(
-                    context,
-                    title: 'Labor Rate, Taxes, and Fees',
-                    child: _laborAndFeesSection(profile, isEditable),
-                  ),
-                  const SizedBox(height: 16),
-                  _sectionTile(
-                    context,
-                    title: 'Plan Tiers',
-                    child: planTiersSection(context),
-                  ),
-                  const SizedBox(height: 16),
-                  _sectionTile(
-                    context,
-                    title: 'Service Types',
-                    child: _serviceTypeSection(catalog, isEditable),
-                  ),
-                  const SizedBox(height: 16),
-                  _sectionTile(
-                    context,
-                    title: 'Room Type Standards',
-                    child: _roomTypeSection(catalog, isEditable),
-                  ),
-                  const SizedBox(height: 16),
-                  _sectionTile(
-                    context,
-                    title: 'Add-on Items',
-                    child: _subItemSection(catalog, isEditable),
-                  ),
-                  const SizedBox(height: 16),
-                  _sectionTile(
-                    context,
-                    title: 'Complexity, Size, and Frequency',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _complexitySection(catalog, isEditable),
-                        const SizedBox(height: 16),
-                        _sizeSection(catalog, isEditable),
-                        const SizedBox(height: 16),
-                        _frequencySection(catalog, isEditable),
-                      ],
+              return RefreshIndicator(
+                onRefresh: () => syncService.downloadNow(
+                  reason: 'pull_to_refresh:pricing_profile',
+                ),
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    _sectionTile(
+                      context,
+                      title: 'Labor Rate, Taxes, and Fees',
+                      child: _laborAndFeesSection(profile, isEditable),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    _sectionTile(
+                      context,
+                      title: 'Plan Tiers',
+                      child: planTiersSection(context),
+                    ),
+                    const SizedBox(height: 16),
+                    _sectionTile(
+                      context,
+                      title: 'Service Types',
+                      child: _serviceTypeSection(catalog, isEditable),
+                    ),
+                    const SizedBox(height: 16),
+                    _sectionTile(
+                      context,
+                      title: 'Room Type Standards',
+                      child: _roomTypeSection(catalog, isEditable),
+                    ),
+                    const SizedBox(height: 16),
+                    _sectionTile(
+                      context,
+                      title: 'Add-on Items',
+                      child: _subItemSection(catalog, isEditable),
+                    ),
+                    const SizedBox(height: 16),
+                    _sectionTile(
+                      context,
+                      title: 'Complexity, Size, and Frequency',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _complexitySection(catalog, isEditable),
+                          const SizedBox(height: 16),
+                          _sizeSection(catalog, isEditable),
+                          const SizedBox(height: 16),
+                          _frequencySection(catalog, isEditable),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           );

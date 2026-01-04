@@ -23,21 +23,35 @@ class _PrototypeShellState extends State<PrototypeShell> {
       appBar: AppBar(
         title: const Text('QuickQuote'),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(44),
+          preferredSize: Size.fromHeight(
+            kDebugMode
+                ? 44 + DebugSyncBanner.preferredHeight + 8
+                : 44,
+          ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: StreamBuilder<SyncStatus>(
-              stream: deps.syncService.statusStream,
-              initialData: deps.syncService.currentStatus,
-              builder: (context, snap) {
-                final status = switch (snap.data) {
-                  SyncStatus.online => _SyncStatus.online,
-                  SyncStatus.syncing => _SyncStatus.syncing,
-                  SyncStatus.error => _SyncStatus.error,
-                  _ => _SyncStatus.offline,
-                };
-                return _SyncBanner(status: status);
-              },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                StreamBuilder<SyncStatus>(
+                  stream: deps.syncService.statusStream,
+                  initialData: deps.syncService.currentStatus,
+                  builder: (context, snap) {
+                    final status = switch (snap.data) {
+                      SyncStatus.online => _SyncStatus.online,
+                      SyncStatus.syncing => _SyncStatus.syncing,
+                      SyncStatus.error => _SyncStatus.error,
+                      _ => _SyncStatus.offline,
+                    };
+                    return _SyncBanner(status: status);
+                  },
+                ),
+                if (kDebugMode) const SizedBox(height: 8),
+                if (kDebugMode)
+                  DebugSyncBanner(
+                    onInfo: () => setState(() => index = 2),
+                  ),
+              ],
             ),
           ),
         ),
