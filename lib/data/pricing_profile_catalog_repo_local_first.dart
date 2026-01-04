@@ -25,29 +25,59 @@ class PricingProfileCatalogRepositoryLocalFirst {
   final SyncService _syncService;
   final Uuid _uuid;
 
-  Stream<PricingProfileCatalog> streamCatalog(String profileId) async* {
-    final controller = StreamController<PricingProfileCatalog>();
+  Stream<PricingProfileCatalog> streamCatalog(String profileId) {
+    late final StreamController<PricingProfileCatalog> controller;
+    StreamSubscription<AppSession?>? sessionSub;
     StreamSubscription<List<PricingProfileServiceTypeRow>>? serviceTypesSub;
     StreamSubscription<List<PricingProfileFrequencyRow>>? frequenciesSub;
     StreamSubscription<List<PricingProfileRoomTypeRow>>? roomTypesSub;
     StreamSubscription<List<PricingProfileSubItemRow>>? subItemsSub;
     StreamSubscription<List<PricingProfileSizeRow>>? sizesSub;
     StreamSubscription<List<PricingProfileComplexityRow>>? complexitiesSub;
+    var emitInProgress = false;
+    var emitQueued = false;
 
-    Future<void> emit(String orgId) async {
-      final catalog = await loadCatalog(profileId);
-      controller.add(catalog);
+    Future<void> emit() async {
+      if (emitInProgress) {
+        emitQueued = true;
+        return;
+      }
+      emitInProgress = true;
+      try {
+        final catalog = await loadCatalog(profileId);
+        if (!controller.isClosed) {
+          controller.add(catalog);
+        }
+      } finally {
+        emitInProgress = false;
+        if (emitQueued) {
+          emitQueued = false;
+          unawaited(emit());
+        }
+      }
+    }
+
+    Future<void> cancelTableSubs() async {
+      await serviceTypesSub?.cancel();
+      await frequenciesSub?.cancel();
+      await roomTypesSub?.cancel();
+      await subItemsSub?.cancel();
+      await sizesSub?.cancel();
+      await complexitiesSub?.cancel();
+      serviceTypesSub = null;
+      frequenciesSub = null;
+      roomTypesSub = null;
+      subItemsSub = null;
+      sizesSub = null;
+      complexitiesSub = null;
     }
 
     void listenSession(AppSession? session) {
-      serviceTypesSub?.cancel();
-      frequenciesSub?.cancel();
-      roomTypesSub?.cancel();
-      subItemsSub?.cancel();
-      sizesSub?.cancel();
-      complexitiesSub?.cancel();
+      unawaited(cancelTableSubs());
       if (session == null || session.orgId == null) {
-        controller.add(PricingProfileCatalog.empty());
+        if (!controller.isClosed) {
+          controller.add(PricingProfileCatalog.empty());
+        }
         return;
       }
       final orgId = session.orgId!;
@@ -59,7 +89,7 @@ class PricingProfileCatalogRepositoryLocalFirst {
                   tbl.deleted.equals(false),
             ))
           .watch()
-          .listen((_) => emit(orgId));
+          .listen((_) => emit());
       frequenciesSub = (_db.select(_db.pricingProfileFrequencies)
             ..where(
               (tbl) =>
@@ -68,7 +98,7 @@ class PricingProfileCatalogRepositoryLocalFirst {
                   tbl.deleted.equals(false),
             ))
           .watch()
-          .listen((_) => emit(orgId));
+          .listen((_) => emit());
       roomTypesSub = (_db.select(_db.pricingProfileRoomTypes)
             ..where(
               (tbl) =>
@@ -77,7 +107,7 @@ class PricingProfileCatalogRepositoryLocalFirst {
                   tbl.deleted.equals(false),
             ))
           .watch()
-          .listen((_) => emit(orgId));
+          .listen((_) => emit());
       subItemsSub = (_db.select(_db.pricingProfileSubItems)
             ..where(
               (tbl) =>
@@ -86,7 +116,7 @@ class PricingProfileCatalogRepositoryLocalFirst {
                   tbl.deleted.equals(false),
             ))
           .watch()
-          .listen((_) => emit(orgId));
+          .listen((_) => emit());
       sizesSub = (_db.select(_db.pricingProfileSizes)
             ..where(
               (tbl) =>
@@ -95,7 +125,7 @@ class PricingProfileCatalogRepositoryLocalFirst {
                   tbl.deleted.equals(false),
             ))
           .watch()
-          .listen((_) => emit(orgId));
+          .listen((_) => emit());
       complexitiesSub = (_db.select(_db.pricingProfileComplexities)
             ..where(
               (tbl) =>
@@ -104,24 +134,23 @@ class PricingProfileCatalogRepositoryLocalFirst {
                   tbl.deleted.equals(false),
             ))
           .watch()
-          .listen((_) => emit(orgId));
-      unawaited(emit(orgId));
+          .listen((_) => emit());
+      unawaited(emit());
     }
 
-    listenSession(_sessionController.value);
-    final sessionSub = _sessionController.stream.listen(listenSession);
+    controller = StreamController<PricingProfileCatalog>.broadcast(
+      onListen: () {
+        listenSession(_sessionController.value);
+        sessionSub = _sessionController.stream.listen(listenSession);
+      },
+      onCancel: () async {
+        await cancelTableSubs();
+        await sessionSub?.cancel();
+        sessionSub = null;
+      },
+    );
 
-    controller.onCancel = () async {
-      await serviceTypesSub?.cancel();
-      await frequenciesSub?.cancel();
-      await roomTypesSub?.cancel();
-      await subItemsSub?.cancel();
-      await sizesSub?.cancel();
-      await complexitiesSub?.cancel();
-      await sessionSub.cancel();
-    };
-
-    yield* controller.stream;
+    return controller.stream;
   }
 
   Future<PricingProfileCatalog> loadCatalog(String profileId) async {

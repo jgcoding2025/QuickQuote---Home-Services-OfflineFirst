@@ -4,20 +4,12 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
   PricingProfilesRepositoryLocalFirst get pricingProfilesRepo;
   PricingProfileCatalogRepositoryLocalFirst get pricingCatalogRepo;
 
-  final Map<String, Stream<PricingProfileCatalog>> _catalogStreams = {};
+  final Map<String, PricingProfileCatalog> _lastCatalogs = {};
   Stream<List<PricingProfileHeader>>? _profilesStream;
   List<PricingProfileHeader> _lastProfiles = const [];
 
-  Stream<PricingProfileCatalog> _catalog$(String profileId) {
-    return _catalogStreams.putIfAbsent(
-      profileId,
-      () => pricingCatalogRepo.streamCatalog(profileId).asBroadcastStream(),
-    );
-  }
-
   Stream<List<PricingProfileHeader>> profiles$() {
-    return _profilesStream ??=
-        pricingProfilesRepo.streamProfiles().asBroadcastStream();
+    return _profilesStream ??= pricingProfilesRepo.streamProfiles();
   }
 
   Widget _pricingProfilesCard(BuildContext context, OrgSettings settings) {
@@ -28,6 +20,9 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
           _lastProfiles = snapshot.data!;
         }
         final profiles = snapshot.hasData ? snapshot.data! : _lastProfiles;
+        final showEmptyState =
+            snapshot.connectionState != ConnectionState.waiting &&
+                profiles.isEmpty;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -55,8 +50,10 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
               isLocked: true,
             ),
             const SizedBox(height: 8),
-            if (profiles.isEmpty)
+            if (showEmptyState)
               const Text('No custom profiles yet.')
+            else if (profiles.isEmpty)
+              const Text('Loading...')
             else
               ...profiles.map(
                 (profile) => _profileTile(
@@ -198,6 +195,8 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
         TextEditingController(text: profile.ccRate.toStringAsFixed(2));
     var taxEnabled = profile.taxEnabled;
     var ccEnabled = profile.ccEnabled;
+    final catalogStream = pricingCatalogRepo.streamCatalog(profile.id);
+    final cachedCatalog = _lastCatalogs[profile.id];
 
     await showDialog<void>(
       context: context,
@@ -254,78 +253,104 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
                           keyboardType: TextInputType.number,
                         ),
                       const SizedBox(height: 12),
-                      Text(
-                        'Service Types',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: 8),
                       StreamBuilder<PricingProfileCatalog>(
-                        stream: _catalog$(profile.id),
+                        stream: catalogStream,
+                        initialData: cachedCatalog,
                         builder: (context, snapshot) {
-                          final catalog =
-                              snapshot.data ?? PricingProfileCatalog.empty();
-                          if (catalog.serviceTypes.isEmpty) {
-                            return const Text('No service types found.');
+                          if (snapshot.hasData) {
+                            _lastCatalogs[profile.id] = snapshot.data!;
                           }
-                          final sorted = catalog.serviceTypes.toList()
-                            ..sort((a, b) => a.row.compareTo(b.row));
-                          return Column(
-                            children: sorted
-                                .map(
-                                  (service) => ListTile(
-                                    dense: true,
-                                    title: Text(service.serviceType),
-                                    subtitle: Text(
-                                      '\$${service.pricePerSqFt.toStringAsFixed(2)} / sq ft • ${service.multiplier.toStringAsFixed(2)}x',
-                                    ),
-                                    trailing: IconButton(
-                                      icon: const Icon(Icons.edit),
-                                      onPressed: () => _editServiceType(
-                                        context,
-                                        service,
+                          final catalog = snapshot.data ?? cachedCatalog;
+                          final isWaiting =
+                              snapshot.connectionState == ConnectionState.waiting;
+
+                          Widget buildServiceTypes() {
+                            if (catalog == null) {
+                              return Text(
+                                isWaiting
+                                    ? 'Loading...'
+                                    : 'No service types found.',
+                              );
+                            }
+                            if (catalog.serviceTypes.isEmpty) {
+                              return const Text('No service types found.');
+                            }
+                            final sorted = catalog.serviceTypes.toList()
+                              ..sort((a, b) => a.row.compareTo(b.row));
+                            return Column(
+                              children: sorted
+                                  .map(
+                                    (service) => ListTile(
+                                      dense: true,
+                                      title: Text(service.serviceType),
+                                      subtitle: Text(
+                                        '\$${service.pricePerSqFt.toStringAsFixed(2)} / sq ft • ${service.multiplier.toStringAsFixed(2)}x',
+                                      ),
+                                      trailing: IconButton(
+                                        icon: const Icon(Icons.edit),
+                                        onPressed: () => _editServiceType(
+                                          context,
+                                          service,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                )
-                                .toList(),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Frequencies',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: 8),
-                      StreamBuilder<PricingProfileCatalog>(
-                        stream: _catalog$(profile.id),
-                        builder: (context, snapshot) {
-                          final catalog =
-                              snapshot.data ?? PricingProfileCatalog.empty();
-                          if (catalog.frequencies.isEmpty) {
-                            return const Text('No frequencies found.');
+                                  )
+                                  .toList(),
+                            );
                           }
-                          return Column(
-                            children: catalog.frequencies
-                                .map(
-                                  (freq) => ListTile(
-                                    dense: true,
-                                    title: Text(
-                                      '${freq.frequency} (${freq.serviceType})',
-                                    ),
-                                    subtitle: Text(
-                                      '${freq.multiplier.toStringAsFixed(2)}x',
-                                    ),
-                                    trailing: IconButton(
-                                      icon: const Icon(Icons.edit),
-                                      onPressed: () => _editFrequency(
-                                        context,
-                                        freq,
+
+                          Widget buildFrequencies() {
+                            if (catalog == null) {
+                              return Text(
+                                isWaiting
+                                    ? 'Loading...'
+                                    : 'No frequencies found.',
+                              );
+                            }
+                            if (catalog.frequencies.isEmpty) {
+                              return const Text('No frequencies found.');
+                            }
+                            return Column(
+                              children: catalog.frequencies
+                                  .map(
+                                    (freq) => ListTile(
+                                      dense: true,
+                                      title: Text(
+                                        '${freq.frequency} (${freq.serviceType})',
+                                      ),
+                                      subtitle: Text(
+                                        '${freq.multiplier.toStringAsFixed(2)}x',
+                                      ),
+                                      trailing: IconButton(
+                                        icon: const Icon(Icons.edit),
+                                        onPressed: () => _editFrequency(
+                                          context,
+                                          freq,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                )
-                                .toList(),
+                                  )
+                                  .toList(),
+                            );
+                          }
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Service Types',
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                              const SizedBox(height: 8),
+                              buildServiceTypes(),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Frequencies',
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                              const SizedBox(height: 8),
+                              buildFrequencies(),
+                            ],
                           );
                         },
                       ),
