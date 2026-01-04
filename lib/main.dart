@@ -12,6 +12,7 @@ import 'data/org_settings_repo_local_first.dart';
 import 'data/pricing_profile_catalog_repo_local_first.dart';
 import 'data/pricing_profiles_repo_local_first.dart';
 import 'data/quotes_repo_local_first.dart';
+import 'data/presence_service.dart';
 import 'data/session_controller.dart';
 import 'data/sync_service.dart';
 import 'firebase_options.dart';
@@ -36,7 +37,12 @@ void main() async {
 
   final db = AppDatabase();
   final sessionController = SessionController();
-  final syncService = SyncService(db: db, session: sessionController);
+  final presenceService = PresenceService();
+  final syncService = SyncService(
+    db: db,
+    session: sessionController,
+    presenceService: presenceService,
+  );
   await syncService.start();
   final clientsRepository = ClientsRepositoryLocalFirst(
     db: db,

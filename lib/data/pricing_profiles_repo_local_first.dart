@@ -628,6 +628,6 @@ class PricingProfilesRepositoryLocalFirst {
             ),
           );
     }
-    unawaited(_syncService.sync());
+    _syncService.requestUpload(reason: 'pricing_profile_change');
   }
 }

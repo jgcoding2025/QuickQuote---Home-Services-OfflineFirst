@@ -217,6 +217,6 @@ class ClientsRepositoryLocalFirst {
         ),
       );
     }
-    unawaited(_syncService.sync());
+    _syncService.requestUpload(reason: 'client_change');
   }
 }

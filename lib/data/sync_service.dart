@@ -8,112 +8,143 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'local_db.dart';
+import 'presence_service.dart';
 import 'session_controller.dart';
 
 enum SyncStatus { online, offline, syncing, error }
 
 class SyncService {
-  SyncService({required AppDatabase db, required SessionController session})
-    : _db = db,
-      _sessionController = session;
+  SyncService({
+    required AppDatabase db,
+    required SessionController session,
+    required PresenceService presenceService,
+  })  : _db = db,
+        _sessionController = session,
+        _presenceService = presenceService;
 
   final AppDatabase _db;
   final SessionController _sessionController;
+  final PresenceService _presenceService;
   final _statusController = StreamController<SyncStatus>.broadcast();
   StreamSubscription<dynamic>? _connectivitySub;
   StreamSubscription<AppSession?>? _sessionSub;
-  Timer? _pollingTimer;
+  StreamSubscription<bool>? _presenceSub;
+  Timer? _downloadPollingTimer;
+  Timer? _uploadDebounceTimer;
+  Timer? _uploadSafetyTimer;
   bool _isOnlineState = false;
-  bool _pollingEnabled = true;
+  bool _downloadPollingEnabled = true;
   SyncStatus _current = SyncStatus.offline;
-  Future<void>? _inFlight;
-  DateTime? _nextAllowedSyncAt;
-  static const Duration pollingInterval = Duration(seconds: 3);
-  static const Duration syncBackoff = Duration(seconds: 3);
+  Future<void>? _uploadInFlight;
+  Future<void>? _downloadInFlight;
+  static const Duration downloadPollingInterval = Duration(seconds: 45);
+  static const Duration uploadDebounce = Duration(seconds: 2);
+  static const Duration safetyUploadInterval = Duration(minutes: 10);
 
   Stream<SyncStatus> get statusStream => _statusController.stream;
   SyncStatus get currentStatus => _current;
 
   void _setStatus(SyncStatus status) {
+    if (_current == status) {
+      return;
+    }
     _current = status;
     _statusController.add(status);
   }
 
   Future<void> start() async {
+    await _presenceService.start();
     final initial = await Connectivity().checkConnectivity();
     _isOnlineState = _isOnline(initial);
     _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       final isOnline = _isOnline(results);
       _isOnlineState = isOnline;
-      if (isOnline) {
-        sync();
-      } else {
+      if (!isOnline) {
         _setStatus(SyncStatus.offline);
       }
-      _updatePolling();
+      _syncPresenceAndPolling();
+      if (isOnline) {
+        requestUpload(reason: 'connectivity_online');
+      }
     });
     _sessionSub = _sessionController.stream.listen((_) {
-      _updatePolling();
+      _syncPresenceAndPolling();
+      if (_canSyncNow()) {
+        requestUpload(reason: 'session_ready');
+      }
     });
-    _updatePolling();
+    _presenceSub = _presenceService.hasPeerOnlineStream.listen((hasPeer) {
+      if (hasPeer) {
+        unawaited(downloadNow(reason: 'peer_online'));
+      }
+      _updateDownloadPolling();
+    });
+    _syncPresenceAndPolling();
+    _startUploadSafetyTimer();
+    _updateDownloadPolling();
   }
 
   Future<void> dispose() async {
     await _connectivitySub?.cancel();
     await _sessionSub?.cancel();
-    _pollingTimer?.cancel();
+    await _presenceSub?.cancel();
+    _downloadPollingTimer?.cancel();
+    _uploadDebounceTimer?.cancel();
+    _uploadSafetyTimer?.cancel();
+    await _presenceService.dispose();
     await _statusController.close();
   }
 
-  Future<void> sync() {
-    return _inFlight ??= _syncImpl().whenComplete(() => _inFlight = null);
-  }
-
-  Future<void> _syncImpl() async {
-    final now = DateTime.now();
-    if (_nextAllowedSyncAt != null &&
-        now.isBefore(_nextAllowedSyncAt!)) {
-      return;
-    }
-    final session = _sessionController.value;
-    if (session == null || session.orgId == null) {
-      _setStatus(SyncStatus.offline);
-      return;
-    }
-    if (session.isGuest) {
-      _setStatus(SyncStatus.offline);
-      return;
-    }
-    if (FirebaseAuth.instance.currentUser == null) {
-      _setStatus(SyncStatus.offline);
-      return;
-    }
-    final connectivity = await Connectivity().checkConnectivity();
-    if (!_isOnline(connectivity)) {
-      _setStatus(SyncStatus.offline);
-      return;
-    }
-    _setStatus(SyncStatus.syncing);
-    try {
-      await _uploadOutbox(session.orgId!);
-      await _downloadChanges(session.orgId!);
-      _setStatus(SyncStatus.online);
-      _nextAllowedSyncAt = null;
-    } catch (e, st) {
-      debugPrint('SYNC ERROR: $e');
-      debugPrint('$st');
-      _setStatus(SyncStatus.error);
-      _nextAllowedSyncAt = DateTime.now().add(syncBackoff);
-    }
+  Future<void> sync({String reason = 'manual'}) async {
+    await uploadNow(reason: '$reason:upload');
+    await downloadNow(reason: '$reason:download');
   }
 
   Future<void> runOnce() async {
-    await sync();
+    await sync(reason: 'run_once');
   }
 
   bool get canSyncNow => _isOnlineState && _hasValidSession();
 
+  void requestUpload({String reason = 'unspecified'}) {
+    _uploadDebounceTimer?.cancel();
+    _uploadDebounceTimer = Timer(uploadDebounce, () {
+      unawaited(uploadNow(reason: reason));
+    });
+  }
+
+  Future<void> uploadNow({String reason = 'manual'}) {
+    return _uploadInFlight ??= _uploadOnce(reason).whenComplete(() {
+          _uploadInFlight = null;
+        });
+  }
+
+  Future<void> downloadNow({String reason = 'manual'}) {
+    return _downloadInFlight ??= _downloadOnce(reason).whenComplete(() {
+          _downloadInFlight = null;
+        });
+  }
+
   Future<void> flushOutboxNow() async {
+    await uploadNow(reason: 'flush_outbox');
+  }
+
+  Future<void> downloadChangesOnce() async {
+    await downloadNow(reason: 'download_once');
+  }
+
+  void startPolling() {
+    _downloadPollingEnabled = true;
+    _updateDownloadPolling();
+  }
+
+  void stopPolling() {
+    _downloadPollingEnabled = false;
+    _downloadPollingTimer?.cancel();
+    _downloadPollingTimer = null;
+  }
+
+  Future<void> _uploadOnce(String reason) async {
     if (!_canSyncNow()) {
       return;
     }
@@ -126,13 +157,13 @@ class SyncService {
       await _uploadOutbox(session.orgId!);
       _setStatus(SyncStatus.online);
     } catch (e, st) {
-      debugPrint('OUTBOX UPLOAD ERROR: $e');
+      debugPrint('OUTBOX UPLOAD ERROR ($reason): $e');
       debugPrint('$st');
       _setStatus(SyncStatus.error);
     }
   }
 
-  Future<void> downloadChangesOnce() async {
+  Future<void> _downloadOnce(String reason) async {
     if (!_canSyncNow()) {
       return;
     }
@@ -140,25 +171,15 @@ class SyncService {
     if (session == null || session.orgId == null) {
       return;
     }
+    _setStatus(SyncStatus.syncing);
     try {
-      await _downloadClients(session.orgId!);
-      await _downloadQuotes(session.orgId!);
-      await _downloadPricingProfiles(session.orgId!);
+      await _downloadChanges(session.orgId!);
+      _setStatus(SyncStatus.online);
     } catch (e, st) {
-      debugPrint('DOWNLOAD ERROR: $e');
+      debugPrint('DOWNLOAD ERROR ($reason): $e');
       debugPrint('$st');
+      _setStatus(SyncStatus.error);
     }
-  }
-
-  void startPolling() {
-    _pollingEnabled = true;
-    _updatePolling();
-  }
-
-  void stopPolling() {
-    _pollingEnabled = false;
-    _pollingTimer?.cancel();
-    _pollingTimer = null;
   }
 
   Future<void> _uploadOutbox(String orgId) async {
@@ -876,20 +897,15 @@ class SyncService {
     return existing != null;
   }
 
-  void _updatePolling() {
-    if (!_pollingEnabled) {
-      return;
-    }
-    if (_shouldPoll()) {
-      _pollingTimer ??= Timer.periodic(pollingInterval, (_) {
-        if (_shouldPoll()) {
-          unawaited(sync());
-        }
-      });
-    } else {
-      _pollingTimer?.cancel();
-      _pollingTimer = null;
-    }
+  Future<bool> _hasPendingOutboxForOrg(String orgId) async {
+    final existing =
+        await (_db.select(_db.outbox)
+              ..where(
+                (tbl) => tbl.orgId.equals(orgId) & tbl.status.equals('pending'),
+              )
+              ..limit(1))
+            .getSingleOrNull();
+    return existing != null;
   }
 
   bool _hasValidSession() {
@@ -907,7 +923,48 @@ class SyncService {
     return _isOnlineState && _hasValidSession();
   }
 
-  bool _shouldPoll() => _canSyncNow();
+  void _syncPresenceAndPolling() {
+    final session = _sessionController.value;
+    final orgId = session?.orgId;
+    final canBeOnline = _canSyncNow();
+    _presenceService.updateSession(orgId: orgId, canBeOnline: canBeOnline);
+    _updateDownloadPolling();
+  }
+
+  void _updateDownloadPolling() {
+    if (!_downloadPollingEnabled) {
+      return;
+    }
+    if (_shouldPollDownloads()) {
+      _downloadPollingTimer ??= Timer.periodic(downloadPollingInterval, (_) {
+        if (_shouldPollDownloads()) {
+          unawaited(downloadNow(reason: 'polling'));
+        }
+      });
+    } else {
+      _downloadPollingTimer?.cancel();
+      _downloadPollingTimer = null;
+    }
+  }
+
+  void _startUploadSafetyTimer() {
+    _uploadSafetyTimer?.cancel();
+    _uploadSafetyTimer = Timer.periodic(safetyUploadInterval, (_) async {
+      if (!_canSyncNow()) {
+        return;
+      }
+      final session = _sessionController.value;
+      if (session == null || session.orgId == null) {
+        return;
+      }
+      final hasPending = await _hasPendingOutboxForOrg(session.orgId!);
+      if (hasPending) {
+        requestUpload(reason: 'safety_timer');
+      }
+    });
+  }
+
+  bool _shouldPollDownloads() => _canSyncNow() && _presenceService.hasPeerOnline;
 
   DocumentReference<Map<String, dynamic>>? _docForEntity(
     String orgId,
