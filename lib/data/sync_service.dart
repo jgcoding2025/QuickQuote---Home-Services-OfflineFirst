@@ -26,7 +26,7 @@ class SyncService {
   bool _isOnlineState = false;
   bool _pollingEnabled = true;
   SyncStatus _current = SyncStatus.offline;
-  Future<void>? _inFlightSync;
+  Future<void>? _inFlight;
   DateTime? _nextAllowedSyncAt;
   static const Duration pollingInterval = Duration(seconds: 3);
   static const Duration syncBackoff = Duration(seconds: 3);
@@ -66,8 +66,7 @@ class SyncService {
   }
 
   Future<void> sync() {
-    return _inFlightSync ??=
-        _syncImpl().whenComplete(() => _inFlightSync = null);
+    return _inFlight ??= _syncImpl().whenComplete(() => _inFlight = null);
   }
 
   Future<void> _syncImpl() async {
@@ -170,6 +169,7 @@ class SyncService {
               )
               ..orderBy([(tbl) => OrderingTerm.asc(tbl.updatedAt)]))
             .get();
+    debugPrint('OUTBOX: ${pending.length} pending items to upload.');
     for (final item in pending) {
       final payload = _decodePayload(item.payload);
       final updatedAt = payload['updatedAt'] is int
@@ -190,10 +190,12 @@ class SyncService {
         'deleted': payload['deleted'] == true || item.opType == 'delete',
       };
       await doc.set(data, SetOptions(merge: true));
+      debugPrint('OUTBOX: starting transaction for item ${item.id}.');
       await _db.transaction(() async {
         await (_db.update(_db.outbox)..where((tbl) => tbl.id.equals(item.id)))
             .write(OutboxCompanion(status: const Value('synced')));
       });
+      debugPrint('OUTBOX: finished transaction for item ${item.id}.');
     }
   }
 
