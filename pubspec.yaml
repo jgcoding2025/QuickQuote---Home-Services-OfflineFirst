@@ -45,6 +45,7 @@ dependencies:
   uuid: ^4.5.2
   sqlite3_flutter_libs: ^0.5.41
   path: ^1.9.1
+  shared_preferences: ^2.5.3
 
 # dev_dependencies are dependencies that are only needed during development
 # and not included in the app itself.

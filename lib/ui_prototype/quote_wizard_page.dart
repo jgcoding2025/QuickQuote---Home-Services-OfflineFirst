@@ -262,6 +262,48 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
             },
           ),
           const SizedBox(height: 24),
+          Text(
+            'Pricing Profile',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          StreamBuilder<List<PricingProfileHeader>>(
+            stream: _pricingProfilesRepo.streamProfiles(),
+            builder: (context, snapshot) {
+              final profiles = snapshot.data ?? const [];
+              final items = [
+                const DropdownMenuItem(
+                  value: 'default',
+                  child: Text('Default'),
+                ),
+                ...profiles.map(
+                  (profile) => DropdownMenuItem(
+                    value: profile.id,
+                    child: Text(profile.name),
+                  ),
+                ),
+              ];
+              if (!items.any((item) => item.value == pricingProfileId)) {
+                pricingProfileId = 'default';
+              }
+              return DropdownButtonFormField<String>(
+                value: pricingProfileId,
+                items: items,
+                isExpanded: true,
+                onChanged: (value) {
+                  final next = value ?? 'default';
+                  setState(() {
+                    pricingProfileId = next;
+                  });
+                  unawaited(_loadSettingsOptionsForProfile(next));
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Select pricing profile',
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
           Text('Quote Details', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           _serviceTypeDropdown(),

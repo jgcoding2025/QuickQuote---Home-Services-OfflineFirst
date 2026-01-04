@@ -391,6 +391,6 @@ class QuotesRepositoryLocalFirst {
         ),
       );
     }
-    unawaited(_syncService.sync());
+    _syncService.requestUpload(reason: 'quote_change');
   }
 }

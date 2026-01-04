@@ -33,6 +33,7 @@ class _SettingsPageState extends State<SettingsPage>
     repo = deps.orgSettingsRepository;
     _pricingProfilesRepo = deps.pricingProfilesRepository;
     _pricingCatalogRepo = deps.pricingProfileCatalogRepository;
+    unawaited(_pricingProfilesRepo.ensureDefaultCatalogSeeded());
   }
 
   @override
@@ -67,32 +68,8 @@ class _SettingsPageState extends State<SettingsPage>
                   children: [
                     _settingsSection(
                       context,
-                      title: 'Service types',
-                      child: _servicePricingCard(context, data.serviceTypes),
-                    ),
-                    const SizedBox(height: 20),
-                    _settingsSection(
-                      context,
-                      title: 'Complexity, size, and frequency',
-                      child: _serviceModifiersCard(context, data),
-                    ),
-                    const SizedBox(height: 20),
-                    _settingsSection(
-                      context,
-                      title: 'Labor Rate, Taxes, Fees',
-                      child: _quoteDefaultsCard(context, s),
-                    ),
-                    const SizedBox(height: 20),
-                    _settingsSection(
-                      context,
-                      title: 'Pricing Profiles',
-                      child: _pricingProfilesCard(context, s),
-                    ),
-                    const SizedBox(height: 20),
-                    _settingsSection(
-                      context,
-                      title: 'Room type standards',
-                      child: _roomTypeStandardsCard(context, data.roomTypes),
+                      title: 'Account & Team',
+                      child: _accountCard(context),
                     ),
                   ],
                 );
@@ -102,20 +79,8 @@ class _SettingsPageState extends State<SettingsPage>
                   children: [
                     _settingsSection(
                       context,
-                      title: 'Account & Team',
-                      child: _accountCard(context),
-                    ),
-                    const SizedBox(height: 20),
-                    _settingsSection(
-                      context,
-                      title: 'Plan tiers',
-                      child: _planTierCard(context, data.planTiers),
-                    ),
-                    const SizedBox(height: 20),
-                    _settingsSection(
-                      context,
-                      title: 'Add-on items',
-                      child: _addonsPricingCard(context, data.subItems),
+                      title: 'Pricing Tiers',
+                      child: _pricingProfilesCard(context, s, data),
                     ),
                   ],
                 );
@@ -126,9 +91,9 @@ class _SettingsPageState extends State<SettingsPage>
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(width: 320, child: rightColumn),
+                        SizedBox(width: 360, child: leftColumn),
                         const SizedBox(width: 20),
-                        Expanded(child: leftColumn),
+                        Expanded(child: rightColumn),
                       ],
                     ),
                   );
@@ -137,9 +102,9 @@ class _SettingsPageState extends State<SettingsPage>
                 return ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
-                    rightColumn,
-                    const SizedBox(height: 24),
                     leftColumn,
+                    const SizedBox(height: 24),
+                    rightColumn,
                   ],
                 );
               },
@@ -199,14 +164,99 @@ class _SettingsPageState extends State<SettingsPage>
       builder: (context, session, _) {
         final isOwner = session?.role == 'owner';
         final isGuest = session?.isGuest ?? true;
+        final orgId = session?.orgId;
+        final peerStream = deps.syncService.hasPeerOnlineStream;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Email: ${session?.email ?? 'Offline'}'),
             const SizedBox(height: 8),
-            Text('Org ID: ${session?.orgId ?? 'None'}'),
+            StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: orgId == null || orgId.isEmpty
+                  ? null
+                  : FirebaseFirestore.instance
+                      .collection('orgs')
+                      .doc(orgId)
+                      .snapshots(),
+              builder: (context, snapshot) {
+                final name = snapshot.data?.data()?['name'] as String?;
+                return Text('Org: ${name ?? orgId ?? 'None'}');
+              },
+            ),
             const SizedBox(height: 8),
             Text('Role: ${session?.role ?? 'Offline'}'),
+            const SizedBox(height: 12),
+            StreamBuilder<bool>(
+              stream: peerStream,
+              initialData: deps.syncService.hasPeerOnline,
+              builder: (context, snapshot) {
+                final hasPeer = snapshot.data ?? false;
+                return Row(
+                  children: [
+                    Icon(
+                      hasPeer ? Icons.wifi_tethering : Icons.wifi_tethering_off,
+                      color: hasPeer ? Colors.green : Colors.grey,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      hasPeer
+                          ? 'Another device is online'
+                          : 'No other devices online',
+                    ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            if (!isGuest && orgId != null)
+              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection('orgs')
+                    .doc(orgId)
+                    .collection('members')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  final members = snapshot.data?.docs ?? const [];
+                  if (members.isEmpty) {
+                    return const Text('No additional team members yet.');
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Team (${members.length})',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      ...members.map((doc) {
+                        final data = doc.data();
+                        final email = data['email'] as String? ?? doc.id;
+                        final role = data['role'] as String? ?? 'member';
+                        final active = data['active'] as bool? ?? true;
+                        final isSelf = doc.id == session?.userId;
+                        return Card(
+                          child: ListTile(
+                            title: Text(email),
+                            subtitle: Text(role),
+                            trailing: isOwner
+                                ? Switch(
+                                    value: active,
+                                    onChanged: isSelf
+                                        ? null
+                                        : (value) async {
+                                            await doc.reference.update({
+                                              'active': value,
+                                            });
+                                          },
+                                  )
+                                : Text(active ? 'Active' : 'Inactive'),
+                          ),
+                        );
+                      }),
+                    ],
+                  );
+                },
+              ),
             if (_inviteError != null) ...[
               const SizedBox(height: 12),
               Text(

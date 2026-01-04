@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -41,4 +42,5 @@ part 'ui_prototype/quote_edit_item_dialog.dart';
 part 'ui_prototype/settings_page.dart';
 part 'ui_prototype/settings_sections_mixin.dart';
 part 'ui_prototype/settings_pricing_profiles_mixin.dart';
+part 'ui_prototype/pricing_tier_detail_page.dart';
 part 'ui_prototype/settings_models.dart';
