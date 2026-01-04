@@ -104,9 +104,9 @@ class _SettingsPageState extends State<SettingsPage>
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(child: leftColumn),
-                        const SizedBox(width: 20),
                         SizedBox(width: 320, child: rightColumn),
+                        const SizedBox(width: 20),
+                        Expanded(child: leftColumn),
                       ],
                     ),
                   );
@@ -115,9 +115,9 @@ class _SettingsPageState extends State<SettingsPage>
                 return ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
-                    leftColumn,
-                    const SizedBox(height: 24),
                     rightColumn,
+                    const SizedBox(height: 24),
+                    leftColumn,
                   ],
                 );
               },
@@ -222,6 +222,19 @@ class _SettingsPageState extends State<SettingsPage>
               ),
             ],
             const SizedBox(height: 12),
+            if (!isGuest)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () async {
+                    await deps.syncService.sync();
+                    if (!context.mounted) return;
+                    _snack(context, 'Sync started.');
+                  },
+                  child: const Text('Sync Now'),
+                ),
+              ),
+            if (!isGuest) const SizedBox(height: 12),
             if (!isGuest)
               SizedBox(
                 width: double.infinity,

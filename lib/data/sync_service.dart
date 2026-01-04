@@ -20,8 +20,15 @@ class SyncService {
   final SessionController _sessionController;
   final _statusController = StreamController<SyncStatus>.broadcast();
   StreamSubscription<dynamic>? _connectivitySub;
+  SyncStatus _current = SyncStatus.offline;
 
   Stream<SyncStatus> get statusStream => _statusController.stream;
+  SyncStatus get currentStatus => _current;
+
+  void _setStatus(SyncStatus status) {
+    _current = status;
+    _statusController.add(status);
+  }
 
   Future<void> start() async {
     _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
@@ -29,7 +36,7 @@ class SyncService {
       if (isOnline) {
         sync();
       } else {
-        _statusController.add(SyncStatus.offline);
+        _setStatus(SyncStatus.offline);
       }
     });
   }
@@ -42,29 +49,31 @@ class SyncService {
   Future<void> sync() async {
     final session = _sessionController.value;
     if (session == null || session.orgId == null) {
-      _statusController.add(SyncStatus.offline);
+      _setStatus(SyncStatus.offline);
       return;
     }
     if (session.isGuest) {
-      _statusController.add(SyncStatus.offline);
+      _setStatus(SyncStatus.offline);
       return;
     }
     if (FirebaseAuth.instance.currentUser == null) {
-      _statusController.add(SyncStatus.offline);
+      _setStatus(SyncStatus.offline);
       return;
     }
     final connectivity = await Connectivity().checkConnectivity();
     if (!_isOnline(connectivity)) {
-      _statusController.add(SyncStatus.offline);
+      _setStatus(SyncStatus.offline);
       return;
     }
-    _statusController.add(SyncStatus.syncing);
+    _setStatus(SyncStatus.syncing);
     try {
       await _uploadOutbox(session.orgId!);
       await _downloadChanges(session.orgId!);
-      _statusController.add(SyncStatus.online);
-    } catch (e) {
-      _statusController.add(SyncStatus.error);
+      _setStatus(SyncStatus.online);
+    } catch (e, st) {
+      print('SYNC ERROR: $e');
+      print(st);
+      _setStatus(SyncStatus.error);
     }
   }
 

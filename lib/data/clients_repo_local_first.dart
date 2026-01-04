@@ -7,18 +7,22 @@ import 'package:uuid/uuid.dart';
 import 'client_models.dart';
 import 'local_db.dart';
 import 'session_controller.dart';
+import 'sync_service.dart';
 
 class ClientsRepositoryLocalFirst {
   ClientsRepositoryLocalFirst({
     required AppDatabase db,
     required SessionController sessionController,
+    required SyncService syncService,
     Uuid? uuid,
   })  : _db = db,
         _sessionController = sessionController,
+        _syncService = syncService,
         _uuid = uuid ?? const Uuid();
 
   final AppDatabase _db;
   final SessionController _sessionController;
+  final SyncService _syncService;
   final Uuid _uuid;
 
   String newClientId() => _uuid.v4();
@@ -160,5 +164,6 @@ class ClientsRepositoryLocalFirst {
         status: const Value('pending'),
       ),
     );
+    unawaited(_syncService.sync());
   }
 }
