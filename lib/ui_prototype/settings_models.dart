@@ -216,6 +216,7 @@ extension on OrgSettings {
     double? taxRate,
     bool? ccEnabled,
     double? ccRate,
+    String? defaultPricingProfileId,
   }) {
     return OrgSettings(
       laborRate: laborRate ?? this.laborRate,
@@ -223,6 +224,8 @@ extension on OrgSettings {
       taxRate: taxRate ?? this.taxRate,
       ccEnabled: ccEnabled ?? this.ccEnabled,
       ccRate: ccRate ?? this.ccRate,
+      defaultPricingProfileId:
+          defaultPricingProfileId ?? this.defaultPricingProfileId,
     );
   }
 }

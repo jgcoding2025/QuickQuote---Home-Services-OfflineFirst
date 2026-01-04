@@ -45,6 +45,7 @@ class OrgSettingsRepositoryLocalFirst {
           taxRate: row.taxRate,
           ccEnabled: row.ccEnabled,
           ccRate: row.ccRate,
+          defaultPricingProfileId: row.defaultPricingProfileId,
         );
       }).listen(
         controller.add,
@@ -80,6 +81,7 @@ class OrgSettingsRepositoryLocalFirst {
         taxRate: Value(settings.taxRate),
         ccEnabled: Value(settings.ccEnabled),
         ccRate: Value(settings.ccRate),
+        defaultPricingProfileId: Value(settings.defaultPricingProfileId),
       ),
     );
     await _insertOutbox(
@@ -89,6 +91,30 @@ class OrgSettingsRepositoryLocalFirst {
       payload: settings.toMap(updatedAt: now),
       orgId: orgId,
       updatedAt: now,
+    );
+  }
+
+  Future<OrgSettings> getCurrent() async {
+    final session = _sessionController.session;
+    final orgId = session.orgId;
+    if (orgId == null) {
+      return OrgSettings.defaults;
+    }
+    final row =
+        await (_db.select(_db.orgSettingsTable)
+              ..where((tbl) => tbl.orgId.equals(orgId))
+              ..limit(1))
+            .getSingleOrNull();
+    if (row == null) {
+      return OrgSettings.defaults;
+    }
+    return OrgSettings(
+      laborRate: row.laborRate,
+      taxEnabled: row.taxEnabled,
+      taxRate: row.taxRate,
+      ccEnabled: row.ccEnabled,
+      ccRate: row.ccRate,
+      defaultPricingProfileId: row.defaultPricingProfileId,
     );
   }
 

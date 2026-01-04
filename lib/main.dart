@@ -9,6 +9,8 @@ import 'data/app_controller.dart';
 import 'data/clients_repo_local_first.dart';
 import 'data/local_db.dart';
 import 'data/org_settings_repo_local_first.dart';
+import 'data/pricing_profile_catalog_repo_local_first.dart';
+import 'data/pricing_profiles_repo_local_first.dart';
 import 'data/quotes_repo_local_first.dart';
 import 'data/session_controller.dart';
 import 'data/sync_service.dart';
@@ -51,6 +53,17 @@ void main() async {
     sessionController: sessionController,
     syncService: syncService,
   );
+  final pricingProfilesRepository = PricingProfilesRepositoryLocalFirst(
+    db: db,
+    sessionController: sessionController,
+    syncService: syncService,
+  );
+  final pricingProfileCatalogRepository =
+      PricingProfileCatalogRepositoryLocalFirst(
+        db: db,
+        sessionController: sessionController,
+        syncService: syncService,
+      );
   final appController = AppController(
     db: db,
     sessionController: sessionController,
@@ -68,6 +81,8 @@ void main() async {
       clientsRepository: clientsRepository,
       quotesRepository: quotesRepository,
       orgSettingsRepository: orgSettingsRepository,
+      pricingProfilesRepository: pricingProfilesRepository,
+      pricingProfileCatalogRepository: pricingProfileCatalogRepository,
       syncService: syncService,
       appController: appController,
       child: const UiPrototypeApp(),

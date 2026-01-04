@@ -12,6 +12,12 @@ class QuoteWizardPage extends StatefulWidget {
 class _QuoteWizardPageState extends State<QuoteWizardPage> {
   late ClientsRepositoryLocalFirst _clientsRepo;
   late QuotesRepositoryLocalFirst _quotesRepo;
+  late OrgSettingsRepositoryLocalFirst _orgSettingsRepo;
+  late PricingProfilesRepositoryLocalFirst _pricingProfilesRepo;
+  late PricingProfileCatalogRepositoryLocalFirst _pricingCatalogRepo;
+  StreamSubscription<OrgSettings>? _orgSettingsSub;
+  OrgSettings _orgSettings = OrgSettings.defaults;
+  String pricingProfileId = 'default';
 
   String? clientId;
   String clientName = '';
@@ -40,21 +46,54 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
     final deps = AppDependencies.of(context);
     _clientsRepo = deps.clientsRepository;
     _quotesRepo = deps.quotesRepository;
+    _orgSettingsRepo = deps.orgSettingsRepository;
+    _pricingProfilesRepo = deps.pricingProfilesRepository;
+    _pricingCatalogRepo = deps.pricingProfileCatalogRepository;
+
+    _orgSettingsSub ??= _orgSettingsRepo.stream().listen((settings) {
+      if (!mounted) {
+        return;
+      }
+      final nextProfileId = settings.defaultPricingProfileId.isEmpty
+          ? 'default'
+          : settings.defaultPricingProfileId;
+      setState(() {
+        _orgSettings = settings;
+        if (pricingProfileId != nextProfileId) {
+          pricingProfileId = nextProfileId;
+          _loadSettingsOptionsForProfile(nextProfileId);
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _orgSettingsSub?.cancel();
+    super.dispose();
   }
 
   bool _initFailed = false;
   bool _didInitClient = false;
 
   Future<void> _loadSettingsOptions() async {
+    await _loadSettingsOptionsForProfile(pricingProfileId);
+  }
+
+  Future<void> _loadSettingsOptionsForProfile(String profileId) async {
     try {
-      final serviceTypes = await _loadList(
-        'assets/settings/service_type_standards.json',
-        _ServiceTypeStandard.fromJson,
-      );
-      final frequencies = await _loadList(
-        'assets/settings/frequency_standards.json',
-        _FrequencyStandard.fromJson,
-      );
+      final serviceTypes = profileId == 'default'
+          ? await _loadList(
+              'assets/settings/service_type_standards.json',
+              _ServiceTypeStandard.fromJson,
+            )
+          : await _loadProfileServiceTypes(profileId);
+      final frequencies = profileId == 'default'
+          ? await _loadList(
+              'assets/settings/frequency_standards.json',
+              _FrequencyStandard.fromJson,
+            )
+          : await _loadProfileFrequencies(profileId);
 
       if (serviceTypes.isEmpty) {
         throw StateError('Service type standards failed to load (empty list)');
@@ -91,6 +130,39 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
       debugPrintStack(stackTrace: s);
       rethrow;
     }
+  }
+
+  Future<List<_ServiceTypeStandard>> _loadProfileServiceTypes(
+    String profileId,
+  ) async {
+    final catalog = await _pricingCatalogRepo.loadCatalog(profileId);
+    return catalog.serviceTypes
+        .map(
+          (row) => _ServiceTypeStandard(
+            row: row.row,
+            category: row.category,
+            serviceType: row.serviceType,
+            description: row.description,
+            pricePerSqFt: row.pricePerSqFt,
+            multiplier: row.multiplier,
+          ),
+        )
+        .toList();
+  }
+
+  Future<List<_FrequencyStandard>> _loadProfileFrequencies(
+    String profileId,
+  ) async {
+    final catalog = await _pricingCatalogRepo.loadCatalog(profileId);
+    return catalog.frequencies
+        .map(
+          (row) => _FrequencyStandard(
+            serviceType: row.serviceType,
+            multiplier: row.multiplier,
+            frequency: row.frequency,
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -227,6 +299,23 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
                       final quoteTitle =
                           '${_today()} | $lastName\n$serviceType';
                       final newId = _quotesRepo.newQuoteId();
+                      final profileId = pricingProfileId;
+                      final header = profileId == 'default'
+                          ? null
+                          : await _pricingProfilesRepo.getProfileById(
+                              profileId,
+                            );
+                      final ratesSource = header == null
+                          ? _orgSettings
+                          : OrgSettings(
+                              laborRate: header.laborRate,
+                              taxEnabled: header.taxEnabled,
+                              taxRate: header.taxRate,
+                              ccEnabled: header.ccEnabled,
+                              ccRate: header.ccRate,
+                              defaultPricingProfileId:
+                                  _orgSettings.defaultPricingProfileId,
+                            );
                       final draft = QuoteDraft(
                         clientId: clientId!,
                         clientName: clientName,
@@ -246,11 +335,12 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
                         entryCode: '',
                         paymentMethod: 'Zelle',
                         feedbackDiscussed: false,
-                        laborRate: 40.0,
-                        taxEnabled: false,
-                        ccEnabled: false,
-                        taxRate: 0.07,
-                        ccRate: 0.03,
+                        laborRate: ratesSource.laborRate,
+                        taxEnabled: ratesSource.taxEnabled,
+                        ccEnabled: ratesSource.ccEnabled,
+                        taxRate: ratesSource.taxRate,
+                        ccRate: ratesSource.ccRate,
+                        pricingProfileId: profileId,
                         defaultRoomType: 'Bedroom',
                         defaultLevel: 'Main Floor',
                         defaultSize: 'M',
@@ -295,6 +385,7 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
                               ccEnabled: draft.ccEnabled,
                               taxRate: draft.taxRate,
                               ccRate: draft.ccRate,
+                              pricingProfileId: draft.pricingProfileId,
                               defaultRoomType: draft.defaultRoomType,
                               defaultLevel: draft.defaultLevel,
                               defaultSize: draft.defaultSize,

@@ -68,6 +68,8 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
 
   @override
   Widget _buildQuoteDetailsSection({
+    required List<DropdownMenuItem<String>> pricingProfileMenuItems,
+    required String resolvedPricingProfile,
     required List<DropdownMenuItem<String>> serviceTypeMenuItems,
     required List<String> frequencyOptions,
     required String resolvedServiceType,
@@ -85,6 +87,18 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
             maxLines: 2,
             decoration: _fieldDecoration('Quote Name'),
             onChanged: (v) => _markDirty(() => quoteName = v),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            key: ValueKey('quote-pricingProfile-$_remoteRevision'),
+            initialValue: resolvedPricingProfile,
+            items: pricingProfileMenuItems,
+            isExpanded: true,
+            onChanged: (v) {
+              final selected = v ?? pricingProfileId;
+              unawaited(_selectPricingProfile(selected));
+            },
+            decoration: _fieldDecoration('Pricing Profile'),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(

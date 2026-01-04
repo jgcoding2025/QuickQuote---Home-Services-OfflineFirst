@@ -58,6 +58,8 @@ class Quotes extends Table {
   BoolColumn get ccEnabled => boolean().withDefault(const Constant(false))();
   RealColumn get taxRate => real().withDefault(const Constant(0.07))();
   RealColumn get ccRate => real().withDefault(const Constant(0.03))();
+  TextColumn get pricingProfileId =>
+      text().withDefault(const Constant('default'))();
   TextColumn get defaultRoomType => text().withDefault(const Constant(''))();
   TextColumn get defaultLevel => text().withDefault(const Constant(''))();
   TextColumn get defaultSize => text().withDefault(const Constant(''))();
@@ -93,9 +95,125 @@ class OrgSettingsTable extends Table {
   RealColumn get taxRate => real().withDefault(const Constant(0.07))();
   BoolColumn get ccEnabled => boolean().withDefault(const Constant(false))();
   RealColumn get ccRate => real().withDefault(const Constant(0.03))();
+  TextColumn get defaultPricingProfileId =>
+      text().withDefault(const Constant('default'))();
 
   @override
   Set<Column<Object>>? get primaryKey => {orgId};
+}
+
+@DataClassName('PricingProfileRow')
+class PricingProfiles extends Table {
+  TextColumn get id => text()();
+  TextColumn get orgId => text()();
+  TextColumn get name => text()();
+  RealColumn get laborRate => real().withDefault(const Constant(40.0))();
+  BoolColumn get taxEnabled => boolean().withDefault(const Constant(false))();
+  RealColumn get taxRate => real().withDefault(const Constant(0.07))();
+  BoolColumn get ccEnabled => boolean().withDefault(const Constant(false))();
+  RealColumn get ccRate => real().withDefault(const Constant(0.03))();
+  IntColumn get updatedAt => integer()();
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
+@DataClassName('PricingProfileServiceTypeRow')
+class PricingProfileServiceTypes extends Table {
+  TextColumn get id => text()();
+  TextColumn get orgId => text()();
+  TextColumn get profileId => text()();
+  IntColumn get row => integer().withDefault(const Constant(0))();
+  TextColumn get category => text().withDefault(const Constant('General'))();
+  TextColumn get serviceType => text()();
+  TextColumn get description => text().withDefault(const Constant(''))();
+  RealColumn get pricePerSqFt => real().withDefault(const Constant(0))();
+  RealColumn get multiplier => real().withDefault(const Constant(1))();
+  IntColumn get updatedAt => integer()();
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
+@DataClassName('PricingProfileFrequencyRow')
+class PricingProfileFrequencies extends Table {
+  TextColumn get id => text()();
+  TextColumn get orgId => text()();
+  TextColumn get profileId => text()();
+  TextColumn get serviceType => text()();
+  TextColumn get frequency => text()();
+  RealColumn get multiplier => real().withDefault(const Constant(1))();
+  IntColumn get updatedAt => integer()();
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
+@DataClassName('PricingProfileRoomTypeRow')
+class PricingProfileRoomTypes extends Table {
+  TextColumn get id => text()();
+  TextColumn get orgId => text()();
+  TextColumn get profileId => text()();
+  IntColumn get row => integer().withDefault(const Constant(0))();
+  TextColumn get category => text().withDefault(const Constant('General'))();
+  TextColumn get roomType => text()();
+  TextColumn get description => text().withDefault(const Constant(''))();
+  IntColumn get minutes => integer().withDefault(const Constant(0))();
+  IntColumn get squareFeet => integer().withDefault(const Constant(0))();
+  IntColumn get updatedAt => integer()();
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
+@DataClassName('PricingProfileSubItemRow')
+class PricingProfileSubItems extends Table {
+  TextColumn get id => text()();
+  TextColumn get orgId => text()();
+  TextColumn get profileId => text()();
+  TextColumn get category => text().withDefault(const Constant('General'))();
+  TextColumn get subItem => text()();
+  TextColumn get description => text().withDefault(const Constant(''))();
+  IntColumn get minutes => integer().withDefault(const Constant(0))();
+  IntColumn get updatedAt => integer()();
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
+@DataClassName('PricingProfileSizeRow')
+class PricingProfileSizes extends Table {
+  TextColumn get id => text()();
+  TextColumn get orgId => text()();
+  TextColumn get profileId => text()();
+  TextColumn get size => text()();
+  RealColumn get multiplier => real().withDefault(const Constant(1))();
+  TextColumn get definition => text().withDefault(const Constant(''))();
+  IntColumn get updatedAt => integer()();
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
+@DataClassName('PricingProfileComplexityRow')
+class PricingProfileComplexities extends Table {
+  TextColumn get id => text()();
+  TextColumn get orgId => text()();
+  TextColumn get profileId => text()();
+  TextColumn get level => text()();
+  RealColumn get multiplier => real().withDefault(const Constant(1))();
+  TextColumn get definition => text().withDefault(const Constant(''))();
+  IntColumn get updatedAt => integer()();
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
 }
 
 @DataClassName('OutboxRow')
@@ -124,13 +242,53 @@ class SyncState extends Table {
 }
 
 @DriftDatabase(
-  tables: [Clients, Quotes, QuoteItems, OrgSettingsTable, Outbox, SyncState],
+  tables: [
+    Clients,
+    Quotes,
+    QuoteItems,
+    OrgSettingsTable,
+    PricingProfiles,
+    PricingProfileServiceTypes,
+    PricingProfileFrequencies,
+    PricingProfileRoomTypes,
+    PricingProfileSubItems,
+    PricingProfileSizes,
+    PricingProfileComplexities,
+    Outbox,
+    SyncState,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) async {
+          await m.createAll();
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.addColumn(
+              quotes,
+              quotes.pricingProfileId,
+            );
+            await m.addColumn(
+              orgSettingsTable,
+              orgSettingsTable.defaultPricingProfileId,
+            );
+            await m.createTable(pricingProfiles);
+            await m.createTable(pricingProfileServiceTypes);
+            await m.createTable(pricingProfileFrequencies);
+            await m.createTable(pricingProfileRoomTypes);
+            await m.createTable(pricingProfileSubItems);
+            await m.createTable(pricingProfileSizes);
+            await m.createTable(pricingProfileComplexities);
+          }
+        },
+      );
 
   Stream<List<ClientRow>> watchClients(String orgId) {
     return (select(clients)
@@ -255,6 +413,27 @@ class AppDatabase extends _$AppDatabase {
     await (update(orgSettingsTable)
           ..where((tbl) => tbl.orgId.equals(fromOrgId)))
         .write(OrgSettingsTableCompanion(orgId: Value(toOrgId)));
+    await (update(pricingProfiles)
+          ..where((tbl) => tbl.orgId.equals(fromOrgId)))
+        .write(PricingProfilesCompanion(orgId: Value(toOrgId)));
+    await (update(pricingProfileServiceTypes)
+          ..where((tbl) => tbl.orgId.equals(fromOrgId)))
+        .write(PricingProfileServiceTypesCompanion(orgId: Value(toOrgId)));
+    await (update(pricingProfileFrequencies)
+          ..where((tbl) => tbl.orgId.equals(fromOrgId)))
+        .write(PricingProfileFrequenciesCompanion(orgId: Value(toOrgId)));
+    await (update(pricingProfileRoomTypes)
+          ..where((tbl) => tbl.orgId.equals(fromOrgId)))
+        .write(PricingProfileRoomTypesCompanion(orgId: Value(toOrgId)));
+    await (update(pricingProfileSubItems)
+          ..where((tbl) => tbl.orgId.equals(fromOrgId)))
+        .write(PricingProfileSubItemsCompanion(orgId: Value(toOrgId)));
+    await (update(pricingProfileSizes)
+          ..where((tbl) => tbl.orgId.equals(fromOrgId)))
+        .write(PricingProfileSizesCompanion(orgId: Value(toOrgId)));
+    await (update(pricingProfileComplexities)
+          ..where((tbl) => tbl.orgId.equals(fromOrgId)))
+        .write(PricingProfileComplexitiesCompanion(orgId: Value(toOrgId)));
     await (update(outbox)..where((tbl) => tbl.orgId.equals(fromOrgId))).write(
       OutboxCompanion(orgId: Value(toOrgId)),
     );
