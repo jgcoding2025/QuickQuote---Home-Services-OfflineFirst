@@ -350,13 +350,11 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
                         items: const [],
                       );
 
-                      final navigator = Navigator.of(context);
-
                       await _quotesRepo.setQuote(newId, draft, isNew: true);
 
                       if (!mounted) return;
 
-                      navigator.pushReplacement(
+                      Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           builder: (_) => QuoteEditorPage(
                             repo: _quotesRepo,

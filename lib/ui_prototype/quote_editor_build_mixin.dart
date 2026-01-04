@@ -69,8 +69,10 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
   }
 
   List<DropdownMenuItem<String>> _pricingProfileMenuItems(
-    List<PricingProfileHeader> profiles,
-  ) {
+    List<PricingProfileHeader> profiles, {
+    String? missingProfileId,
+    String? missingProfileLabel,
+  }) {
     return [
       const DropdownMenuItem(
         value: 'default',
@@ -82,6 +84,11 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
           child: Text(profile.name),
         ),
       ),
+      if (missingProfileId != null)
+        DropdownMenuItem(
+          value: missingProfileId,
+          child: Text(missingProfileLabel ?? 'Loading pricing profile...'),
+        ),
     ];
   }
 
@@ -136,9 +143,16 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
                       standard.serviceType,
                   }.toList()
                 : [serviceType];
+            final missingProfileId =
+                pricingProfileId != 'default' &&
+                        pricingProfiles
+                            .every((profile) => profile.id != pricingProfileId)
+                    ? pricingProfileId
+                    : null;
             final pricingProfileOptions = [
               'default',
               ...pricingProfiles.map((profile) => profile.id),
+              if (missingProfileId != null) missingProfileId,
             ];
             final roomTypeOptions = data.roomTypes.isNotEmpty
                 ? data.roomTypes.map((room) => room.roomType).toList()
@@ -167,8 +181,15 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
               data.serviceTypes,
               serviceTypeOptions,
             );
-            final pricingProfileMenuItems =
-                _pricingProfileMenuItems(pricingProfiles);
+            final missingProfileLabel = pricingProfileDeleted
+                ? 'Deleted profile${missingPricingProfileName == null ? '' : ': $missingPricingProfileName'}'
+                : 'Loading pricing profile...';
+            final pricingProfileMenuItems = _pricingProfileMenuItems(
+              pricingProfiles,
+              missingProfileId: missingProfileId,
+              missingProfileLabel:
+                  missingProfileId == null ? null : missingProfileLabel,
+            );
             final subItemMenuItems = _subItemMenuItems(
               data.subItems,
               subItemOptions,
@@ -234,6 +255,36 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                if (pricingProfileDeleted)
+                  Card(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    child: ListTile(
+                      title: const Text('Pricing profile deleted'),
+                      subtitle: Text(
+                        missingPricingProfileName == null
+                            ? 'This quote references a deleted profile.'
+                            : 'This quote references the deleted profile "$missingPricingProfileName".',
+                      ),
+                      trailing: FilledButton(
+                        onPressed: () => _selectPricingProfile('default'),
+                        child: const Text('Switch to Default'),
+                      ),
+                    ),
+                  )
+                else if (pricingProfileMissing)
+                  Card(
+                    child: ListTile(
+                      leading: const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      title: const Text('Loading pricing profile...'),
+                      subtitle: const Text(
+                        'Keeping your selection while profiles sync.',
+                      ),
+                    ),
+                  ),
                 if (_hasRemoteUpdate)
                   Card(
                     color: Theme.of(context).colorScheme.secondaryContainer,

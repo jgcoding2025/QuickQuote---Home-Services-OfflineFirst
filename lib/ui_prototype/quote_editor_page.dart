@@ -130,6 +130,9 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   StreamSubscription<OrgSettings>? _orgSettingsSub;
   List<PricingProfileHeader> _pricingProfiles = const [];
   OrgSettings _orgSettings = OrgSettings.defaults;
+  bool _pricingProfileMissing = false;
+  bool _pricingProfileDeleted = false;
+  String? _missingPricingProfileName;
 
   @override
   List<PricingProfileHeader> get pricingProfiles => _pricingProfiles;
@@ -137,6 +140,30 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   @override
   set pricingProfiles(List<PricingProfileHeader> value) {
     _pricingProfiles = value;
+  }
+
+  @override
+  bool get pricingProfileMissing => _pricingProfileMissing;
+
+  @override
+  set pricingProfileMissing(bool value) {
+    _pricingProfileMissing = value;
+  }
+
+  @override
+  bool get pricingProfileDeleted => _pricingProfileDeleted;
+
+  @override
+  set pricingProfileDeleted(bool value) {
+    _pricingProfileDeleted = value;
+  }
+
+  @override
+  String? get missingPricingProfileName => _missingPricingProfileName;
+
+  @override
+  set missingPricingProfileName(String? value) {
+    _missingPricingProfileName = value;
   }
 
   @override
@@ -167,6 +194,7 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
       setState(() {
         _pricingProfiles = profiles;
       });
+      _refreshPricingProfileStatus(profiles);
     });
     _orgSettingsSub ??= _orgSettingsRepo.stream().listen((settings) {
       setState(() {
@@ -209,13 +237,31 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
         taxRate = _orgSettings.taxRate;
         ccEnabled = _orgSettings.ccEnabled;
         ccRate = _orgSettings.ccRate;
+        _pricingProfileMissing = false;
+        _pricingProfileDeleted = false;
+        _missingPricingProfileName = null;
       });
     } else {
       final header = await _pricingProfilesRepo.getProfileById(profileId);
-      if (header == null) {
+      if (!mounted) {
         return;
       }
-      if (!mounted) {
+      if (header == null) {
+        setState(() {
+          _pricingProfileMissing = true;
+          _pricingProfileDeleted = false;
+          _missingPricingProfileName = null;
+        });
+        _snack(context, 'Loading pricing profile...');
+        return;
+      }
+      if (header.deleted) {
+        setState(() {
+          _pricingProfileMissing = false;
+          _pricingProfileDeleted = true;
+          _missingPricingProfileName = header.name;
+        });
+        _snack(context, 'Pricing profile was deleted.');
         return;
       }
       setState(() {
@@ -224,6 +270,9 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
         taxRate = header.taxRate;
         ccEnabled = header.ccEnabled;
         ccRate = header.ccRate;
+        _pricingProfileMissing = false;
+        _pricingProfileDeleted = false;
+        _missingPricingProfileName = null;
       });
     }
     _scheduleAutoSave();
@@ -237,6 +286,69 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
       _pendingRemoteQuote = null;
       _remoteRevision += 1;
     });
+  }
+
+  void _setPricingProfileStatus({
+    required bool missing,
+    required bool deleted,
+    String? name,
+  }) {
+    if (_pricingProfileMissing == missing &&
+        _pricingProfileDeleted == deleted &&
+        _missingPricingProfileName == name) {
+      return;
+    }
+    setState(() {
+      _pricingProfileMissing = missing;
+      _pricingProfileDeleted = deleted;
+      _missingPricingProfileName = name;
+    });
+  }
+
+  Future<void> _refreshPricingProfileStatus(
+    List<PricingProfileHeader> profiles,
+  ) async {
+    final currentId = pricingProfileId;
+    if (currentId == 'default') {
+      _setPricingProfileStatus(missing: false, deleted: false, name: null);
+      return;
+    }
+    PricingProfileHeader? match;
+    for (final profile in profiles) {
+      if (profile.id == currentId) {
+        match = profile;
+        break;
+      }
+    }
+    if (match != null) {
+      final wasMissing = _pricingProfileMissing || _pricingProfileDeleted;
+      _setPricingProfileStatus(missing: false, deleted: false, name: null);
+      if (wasMissing) {
+        setState(() {
+          _settingsFuture = _loadQuoteSettingsData();
+        });
+      }
+      return;
+    }
+    final header = await _pricingProfilesRepo.getProfileById(currentId);
+    if (!mounted) return;
+    if (header == null) {
+      _setPricingProfileStatus(missing: true, deleted: false, name: null);
+      return;
+    }
+    if (header.deleted) {
+      _setPricingProfileStatus(
+        missing: false,
+        deleted: true,
+        name: header.name,
+      );
+      return;
+    }
+    _setPricingProfileStatus(
+      missing: true,
+      deleted: false,
+      name: header.name,
+    );
   }
 
   @override

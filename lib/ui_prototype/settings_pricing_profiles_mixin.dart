@@ -6,6 +6,7 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
 
   final Map<String, Stream<PricingProfileCatalog>> _catalogStreams = {};
   Stream<List<PricingProfileHeader>>? _profilesStream;
+  List<PricingProfileHeader> _lastProfiles = const [];
 
   Stream<PricingProfileCatalog> _catalog$(String profileId) {
     return _catalogStreams.putIfAbsent(
@@ -23,7 +24,10 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
     return StreamBuilder<List<PricingProfileHeader>>(
       stream: profiles$(),
       builder: (context, snapshot) {
-        final profiles = snapshot.data ?? const [];
+        if (snapshot.hasData) {
+          _lastProfiles = snapshot.data!;
+        }
+        final profiles = snapshot.hasData ? snapshot.data! : _lastProfiles;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -144,13 +148,11 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
     }
     try {
       await pricingProfilesRepo.createProfileByDuplicatingDefault(name);
-      if (mounted) {
-        _snack(context, 'Pricing profile created.');
-      }
+      if (!mounted) return;
+      _snack(this.context, 'Pricing profile created.');
     } catch (e) {
-      if (mounted) {
-        _snack(context, 'Unable to create profile.');
-      }
+      if (!mounted) return;
+      _snack(this.context, 'Unable to create profile.');
     }
   }
 

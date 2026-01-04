@@ -58,6 +58,15 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   List<PricingProfileHeader> get pricingProfiles;
   set pricingProfiles(List<PricingProfileHeader> value);
 
+  bool get pricingProfileMissing;
+  set pricingProfileMissing(bool value);
+
+  bool get pricingProfileDeleted;
+  set pricingProfileDeleted(bool value);
+
+  String? get missingPricingProfileName;
+  set missingPricingProfileName(String? value);
+
   String get customerName;
   set customerName(String value);
 

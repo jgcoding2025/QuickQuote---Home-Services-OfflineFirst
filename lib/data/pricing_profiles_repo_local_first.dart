@@ -27,14 +27,21 @@ class PricingProfilesRepositoryLocalFirst {
   final SyncService _syncService;
   final Uuid _uuid;
 
-  Stream<List<PricingProfileHeader>> streamProfiles() async* {
-    final controller = StreamController<List<PricingProfileHeader>>();
+  Stream<List<PricingProfileHeader>> streamProfiles() {
+    final controller =
+        StreamController<List<PricingProfileHeader>>.broadcast();
     StreamSubscription<List<PricingProfileHeader>>? dataSub;
+
+    void emitProfiles(List<PricingProfileHeader> profiles) {
+      if (!controller.isClosed) {
+        controller.add(profiles);
+      }
+    }
 
     void listenSession(AppSession? session) {
       dataSub?.cancel();
       if (session == null || session.orgId == null) {
-        controller.add(const []);
+        emitProfiles(const []);
         return;
       }
       dataSub =
@@ -47,7 +54,7 @@ class PricingProfilesRepositoryLocalFirst {
                 ..orderBy([(tbl) => OrderingTerm.asc(tbl.name)]))
               .watch()
               .map((rows) => rows.map(_mapHeader).toList())
-              .listen(controller.add, onError: controller.addError);
+              .listen(emitProfiles, onError: controller.addError);
     }
 
     listenSession(_sessionController.value);
@@ -58,7 +65,7 @@ class PricingProfilesRepositoryLocalFirst {
       await sessionSub.cancel();
     };
 
-    yield* controller.stream;
+    return controller.stream;
   }
 
   Future<PricingProfileHeader?> getProfileById(String profileId) async {
