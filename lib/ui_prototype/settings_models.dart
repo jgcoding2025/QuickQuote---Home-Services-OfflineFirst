@@ -167,8 +167,8 @@ class _SubItemStandard {
   final int minutes;
 }
 
-class _SettingsData {
-  _SettingsData({
+class SettingsData {
+  SettingsData({
     required this.planTiers,
     required this.serviceTypes,
     required this.complexities,
@@ -178,8 +178,8 @@ class _SettingsData {
     required this.subItems,
   });
 
-  factory _SettingsData.empty() {
-    return _SettingsData(
+  factory SettingsData.empty() {
+    return SettingsData(
       planTiers: const [],
       serviceTypes: const [],
       complexities: const [],

@@ -15,7 +15,7 @@ class _SettingsPageState extends State<SettingsPage>
   late OrgSettingsRepositoryLocalFirst repo;
   late PricingProfilesRepositoryLocalFirst _pricingProfilesRepo;
   late PricingProfileCatalogRepositoryLocalFirst _pricingCatalogRepo;
-  late final Future<_SettingsData> _settingsDataFuture;
+  late final Future<SettingsData> _settingsDataFuture;
   bool _inviteLoading = false;
   String? _inviteCode;
   String? _inviteError;
@@ -46,7 +46,7 @@ class _SettingsPageState extends State<SettingsPage>
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<_SettingsData>(
+    return FutureBuilder<SettingsData>(
       future: _settingsDataFuture,
       builder: (context, dataSnap) {
         if (dataSnap.connectionState == ConnectionState.waiting) {
@@ -55,7 +55,7 @@ class _SettingsPageState extends State<SettingsPage>
         if (dataSnap.hasError) {
           return const Center(child: Text('Failed to load settings data.'));
         }
-        final data = dataSnap.data ?? _SettingsData.empty();
+        final data = dataSnap.data ?? SettingsData.empty();
         return StreamBuilder<OrgSettings>(
           stream: repo.stream(),
           builder: (context, snap) {
@@ -115,7 +115,7 @@ class _SettingsPageState extends State<SettingsPage>
     );
   }
 
-  Future<_SettingsData> _loadSettingsData() async {
+  Future<SettingsData> _loadSettingsData() async {
     final planTiers = await _loadList(
       'assets/settings/plan_tiers.json',
       _PlanTier.fromJson,
@@ -145,7 +145,7 @@ class _SettingsPageState extends State<SettingsPage>
       _SubItemStandard.fromJson,
     );
 
-    return _SettingsData(
+    return SettingsData(
       planTiers: planTiers,
       serviceTypes: serviceTypes,
       complexities: complexities,
