@@ -418,6 +418,10 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
       _isDirty = true;
       _autoSaveGeneration += 1;
     });
+    _scheduleAutoSave();
+  }
+
+  void _scheduleAutoSave() {
     final syncService = AppDependencies.of(context).syncService;
     final generation = _autoSaveGeneration;
     _autoSaveDebouncer.run(() {
