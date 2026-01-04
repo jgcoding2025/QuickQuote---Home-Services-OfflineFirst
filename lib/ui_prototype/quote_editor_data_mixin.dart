@@ -24,6 +24,15 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   bool get _isDirty;
   set _isDirty(bool value);
 
+  bool get _applyingRemote;
+  set _applyingRemote(bool value);
+
+  bool get _hasRemoteUpdate;
+  set _hasRemoteUpdate(bool value);
+
+  int get _remoteRevision;
+  set _remoteRevision(int value);
+
   Debouncer get _autoSaveDebouncer;
   int get _autoSaveGeneration;
   set _autoSaveGeneration(int value);
@@ -113,6 +122,7 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
 
   Future<bool> _confirmDiscardChanges();
   Future<void> _saveQuote();
+  void _refreshFromRemote();
   void _markDirty([VoidCallback? update]);
   Future<void> _autoSaveQuote(int generation, SyncService syncService);
 
@@ -413,6 +423,12 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
 
   @override
   void _markDirty([VoidCallback? update]) {
+    if (_applyingRemote) {
+      setState(() {
+        update?.call();
+      });
+      return;
+    }
     setState(() {
       update?.call();
       _isDirty = true;

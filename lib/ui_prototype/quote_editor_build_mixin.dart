@@ -202,6 +202,21 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                if (_hasRemoteUpdate)
+                  Card(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    child: ListTile(
+                      leading: const Icon(Icons.sync),
+                      title: const Text('Updated on another device'),
+                      subtitle:
+                          const Text('Refresh to load the latest changes.'),
+                      trailing: TextButton(
+                        onPressed: _refreshFromRemote,
+                        child: const Text('Refresh'),
+                      ),
+                    ),
+                  ),
+                if (_hasRemoteUpdate) const SizedBox(height: 12),
                 Text('Quote', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 12),
                 _buildCustomerDetailsSection(),

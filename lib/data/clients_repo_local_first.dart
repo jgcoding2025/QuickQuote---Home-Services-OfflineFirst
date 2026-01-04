@@ -57,6 +57,36 @@ class ClientsRepositoryLocalFirst {
     yield* controller.stream;
   }
 
+  Stream<Client?> watchClientById(String clientId) async* {
+    final controller = StreamController<Client?>();
+    StreamSubscription<ClientRow?>? dataSub;
+
+    void listenSession(AppSession? session) {
+      dataSub?.cancel();
+      if (session == null || session.orgId == null) {
+        controller.add(null);
+        return;
+      }
+      dataSub = _db
+          .watchClientById(session.orgId!, clientId)
+          .map((row) => row == null ? null : _clientFromRow(row))
+          .listen(
+            controller.add,
+            onError: controller.addError,
+          );
+    }
+
+    listenSession(_sessionController.value);
+    final sessionSub = _sessionController.stream.listen(listenSession);
+
+    controller.onCancel = () async {
+      await dataSub?.cancel();
+      await sessionSub.cancel();
+    };
+
+    yield* controller.stream;
+  }
+
   Future<void> setClient(
     String clientId,
     ClientDraft d, {

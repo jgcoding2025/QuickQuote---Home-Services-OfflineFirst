@@ -9,12 +9,14 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
       Column(
         children: [
           TextFormField(
+            key: ValueKey('quote-customerName-$_remoteRevision'),
             initialValue: customerName,
             decoration: _fieldDecoration('Customer'),
             onChanged: (v) => _markDirty(() => customerName = v),
           ),
           const SizedBox(height: 12),
           TextFormField(
+            key: ValueKey('quote-address-$_remoteRevision'),
             initialValue: address,
             decoration: _fieldDecoration('Address'),
             onChanged: (v) => _markDirty(() => address = v),
@@ -24,6 +26,7 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
             children: [
               Expanded(
                 child: TextFormField(
+                  key: ValueKey('quote-date-$_remoteRevision'),
                   initialValue: quoteDate,
                   decoration: _fieldDecoration('Date'),
                   onChanged: (v) => _markDirty(() => quoteDate = v),
@@ -32,6 +35,7 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
               const SizedBox(width: 12),
               Expanded(
                 child: TextFormField(
+                  key: ValueKey('quote-totalSqFt-$_remoteRevision'),
                   initialValue: totalSqFt,
                   decoration: _fieldDecoration('Total Sq Ft'),
                   keyboardType: TextInputType.number,
@@ -47,6 +51,7 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
             title: const Text('Use Total Sq Ft'),
           ),
           TextFormField(
+            key: ValueKey('quote-estimatedSqFt-$_remoteRevision'),
             initialValue: estimatedSqFt,
             decoration: _fieldDecoration('Estimated Sq Ft (rooms)'),
             keyboardType: TextInputType.number,
@@ -74,6 +79,7 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
       Column(
         children: [
           TextFormField(
+            key: ValueKey('quote-quoteName-$_remoteRevision'),
             initialValue: quoteName,
             minLines: 2,
             maxLines: 2,
@@ -82,6 +88,7 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
+            key: ValueKey('quote-serviceType-$_remoteRevision'),
             initialValue: resolvedServiceType,
             items: serviceTypeMenuItems,
             isExpanded: true,
@@ -141,6 +148,7 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
+            key: ValueKey('quote-frequency-$_remoteRevision'),
             initialValue: resolvedFrequency,
             items: frequencyOptions
                 .map(
@@ -153,6 +161,7 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
+            key: ValueKey('quote-lastProClean-$_remoteRevision'),
             initialValue: lastProClean,
             items: const [
               DropdownMenuItem(value: '< 2 weeks', child: Text('< 2 weeks')),
@@ -176,6 +185,7 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
               SizedBox(
                 width: 120,
                 child: TextFormField(
+                  key: ValueKey('quote-laborRate-$_remoteRevision'),
                   initialValue: laborRate.toStringAsFixed(0),
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(prefixText: '\$'),
@@ -196,6 +206,7 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
             children: [
               Expanded(
                 child: TextFormField(
+                  key: ValueKey('quote-taxRate-$_remoteRevision'),
                   initialValue: (taxRate * 100).toStringAsFixed(2),
                   keyboardType: TextInputType.number,
                   decoration: _fieldDecoration('Tax Rate (%)'),
@@ -210,6 +221,7 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
               const SizedBox(width: 12),
               Expanded(
                 child: TextFormField(
+                  key: ValueKey('quote-ccRate-$_remoteRevision'),
                   initialValue: (ccRate * 100).toStringAsFixed(2),
                   keyboardType: TextInputType.number,
                   decoration: _fieldDecoration('CC Fee Rate (%)'),
@@ -279,12 +291,14 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
           ),
           const SizedBox(height: 4),
           TextFormField(
+            key: ValueKey('quote-entryCode-$_remoteRevision'),
             initialValue: entryCode,
             decoration: _fieldDecoration('Entry'),
             onChanged: (v) => _markDirty(() => entryCode = v),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
+            key: ValueKey('quote-paymentMethod-$_remoteRevision'),
             initialValue: paymentMethod,
             items: const [
               DropdownMenuItem(value: 'Zelle', child: Text('Zelle')),
@@ -314,6 +328,7 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
       context,
       'Special Notes',
       TextFormField(
+        key: ValueKey('quote-specialNotes-$_remoteRevision'),
         initialValue: specialNotes,
         maxLines: 5,
         decoration: _fieldDecoration(''),
