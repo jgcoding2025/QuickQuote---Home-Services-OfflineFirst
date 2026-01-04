@@ -85,6 +85,35 @@ class QuotesRepositoryLocalFirst {
     yield* controller.stream;
   }
 
+  Stream<Quote?> watchQuoteById(String quoteId) async* {
+    final controller = StreamController<Quote?>();
+    StreamSubscription<Quote?>? dataSub;
+
+    Future<void> listenSession(AppSession? session) async {
+      await dataSub?.cancel();
+      if (session == null || session.orgId == null) {
+        controller.add(null);
+        return;
+      }
+      dataSub = _db
+          .watchQuoteById(session.orgId!, quoteId)
+          .asyncMap(_mapQuoteRowOrNull)
+          .listen(
+            controller.add,
+            onError: controller.addError,
+          );
+    }
+
+    await listenSession(_sessionController.value);
+    final sessionSub = _sessionController.stream.listen(listenSession);
+    controller.onCancel = () async {
+      await dataSub?.cancel();
+      await sessionSub.cancel();
+    };
+
+    yield* controller.stream;
+  }
+
   Future<void> setQuote(
     String quoteId,
     QuoteDraft d, {
@@ -182,50 +211,62 @@ class QuotesRepositoryLocalFirst {
   }
 
   Future<List<Quote>> _mapQuotes(List<QuoteRow> rows) async {
-    final itemsByQuote = <String, List<Map<String, dynamic>>>{};
+    final quotes = <Quote>[];
     for (final row in rows) {
-      final items = await _db.loadQuoteItems(row.id);
-      final ordered = items.where((item) => !item.deleted).toList()
-        ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-      itemsByQuote[row.id] =
-          ordered.map((item) => _decodeItem(item.payload)).toList();
+      quotes.add(await _mapQuoteRow(row));
     }
+    return quotes;
+  }
 
-    return rows.map((row) {
-      return Quote(
-        id: row.id,
-        clientId: row.clientId,
-        clientName: row.clientName,
-        quoteName: row.quoteName,
-        quoteDate: row.quoteDate,
-        serviceType: row.serviceType,
-        frequency: row.frequency,
-        lastProClean: row.lastProClean,
-        status: row.status.isEmpty ? 'Draft' : row.status,
-        total: row.total,
-        address: row.address,
-        totalSqFt: row.totalSqFt,
-        useTotalSqFt: row.useTotalSqFt,
-        estimatedSqFt: row.estimatedSqFt,
-        petsPresent: row.petsPresent,
-        homeOccupied: row.homeOccupied,
-        entryCode: row.entryCode,
-        paymentMethod: row.paymentMethod,
-        feedbackDiscussed: row.feedbackDiscussed,
-        laborRate: row.laborRate,
-        taxEnabled: row.taxEnabled,
-        ccEnabled: row.ccEnabled,
-        taxRate: row.taxRate,
-        ccRate: row.ccRate,
-        defaultRoomType: row.defaultRoomType,
-        defaultLevel: row.defaultLevel,
-        defaultSize: row.defaultSize,
-        defaultComplexity: row.defaultComplexity,
-        subItemType: row.subItemType,
-        specialNotes: row.specialNotes,
-        items: itemsByQuote[row.id] ?? const [],
-      );
-    }).toList();
+  Future<Quote?> _mapQuoteRowOrNull(QuoteRow? row) async {
+    if (row == null) {
+      return null;
+    }
+    return _mapQuoteRow(row);
+  }
+
+  Future<Quote> _mapQuoteRow(QuoteRow row) async {
+    final items = await _loadQuoteItems(row.id);
+    return Quote(
+      id: row.id,
+      clientId: row.clientId,
+      clientName: row.clientName,
+      quoteName: row.quoteName,
+      quoteDate: row.quoteDate,
+      serviceType: row.serviceType,
+      frequency: row.frequency,
+      lastProClean: row.lastProClean,
+      status: row.status.isEmpty ? 'Draft' : row.status,
+      total: row.total,
+      address: row.address,
+      totalSqFt: row.totalSqFt,
+      useTotalSqFt: row.useTotalSqFt,
+      estimatedSqFt: row.estimatedSqFt,
+      petsPresent: row.petsPresent,
+      homeOccupied: row.homeOccupied,
+      entryCode: row.entryCode,
+      paymentMethod: row.paymentMethod,
+      feedbackDiscussed: row.feedbackDiscussed,
+      laborRate: row.laborRate,
+      taxEnabled: row.taxEnabled,
+      ccEnabled: row.ccEnabled,
+      taxRate: row.taxRate,
+      ccRate: row.ccRate,
+      defaultRoomType: row.defaultRoomType,
+      defaultLevel: row.defaultLevel,
+      defaultSize: row.defaultSize,
+      defaultComplexity: row.defaultComplexity,
+      subItemType: row.subItemType,
+      specialNotes: row.specialNotes,
+      items: items,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> _loadQuoteItems(String quoteId) async {
+    final items = await _db.loadQuoteItems(quoteId);
+    final ordered = items.where((item) => !item.deleted).toList()
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    return ordered.map((item) => _decodeItem(item.payload)).toList();
   }
 
   QuotesCompanion _quoteCompanion(

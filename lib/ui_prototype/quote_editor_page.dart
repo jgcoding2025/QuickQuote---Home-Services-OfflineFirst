@@ -56,6 +56,14 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   @override
   bool _isDirty = false;
   @override
+  bool _applyingRemote = false;
+  @override
+  bool _hasRemoteUpdate = false;
+  Quote? _pendingRemoteQuote;
+  StreamSubscription<Quote?>? _remoteSubscription;
+  @override
+  int _remoteRevision = 0;
+  @override
   final Debouncer _autoSaveDebouncer = Debouncer(
     const Duration(milliseconds: 800),
   );
@@ -118,62 +126,95 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   void initState() {
     super.initState();
     _settingsFuture = _loadQuoteSettingsData();
-    quoteName = widget.quote.quoteName;
-    quoteDate = widget.quote.quoteDate.isEmpty
-        ? _today()
-        : widget.quote.quoteDate;
-    customerName = widget.quote.clientName;
-    serviceType = widget.quote.serviceType;
-    frequency = widget.quote.frequency;
-    lastProClean = widget.quote.lastProClean;
-    status = widget.quote.status;
-    if (widget.quote.address.isNotEmpty) {
-      address = widget.quote.address;
-    }
-    if (widget.quote.totalSqFt.isNotEmpty) {
-      totalSqFt = widget.quote.totalSqFt;
-    }
-    useTotalSqFt = widget.quote.useTotalSqFt;
-    if (widget.quote.estimatedSqFt.isNotEmpty) {
-      estimatedSqFt = widget.quote.estimatedSqFt;
-    }
-    petsPresent = widget.quote.petsPresent;
-    homeOccupied = widget.quote.homeOccupied;
-    if (widget.quote.entryCode.isNotEmpty) {
-      entryCode = widget.quote.entryCode;
-    }
-    if (widget.quote.paymentMethod.isNotEmpty) {
-      paymentMethod = widget.quote.paymentMethod;
-    }
-    feedbackDiscussed = widget.quote.feedbackDiscussed;
-    laborRate = widget.quote.laborRate;
-    taxEnabled = widget.quote.taxEnabled;
-    ccEnabled = widget.quote.ccEnabled;
-    taxRate = widget.quote.taxRate;
-    ccRate = widget.quote.ccRate;
-    if (widget.quote.defaultRoomType.isNotEmpty) {
-      defaultRoomType = widget.quote.defaultRoomType;
-    }
-    if (widget.quote.defaultLevel.isNotEmpty) {
-      defaultLevel = widget.quote.defaultLevel;
-    }
-    if (widget.quote.defaultSize.isNotEmpty) {
-      defaultSize = widget.quote.defaultSize;
-    }
-    if (widget.quote.defaultComplexity.isNotEmpty) {
-      defaultComplexity = widget.quote.defaultComplexity;
-    }
-    if (widget.quote.subItemType.isNotEmpty) {
-      subItemType = widget.quote.subItemType;
-    }
-    specialNotes = widget.quote.specialNotes;
-    items.addAll(widget.quote.items.map((item) => _QuoteItem.fromMap(item)));
+    _syncFromQuote(widget.quote);
+    _startRemoteWatch();
   }
 
   @override
   void dispose() {
+    _remoteSubscription?.cancel();
     _autoSaveDebouncer.dispose();
     super.dispose();
+  }
+
+  void _startRemoteWatch() {
+    _remoteSubscription = widget.repo
+        .watchQuoteById(widget.quote.id)
+        .listen((quote) {
+      if (!mounted || quote == null) return;
+      if (!_isDirty) {
+        _applyRemoteQuote(quote);
+      } else {
+        setState(() {
+          _pendingRemoteQuote = quote;
+          _hasRemoteUpdate = true;
+        });
+      }
+    });
+  }
+
+  void _syncFromQuote(Quote quote) {
+    quoteName = quote.quoteName;
+    quoteDate = quote.quoteDate.isEmpty ? _today() : quote.quoteDate;
+    customerName = quote.clientName;
+    serviceType = quote.serviceType;
+    frequency = quote.frequency;
+    lastProClean = quote.lastProClean;
+    status = quote.status;
+    address = quote.address;
+    totalSqFt = quote.totalSqFt;
+    useTotalSqFt = quote.useTotalSqFt;
+    estimatedSqFt = quote.estimatedSqFt;
+    petsPresent = quote.petsPresent;
+    homeOccupied = quote.homeOccupied;
+    entryCode = quote.entryCode;
+    paymentMethod = quote.paymentMethod;
+    feedbackDiscussed = quote.feedbackDiscussed;
+    laborRate = quote.laborRate;
+    taxEnabled = quote.taxEnabled;
+    ccEnabled = quote.ccEnabled;
+    taxRate = quote.taxRate;
+    ccRate = quote.ccRate;
+    if (quote.defaultRoomType.isNotEmpty) {
+      defaultRoomType = quote.defaultRoomType;
+    }
+    if (quote.defaultLevel.isNotEmpty) {
+      defaultLevel = quote.defaultLevel;
+    }
+    if (quote.defaultSize.isNotEmpty) {
+      defaultSize = quote.defaultSize;
+    }
+    if (quote.defaultComplexity.isNotEmpty) {
+      defaultComplexity = quote.defaultComplexity;
+    }
+    if (quote.subItemType.isNotEmpty) {
+      subItemType = quote.subItemType;
+    }
+    specialNotes = quote.specialNotes;
+    items
+      ..clear()
+      ..addAll(quote.items.map((item) => _QuoteItem.fromMap(item)));
+  }
+
+  void _applyRemoteQuote(Quote quote) {
+    _applyingRemote = true;
+    setState(() {
+      _syncFromQuote(quote);
+      _isDirty = false;
+      _hasRemoteUpdate = false;
+      _pendingRemoteQuote = null;
+      _remoteRevision += 1;
+    });
+    _applyingRemote = false;
+  }
+
+  @override
+  void _refreshFromRemote() {
+    final quote = _pendingRemoteQuote;
+    if (quote == null) {
+      return;
+    }
+    _applyRemoteQuote(quote);
   }
 
   @override

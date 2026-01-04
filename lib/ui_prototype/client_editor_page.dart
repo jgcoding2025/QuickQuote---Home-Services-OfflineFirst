@@ -20,6 +20,11 @@ class _ClientEditorPageState extends State<ClientEditorPage>
   @override
   bool _isDirty = false;
   @override
+  bool _applyingRemote = false;
+  bool _hasRemoteUpdate = false;
+  Client? _pendingRemoteClient;
+  StreamSubscription<Client?>? _remoteSubscription;
+  @override
   late ClientDraft _baseline;
   @override
   bool _allowPopOnce = false;
@@ -49,6 +54,7 @@ class _ClientEditorPageState extends State<ClientEditorPage>
   void initState() {
     super.initState();
     _load(widget.existing);
+    _startRemoteWatch();
 
     // Mark dirty when any field changes
     for (final c in [
@@ -69,6 +75,7 @@ class _ClientEditorPageState extends State<ClientEditorPage>
 
   @override
   void dispose() {
+    _remoteSubscription?.cancel();
     for (final c in [
       firstName,
       lastName,
@@ -95,6 +102,40 @@ class _ClientEditorPageState extends State<ClientEditorPage>
     email.dispose();
     notes.dispose();
     super.dispose();
+  }
+
+  void _startRemoteWatch() {
+    if (clientId == null) return;
+    _remoteSubscription =
+        widget.repo.watchClientById(clientId!).listen((client) {
+      if (!mounted || client == null) return;
+      if (!_isDirty) {
+        _applyRemoteClient(client);
+      } else {
+        setState(() {
+          _pendingRemoteClient = client;
+          _hasRemoteUpdate = true;
+        });
+      }
+    });
+  }
+
+  void _applyRemoteClient(Client client) {
+    _applyingRemote = true;
+    _load(client, notify: false);
+    setState(() {
+      _hasRemoteUpdate = false;
+      _pendingRemoteClient = null;
+    });
+    _applyingRemote = false;
+  }
+
+  void _refreshFromRemote() {
+    final client = _pendingRemoteClient;
+    if (client == null) {
+      return;
+    }
+    _applyRemoteClient(client);
   }
 
   @override
@@ -132,6 +173,21 @@ class _ClientEditorPageState extends State<ClientEditorPage>
         body: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (_hasRemoteUpdate)
+              Card(
+                color: Theme.of(context).colorScheme.secondaryContainer,
+                child: ListTile(
+                  leading: const Icon(Icons.sync),
+                  title: const Text('Updated on another device'),
+                  subtitle:
+                      const Text('Refresh to load the latest changes.'),
+                  trailing: TextButton(
+                    onPressed: _refreshFromRemote,
+                    child: const Text('Refresh'),
+                  ),
+                ),
+              ),
+            if (_hasRemoteUpdate) const SizedBox(height: 12),
             ..._buildClientDetailsForm(),
             const SizedBox(height: 16),
             _buildSaveActions(),
