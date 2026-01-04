@@ -2,6 +2,7 @@
 
 part of 'local_db.dart';
 
+// ignore_for_file: type=lint
 class $ClientsTable extends Clients with TableInfo<$ClientsTable, ClientRow> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -8766,7 +8767,7 @@ class FinalizedDocumentRow extends DataClass
     map['status'] = Variable<String>(status);
     map['local_path'] = Variable<String>(localPath);
     if (!nullToAbsent || remotePath != null) {
-      map['remote_path'] = Variable<String>(remotePath!);
+      map['remote_path'] = Variable<String>(remotePath);
     }
     map['quote_snapshot'] = Variable<String>(quoteSnapshot);
     map['pricing_snapshot'] = Variable<String>(pricingSnapshot);
@@ -8813,7 +8814,6 @@ class FinalizedDocumentRow extends DataClass
       totalsSnapshot: serializer.fromJson<String>(json['totalsSnapshot']),
     );
   }
-
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
@@ -8860,27 +8860,28 @@ class FinalizedDocumentRow extends DataClass
     pricingSnapshot: pricingSnapshot ?? this.pricingSnapshot,
     totalsSnapshot: totalsSnapshot ?? this.totalsSnapshot,
   );
-
   FinalizedDocumentRow copyWithCompanion(FinalizedDocumentsCompanion data) {
     return FinalizedDocumentRow(
-      id: data.id.present ? data.id.value : id,
-      orgId: data.orgId.present ? data.orgId.value : orgId,
-      quoteId: data.quoteId.present ? data.quoteId.value : quoteId,
-      docType: data.docType.present ? data.docType.value : docType,
-      createdAt: data.createdAt.present ? data.createdAt.value : createdAt,
-      updatedAt: data.updatedAt.present ? data.updatedAt.value : updatedAt,
-      status: data.status.present ? data.status.value : status,
-      localPath: data.localPath.present ? data.localPath.value : localPath,
-      remotePath: data.remotePath.present ? data.remotePath.value : remotePath,
+      id: data.id.present ? data.id.value : this.id,
+      orgId: data.orgId.present ? data.orgId.value : this.orgId,
+      quoteId: data.quoteId.present ? data.quoteId.value : this.quoteId,
+      docType: data.docType.present ? data.docType.value : this.docType,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      status: data.status.present ? data.status.value : this.status,
+      localPath: data.localPath.present ? data.localPath.value : this.localPath,
+      remotePath: data.remotePath.present
+          ? data.remotePath.value
+          : this.remotePath,
       quoteSnapshot: data.quoteSnapshot.present
           ? data.quoteSnapshot.value
-          : quoteSnapshot,
+          : this.quoteSnapshot,
       pricingSnapshot: data.pricingSnapshot.present
           ? data.pricingSnapshot.value
-          : pricingSnapshot,
+          : this.pricingSnapshot,
       totalsSnapshot: data.totalsSnapshot.present
           ? data.totalsSnapshot.value
-          : totalsSnapshot,
+          : this.totalsSnapshot,
     );
   }
 
@@ -8922,18 +8923,18 @@ class FinalizedDocumentRow extends DataClass
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is FinalizedDocumentRow &&
-          other.id == id &&
-          other.orgId == orgId &&
-          other.quoteId == quoteId &&
-          other.docType == docType &&
-          other.createdAt == createdAt &&
-          other.updatedAt == updatedAt &&
-          other.status == status &&
-          other.localPath == localPath &&
-          other.remotePath == remotePath &&
-          other.quoteSnapshot == quoteSnapshot &&
-          other.pricingSnapshot == pricingSnapshot &&
-          other.totalsSnapshot == totalsSnapshot);
+          other.id == this.id &&
+          other.orgId == this.orgId &&
+          other.quoteId == this.quoteId &&
+          other.docType == this.docType &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.status == this.status &&
+          other.localPath == this.localPath &&
+          other.remotePath == this.remotePath &&
+          other.quoteSnapshot == this.quoteSnapshot &&
+          other.pricingSnapshot == this.pricingSnapshot &&
+          other.totalsSnapshot == this.totalsSnapshot);
 }
 
 class FinalizedDocumentsCompanion
@@ -9083,10 +9084,7 @@ class FinalizedDocumentsCompanion
       map['local_path'] = Variable<String>(localPath.value);
     }
     if (remotePath.present) {
-      final v = remotePath.value;
-      if (v != null) {
-        map['remote_path'] = Variable<String>(v);
-      }
+      map['remote_path'] = Variable<String>(remotePath.value);
     }
     if (quoteSnapshot.present) {
       map['quote_snapshot'] = Variable<String>(quoteSnapshot.value);
@@ -9568,6 +9566,7 @@ typedef $$QuotesTableCreateCompanionBuilder =
       Value<bool> ccEnabled,
       Value<double> taxRate,
       Value<double> ccRate,
+      Value<String> pricingProfileId,
       Value<String> defaultRoomType,
       Value<String> defaultLevel,
       Value<String> defaultSize,
@@ -9605,6 +9604,7 @@ typedef $$QuotesTableUpdateCompanionBuilder =
       Value<bool> ccEnabled,
       Value<double> taxRate,
       Value<double> ccRate,
+      Value<String> pricingProfileId,
       Value<String> defaultRoomType,
       Value<String> defaultLevel,
       Value<String> defaultSize,
@@ -9755,6 +9755,11 @@ class $$QuotesTableFilterComposer
 
   ColumnFilters<double> get ccRate => $composableBuilder(
     column: $table.ccRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pricingProfileId => $composableBuilder(
+    column: $table.pricingProfileId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9933,6 +9938,11 @@ class $$QuotesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get pricingProfileId => $composableBuilder(
+    column: $table.pricingProfileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get defaultRoomType => $composableBuilder(
     column: $table.defaultRoomType,
     builder: (column) => ColumnOrderings(column),
@@ -10074,6 +10084,11 @@ class $$QuotesTableAnnotationComposer
   GeneratedColumn<double> get ccRate =>
       $composableBuilder(column: $table.ccRate, builder: (column) => column);
 
+  GeneratedColumn<String> get pricingProfileId => $composableBuilder(
+    column: $table.pricingProfileId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get defaultRoomType => $composableBuilder(
     column: $table.defaultRoomType,
     builder: (column) => column,
@@ -10160,6 +10175,7 @@ class $$QuotesTableTableManager
                 Value<bool> ccEnabled = const Value.absent(),
                 Value<double> taxRate = const Value.absent(),
                 Value<double> ccRate = const Value.absent(),
+                Value<String> pricingProfileId = const Value.absent(),
                 Value<String> defaultRoomType = const Value.absent(),
                 Value<String> defaultLevel = const Value.absent(),
                 Value<String> defaultSize = const Value.absent(),
@@ -10195,6 +10211,7 @@ class $$QuotesTableTableManager
                 ccEnabled: ccEnabled,
                 taxRate: taxRate,
                 ccRate: ccRate,
+                pricingProfileId: pricingProfileId,
                 defaultRoomType: defaultRoomType,
                 defaultLevel: defaultLevel,
                 defaultSize: defaultSize,
@@ -10232,6 +10249,7 @@ class $$QuotesTableTableManager
                 Value<bool> ccEnabled = const Value.absent(),
                 Value<double> taxRate = const Value.absent(),
                 Value<double> ccRate = const Value.absent(),
+                Value<String> pricingProfileId = const Value.absent(),
                 Value<String> defaultRoomType = const Value.absent(),
                 Value<String> defaultLevel = const Value.absent(),
                 Value<String> defaultSize = const Value.absent(),
@@ -10267,6 +10285,7 @@ class $$QuotesTableTableManager
                 ccEnabled: ccEnabled,
                 taxRate: taxRate,
                 ccRate: ccRate,
+                pricingProfileId: pricingProfileId,
                 defaultRoomType: defaultRoomType,
                 defaultLevel: defaultLevel,
                 defaultSize: defaultSize,
@@ -10545,6 +10564,7 @@ typedef $$OrgSettingsTableTableCreateCompanionBuilder =
       Value<double> taxRate,
       Value<bool> ccEnabled,
       Value<double> ccRate,
+      Value<String> defaultPricingProfileId,
       Value<int> rowid,
     });
 typedef $$OrgSettingsTableTableUpdateCompanionBuilder =
@@ -10557,6 +10577,7 @@ typedef $$OrgSettingsTableTableUpdateCompanionBuilder =
       Value<double> taxRate,
       Value<bool> ccEnabled,
       Value<double> ccRate,
+      Value<String> defaultPricingProfileId,
       Value<int> rowid,
     });
 
@@ -10606,6 +10627,11 @@ class $$OrgSettingsTableTableFilterComposer
 
   ColumnFilters<double> get ccRate => $composableBuilder(
     column: $table.ccRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get defaultPricingProfileId => $composableBuilder(
+    column: $table.defaultPricingProfileId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -10658,6 +10684,11 @@ class $$OrgSettingsTableTableOrderingComposer
     column: $table.ccRate,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get defaultPricingProfileId => $composableBuilder(
+    column: $table.defaultPricingProfileId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$OrgSettingsTableTableAnnotationComposer
@@ -10694,6 +10725,11 @@ class $$OrgSettingsTableTableAnnotationComposer
 
   GeneratedColumn<double> get ccRate =>
       $composableBuilder(column: $table.ccRate, builder: (column) => column);
+
+  GeneratedColumn<String> get defaultPricingProfileId => $composableBuilder(
+    column: $table.defaultPricingProfileId,
+    builder: (column) => column,
+  );
 }
 
 class $$OrgSettingsTableTableTableManager
@@ -10741,6 +10777,7 @@ class $$OrgSettingsTableTableTableManager
                 Value<double> taxRate = const Value.absent(),
                 Value<bool> ccEnabled = const Value.absent(),
                 Value<double> ccRate = const Value.absent(),
+                Value<String> defaultPricingProfileId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => OrgSettingsTableCompanion(
                 orgId: orgId,
@@ -10751,6 +10788,7 @@ class $$OrgSettingsTableTableTableManager
                 taxRate: taxRate,
                 ccEnabled: ccEnabled,
                 ccRate: ccRate,
+                defaultPricingProfileId: defaultPricingProfileId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -10763,6 +10801,7 @@ class $$OrgSettingsTableTableTableManager
                 Value<double> taxRate = const Value.absent(),
                 Value<bool> ccEnabled = const Value.absent(),
                 Value<double> ccRate = const Value.absent(),
+                Value<String> defaultPricingProfileId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => OrgSettingsTableCompanion.insert(
                 orgId: orgId,
@@ -10773,6 +10812,7 @@ class $$OrgSettingsTableTableTableManager
                 taxRate: taxRate,
                 ccEnabled: ccEnabled,
                 ccRate: ccRate,
+                defaultPricingProfileId: defaultPricingProfileId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -10798,6 +10838,2121 @@ typedef $$OrgSettingsTableTableProcessedTableManager =
         BaseReferences<_$AppDatabase, $OrgSettingsTableTable, OrgSettingsRow>,
       ),
       OrgSettingsRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PricingProfilesTableCreateCompanionBuilder =
+    PricingProfilesCompanion Function({
+      required String id,
+      required String orgId,
+      required String name,
+      Value<double> laborRate,
+      Value<bool> taxEnabled,
+      Value<double> taxRate,
+      Value<bool> ccEnabled,
+      Value<double> ccRate,
+      required int updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+typedef $$PricingProfilesTableUpdateCompanionBuilder =
+    PricingProfilesCompanion Function({
+      Value<String> id,
+      Value<String> orgId,
+      Value<String> name,
+      Value<double> laborRate,
+      Value<bool> taxEnabled,
+      Value<double> taxRate,
+      Value<bool> ccEnabled,
+      Value<double> ccRate,
+      Value<int> updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+
+class $$PricingProfilesTableFilterComposer
+    extends Composer<_$AppDatabase, $PricingProfilesTable> {
+  $$PricingProfilesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get laborRate => $composableBuilder(
+    column: $table.laborRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get taxEnabled => $composableBuilder(
+    column: $table.taxEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get taxRate => $composableBuilder(
+    column: $table.taxRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get ccEnabled => $composableBuilder(
+    column: $table.ccEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get ccRate => $composableBuilder(
+    column: $table.ccRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PricingProfilesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PricingProfilesTable> {
+  $$PricingProfilesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get laborRate => $composableBuilder(
+    column: $table.laborRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get taxEnabled => $composableBuilder(
+    column: $table.taxEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get taxRate => $composableBuilder(
+    column: $table.taxRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get ccEnabled => $composableBuilder(
+    column: $table.ccEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get ccRate => $composableBuilder(
+    column: $table.ccRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PricingProfilesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PricingProfilesTable> {
+  $$PricingProfilesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<double> get laborRate =>
+      $composableBuilder(column: $table.laborRate, builder: (column) => column);
+
+  GeneratedColumn<bool> get taxEnabled => $composableBuilder(
+    column: $table.taxEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get taxRate =>
+      $composableBuilder(column: $table.taxRate, builder: (column) => column);
+
+  GeneratedColumn<bool> get ccEnabled =>
+      $composableBuilder(column: $table.ccEnabled, builder: (column) => column);
+
+  GeneratedColumn<double> get ccRate =>
+      $composableBuilder(column: $table.ccRate, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+}
+
+class $$PricingProfilesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PricingProfilesTable,
+          PricingProfileRow,
+          $$PricingProfilesTableFilterComposer,
+          $$PricingProfilesTableOrderingComposer,
+          $$PricingProfilesTableAnnotationComposer,
+          $$PricingProfilesTableCreateCompanionBuilder,
+          $$PricingProfilesTableUpdateCompanionBuilder,
+          (
+            PricingProfileRow,
+            BaseReferences<
+              _$AppDatabase,
+              $PricingProfilesTable,
+              PricingProfileRow
+            >,
+          ),
+          PricingProfileRow,
+          PrefetchHooks Function()
+        > {
+  $$PricingProfilesTableTableManager(
+    _$AppDatabase db,
+    $PricingProfilesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PricingProfilesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PricingProfilesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PricingProfilesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<double> laborRate = const Value.absent(),
+                Value<bool> taxEnabled = const Value.absent(),
+                Value<double> taxRate = const Value.absent(),
+                Value<bool> ccEnabled = const Value.absent(),
+                Value<double> ccRate = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfilesCompanion(
+                id: id,
+                orgId: orgId,
+                name: name,
+                laborRate: laborRate,
+                taxEnabled: taxEnabled,
+                taxRate: taxRate,
+                ccEnabled: ccEnabled,
+                ccRate: ccRate,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orgId,
+                required String name,
+                Value<double> laborRate = const Value.absent(),
+                Value<bool> taxEnabled = const Value.absent(),
+                Value<double> taxRate = const Value.absent(),
+                Value<bool> ccEnabled = const Value.absent(),
+                Value<double> ccRate = const Value.absent(),
+                required int updatedAt,
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfilesCompanion.insert(
+                id: id,
+                orgId: orgId,
+                name: name,
+                laborRate: laborRate,
+                taxEnabled: taxEnabled,
+                taxRate: taxRate,
+                ccEnabled: ccEnabled,
+                ccRate: ccRate,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PricingProfilesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PricingProfilesTable,
+      PricingProfileRow,
+      $$PricingProfilesTableFilterComposer,
+      $$PricingProfilesTableOrderingComposer,
+      $$PricingProfilesTableAnnotationComposer,
+      $$PricingProfilesTableCreateCompanionBuilder,
+      $$PricingProfilesTableUpdateCompanionBuilder,
+      (
+        PricingProfileRow,
+        BaseReferences<_$AppDatabase, $PricingProfilesTable, PricingProfileRow>,
+      ),
+      PricingProfileRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PricingProfileServiceTypesTableCreateCompanionBuilder =
+    PricingProfileServiceTypesCompanion Function({
+      required String id,
+      required String orgId,
+      required String profileId,
+      Value<int> row,
+      Value<String> category,
+      required String serviceType,
+      Value<String> description,
+      Value<double> pricePerSqFt,
+      Value<double> multiplier,
+      required int updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+typedef $$PricingProfileServiceTypesTableUpdateCompanionBuilder =
+    PricingProfileServiceTypesCompanion Function({
+      Value<String> id,
+      Value<String> orgId,
+      Value<String> profileId,
+      Value<int> row,
+      Value<String> category,
+      Value<String> serviceType,
+      Value<String> description,
+      Value<double> pricePerSqFt,
+      Value<double> multiplier,
+      Value<int> updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+
+class $$PricingProfileServiceTypesTableFilterComposer
+    extends Composer<_$AppDatabase, $PricingProfileServiceTypesTable> {
+  $$PricingProfileServiceTypesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get row => $composableBuilder(
+    column: $table.row,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get serviceType => $composableBuilder(
+    column: $table.serviceType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get pricePerSqFt => $composableBuilder(
+    column: $table.pricePerSqFt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get multiplier => $composableBuilder(
+    column: $table.multiplier,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PricingProfileServiceTypesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PricingProfileServiceTypesTable> {
+  $$PricingProfileServiceTypesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get row => $composableBuilder(
+    column: $table.row,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get serviceType => $composableBuilder(
+    column: $table.serviceType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get pricePerSqFt => $composableBuilder(
+    column: $table.pricePerSqFt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get multiplier => $composableBuilder(
+    column: $table.multiplier,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PricingProfileServiceTypesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PricingProfileServiceTypesTable> {
+  $$PricingProfileServiceTypesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<String> get profileId =>
+      $composableBuilder(column: $table.profileId, builder: (column) => column);
+
+  GeneratedColumn<int> get row =>
+      $composableBuilder(column: $table.row, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get serviceType => $composableBuilder(
+    column: $table.serviceType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get pricePerSqFt => $composableBuilder(
+    column: $table.pricePerSqFt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get multiplier => $composableBuilder(
+    column: $table.multiplier,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+}
+
+class $$PricingProfileServiceTypesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PricingProfileServiceTypesTable,
+          PricingProfileServiceTypeRow,
+          $$PricingProfileServiceTypesTableFilterComposer,
+          $$PricingProfileServiceTypesTableOrderingComposer,
+          $$PricingProfileServiceTypesTableAnnotationComposer,
+          $$PricingProfileServiceTypesTableCreateCompanionBuilder,
+          $$PricingProfileServiceTypesTableUpdateCompanionBuilder,
+          (
+            PricingProfileServiceTypeRow,
+            BaseReferences<
+              _$AppDatabase,
+              $PricingProfileServiceTypesTable,
+              PricingProfileServiceTypeRow
+            >,
+          ),
+          PricingProfileServiceTypeRow,
+          PrefetchHooks Function()
+        > {
+  $$PricingProfileServiceTypesTableTableManager(
+    _$AppDatabase db,
+    $PricingProfileServiceTypesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PricingProfileServiceTypesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PricingProfileServiceTypesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PricingProfileServiceTypesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<String> profileId = const Value.absent(),
+                Value<int> row = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String> serviceType = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<double> pricePerSqFt = const Value.absent(),
+                Value<double> multiplier = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfileServiceTypesCompanion(
+                id: id,
+                orgId: orgId,
+                profileId: profileId,
+                row: row,
+                category: category,
+                serviceType: serviceType,
+                description: description,
+                pricePerSqFt: pricePerSqFt,
+                multiplier: multiplier,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orgId,
+                required String profileId,
+                Value<int> row = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                required String serviceType,
+                Value<String> description = const Value.absent(),
+                Value<double> pricePerSqFt = const Value.absent(),
+                Value<double> multiplier = const Value.absent(),
+                required int updatedAt,
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfileServiceTypesCompanion.insert(
+                id: id,
+                orgId: orgId,
+                profileId: profileId,
+                row: row,
+                category: category,
+                serviceType: serviceType,
+                description: description,
+                pricePerSqFt: pricePerSqFt,
+                multiplier: multiplier,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PricingProfileServiceTypesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PricingProfileServiceTypesTable,
+      PricingProfileServiceTypeRow,
+      $$PricingProfileServiceTypesTableFilterComposer,
+      $$PricingProfileServiceTypesTableOrderingComposer,
+      $$PricingProfileServiceTypesTableAnnotationComposer,
+      $$PricingProfileServiceTypesTableCreateCompanionBuilder,
+      $$PricingProfileServiceTypesTableUpdateCompanionBuilder,
+      (
+        PricingProfileServiceTypeRow,
+        BaseReferences<
+          _$AppDatabase,
+          $PricingProfileServiceTypesTable,
+          PricingProfileServiceTypeRow
+        >,
+      ),
+      PricingProfileServiceTypeRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PricingProfileFrequenciesTableCreateCompanionBuilder =
+    PricingProfileFrequenciesCompanion Function({
+      required String id,
+      required String orgId,
+      required String profileId,
+      required String serviceType,
+      required String frequency,
+      Value<double> multiplier,
+      required int updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+typedef $$PricingProfileFrequenciesTableUpdateCompanionBuilder =
+    PricingProfileFrequenciesCompanion Function({
+      Value<String> id,
+      Value<String> orgId,
+      Value<String> profileId,
+      Value<String> serviceType,
+      Value<String> frequency,
+      Value<double> multiplier,
+      Value<int> updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+
+class $$PricingProfileFrequenciesTableFilterComposer
+    extends Composer<_$AppDatabase, $PricingProfileFrequenciesTable> {
+  $$PricingProfileFrequenciesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get serviceType => $composableBuilder(
+    column: $table.serviceType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get frequency => $composableBuilder(
+    column: $table.frequency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get multiplier => $composableBuilder(
+    column: $table.multiplier,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PricingProfileFrequenciesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PricingProfileFrequenciesTable> {
+  $$PricingProfileFrequenciesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get serviceType => $composableBuilder(
+    column: $table.serviceType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get frequency => $composableBuilder(
+    column: $table.frequency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get multiplier => $composableBuilder(
+    column: $table.multiplier,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PricingProfileFrequenciesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PricingProfileFrequenciesTable> {
+  $$PricingProfileFrequenciesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<String> get profileId =>
+      $composableBuilder(column: $table.profileId, builder: (column) => column);
+
+  GeneratedColumn<String> get serviceType => $composableBuilder(
+    column: $table.serviceType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get frequency =>
+      $composableBuilder(column: $table.frequency, builder: (column) => column);
+
+  GeneratedColumn<double> get multiplier => $composableBuilder(
+    column: $table.multiplier,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+}
+
+class $$PricingProfileFrequenciesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PricingProfileFrequenciesTable,
+          PricingProfileFrequencyRow,
+          $$PricingProfileFrequenciesTableFilterComposer,
+          $$PricingProfileFrequenciesTableOrderingComposer,
+          $$PricingProfileFrequenciesTableAnnotationComposer,
+          $$PricingProfileFrequenciesTableCreateCompanionBuilder,
+          $$PricingProfileFrequenciesTableUpdateCompanionBuilder,
+          (
+            PricingProfileFrequencyRow,
+            BaseReferences<
+              _$AppDatabase,
+              $PricingProfileFrequenciesTable,
+              PricingProfileFrequencyRow
+            >,
+          ),
+          PricingProfileFrequencyRow,
+          PrefetchHooks Function()
+        > {
+  $$PricingProfileFrequenciesTableTableManager(
+    _$AppDatabase db,
+    $PricingProfileFrequenciesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PricingProfileFrequenciesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PricingProfileFrequenciesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PricingProfileFrequenciesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<String> profileId = const Value.absent(),
+                Value<String> serviceType = const Value.absent(),
+                Value<String> frequency = const Value.absent(),
+                Value<double> multiplier = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfileFrequenciesCompanion(
+                id: id,
+                orgId: orgId,
+                profileId: profileId,
+                serviceType: serviceType,
+                frequency: frequency,
+                multiplier: multiplier,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orgId,
+                required String profileId,
+                required String serviceType,
+                required String frequency,
+                Value<double> multiplier = const Value.absent(),
+                required int updatedAt,
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfileFrequenciesCompanion.insert(
+                id: id,
+                orgId: orgId,
+                profileId: profileId,
+                serviceType: serviceType,
+                frequency: frequency,
+                multiplier: multiplier,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PricingProfileFrequenciesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PricingProfileFrequenciesTable,
+      PricingProfileFrequencyRow,
+      $$PricingProfileFrequenciesTableFilterComposer,
+      $$PricingProfileFrequenciesTableOrderingComposer,
+      $$PricingProfileFrequenciesTableAnnotationComposer,
+      $$PricingProfileFrequenciesTableCreateCompanionBuilder,
+      $$PricingProfileFrequenciesTableUpdateCompanionBuilder,
+      (
+        PricingProfileFrequencyRow,
+        BaseReferences<
+          _$AppDatabase,
+          $PricingProfileFrequenciesTable,
+          PricingProfileFrequencyRow
+        >,
+      ),
+      PricingProfileFrequencyRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PricingProfileRoomTypesTableCreateCompanionBuilder =
+    PricingProfileRoomTypesCompanion Function({
+      required String id,
+      required String orgId,
+      required String profileId,
+      Value<int> row,
+      Value<String> category,
+      required String roomType,
+      Value<String> description,
+      Value<int> minutes,
+      Value<int> squareFeet,
+      required int updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+typedef $$PricingProfileRoomTypesTableUpdateCompanionBuilder =
+    PricingProfileRoomTypesCompanion Function({
+      Value<String> id,
+      Value<String> orgId,
+      Value<String> profileId,
+      Value<int> row,
+      Value<String> category,
+      Value<String> roomType,
+      Value<String> description,
+      Value<int> minutes,
+      Value<int> squareFeet,
+      Value<int> updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+
+class $$PricingProfileRoomTypesTableFilterComposer
+    extends Composer<_$AppDatabase, $PricingProfileRoomTypesTable> {
+  $$PricingProfileRoomTypesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get row => $composableBuilder(
+    column: $table.row,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get roomType => $composableBuilder(
+    column: $table.roomType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get minutes => $composableBuilder(
+    column: $table.minutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get squareFeet => $composableBuilder(
+    column: $table.squareFeet,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PricingProfileRoomTypesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PricingProfileRoomTypesTable> {
+  $$PricingProfileRoomTypesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get row => $composableBuilder(
+    column: $table.row,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get roomType => $composableBuilder(
+    column: $table.roomType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get minutes => $composableBuilder(
+    column: $table.minutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get squareFeet => $composableBuilder(
+    column: $table.squareFeet,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PricingProfileRoomTypesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PricingProfileRoomTypesTable> {
+  $$PricingProfileRoomTypesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<String> get profileId =>
+      $composableBuilder(column: $table.profileId, builder: (column) => column);
+
+  GeneratedColumn<int> get row =>
+      $composableBuilder(column: $table.row, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get roomType =>
+      $composableBuilder(column: $table.roomType, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get minutes =>
+      $composableBuilder(column: $table.minutes, builder: (column) => column);
+
+  GeneratedColumn<int> get squareFeet => $composableBuilder(
+    column: $table.squareFeet,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+}
+
+class $$PricingProfileRoomTypesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PricingProfileRoomTypesTable,
+          PricingProfileRoomTypeRow,
+          $$PricingProfileRoomTypesTableFilterComposer,
+          $$PricingProfileRoomTypesTableOrderingComposer,
+          $$PricingProfileRoomTypesTableAnnotationComposer,
+          $$PricingProfileRoomTypesTableCreateCompanionBuilder,
+          $$PricingProfileRoomTypesTableUpdateCompanionBuilder,
+          (
+            PricingProfileRoomTypeRow,
+            BaseReferences<
+              _$AppDatabase,
+              $PricingProfileRoomTypesTable,
+              PricingProfileRoomTypeRow
+            >,
+          ),
+          PricingProfileRoomTypeRow,
+          PrefetchHooks Function()
+        > {
+  $$PricingProfileRoomTypesTableTableManager(
+    _$AppDatabase db,
+    $PricingProfileRoomTypesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PricingProfileRoomTypesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PricingProfileRoomTypesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PricingProfileRoomTypesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<String> profileId = const Value.absent(),
+                Value<int> row = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String> roomType = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<int> minutes = const Value.absent(),
+                Value<int> squareFeet = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfileRoomTypesCompanion(
+                id: id,
+                orgId: orgId,
+                profileId: profileId,
+                row: row,
+                category: category,
+                roomType: roomType,
+                description: description,
+                minutes: minutes,
+                squareFeet: squareFeet,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orgId,
+                required String profileId,
+                Value<int> row = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                required String roomType,
+                Value<String> description = const Value.absent(),
+                Value<int> minutes = const Value.absent(),
+                Value<int> squareFeet = const Value.absent(),
+                required int updatedAt,
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfileRoomTypesCompanion.insert(
+                id: id,
+                orgId: orgId,
+                profileId: profileId,
+                row: row,
+                category: category,
+                roomType: roomType,
+                description: description,
+                minutes: minutes,
+                squareFeet: squareFeet,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PricingProfileRoomTypesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PricingProfileRoomTypesTable,
+      PricingProfileRoomTypeRow,
+      $$PricingProfileRoomTypesTableFilterComposer,
+      $$PricingProfileRoomTypesTableOrderingComposer,
+      $$PricingProfileRoomTypesTableAnnotationComposer,
+      $$PricingProfileRoomTypesTableCreateCompanionBuilder,
+      $$PricingProfileRoomTypesTableUpdateCompanionBuilder,
+      (
+        PricingProfileRoomTypeRow,
+        BaseReferences<
+          _$AppDatabase,
+          $PricingProfileRoomTypesTable,
+          PricingProfileRoomTypeRow
+        >,
+      ),
+      PricingProfileRoomTypeRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PricingProfileSubItemsTableCreateCompanionBuilder =
+    PricingProfileSubItemsCompanion Function({
+      required String id,
+      required String orgId,
+      required String profileId,
+      Value<String> category,
+      required String subItem,
+      Value<String> description,
+      Value<int> minutes,
+      required int updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+typedef $$PricingProfileSubItemsTableUpdateCompanionBuilder =
+    PricingProfileSubItemsCompanion Function({
+      Value<String> id,
+      Value<String> orgId,
+      Value<String> profileId,
+      Value<String> category,
+      Value<String> subItem,
+      Value<String> description,
+      Value<int> minutes,
+      Value<int> updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+
+class $$PricingProfileSubItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $PricingProfileSubItemsTable> {
+  $$PricingProfileSubItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subItem => $composableBuilder(
+    column: $table.subItem,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get minutes => $composableBuilder(
+    column: $table.minutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PricingProfileSubItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PricingProfileSubItemsTable> {
+  $$PricingProfileSubItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subItem => $composableBuilder(
+    column: $table.subItem,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get minutes => $composableBuilder(
+    column: $table.minutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PricingProfileSubItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PricingProfileSubItemsTable> {
+  $$PricingProfileSubItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<String> get profileId =>
+      $composableBuilder(column: $table.profileId, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get subItem =>
+      $composableBuilder(column: $table.subItem, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get minutes =>
+      $composableBuilder(column: $table.minutes, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+}
+
+class $$PricingProfileSubItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PricingProfileSubItemsTable,
+          PricingProfileSubItemRow,
+          $$PricingProfileSubItemsTableFilterComposer,
+          $$PricingProfileSubItemsTableOrderingComposer,
+          $$PricingProfileSubItemsTableAnnotationComposer,
+          $$PricingProfileSubItemsTableCreateCompanionBuilder,
+          $$PricingProfileSubItemsTableUpdateCompanionBuilder,
+          (
+            PricingProfileSubItemRow,
+            BaseReferences<
+              _$AppDatabase,
+              $PricingProfileSubItemsTable,
+              PricingProfileSubItemRow
+            >,
+          ),
+          PricingProfileSubItemRow,
+          PrefetchHooks Function()
+        > {
+  $$PricingProfileSubItemsTableTableManager(
+    _$AppDatabase db,
+    $PricingProfileSubItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PricingProfileSubItemsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PricingProfileSubItemsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PricingProfileSubItemsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<String> profileId = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String> subItem = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<int> minutes = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfileSubItemsCompanion(
+                id: id,
+                orgId: orgId,
+                profileId: profileId,
+                category: category,
+                subItem: subItem,
+                description: description,
+                minutes: minutes,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orgId,
+                required String profileId,
+                Value<String> category = const Value.absent(),
+                required String subItem,
+                Value<String> description = const Value.absent(),
+                Value<int> minutes = const Value.absent(),
+                required int updatedAt,
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfileSubItemsCompanion.insert(
+                id: id,
+                orgId: orgId,
+                profileId: profileId,
+                category: category,
+                subItem: subItem,
+                description: description,
+                minutes: minutes,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PricingProfileSubItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PricingProfileSubItemsTable,
+      PricingProfileSubItemRow,
+      $$PricingProfileSubItemsTableFilterComposer,
+      $$PricingProfileSubItemsTableOrderingComposer,
+      $$PricingProfileSubItemsTableAnnotationComposer,
+      $$PricingProfileSubItemsTableCreateCompanionBuilder,
+      $$PricingProfileSubItemsTableUpdateCompanionBuilder,
+      (
+        PricingProfileSubItemRow,
+        BaseReferences<
+          _$AppDatabase,
+          $PricingProfileSubItemsTable,
+          PricingProfileSubItemRow
+        >,
+      ),
+      PricingProfileSubItemRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PricingProfileSizesTableCreateCompanionBuilder =
+    PricingProfileSizesCompanion Function({
+      required String id,
+      required String orgId,
+      required String profileId,
+      required String size,
+      Value<double> multiplier,
+      Value<String> definition,
+      required int updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+typedef $$PricingProfileSizesTableUpdateCompanionBuilder =
+    PricingProfileSizesCompanion Function({
+      Value<String> id,
+      Value<String> orgId,
+      Value<String> profileId,
+      Value<String> size,
+      Value<double> multiplier,
+      Value<String> definition,
+      Value<int> updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+
+class $$PricingProfileSizesTableFilterComposer
+    extends Composer<_$AppDatabase, $PricingProfileSizesTable> {
+  $$PricingProfileSizesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get size => $composableBuilder(
+    column: $table.size,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get multiplier => $composableBuilder(
+    column: $table.multiplier,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get definition => $composableBuilder(
+    column: $table.definition,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PricingProfileSizesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PricingProfileSizesTable> {
+  $$PricingProfileSizesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get size => $composableBuilder(
+    column: $table.size,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get multiplier => $composableBuilder(
+    column: $table.multiplier,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get definition => $composableBuilder(
+    column: $table.definition,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PricingProfileSizesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PricingProfileSizesTable> {
+  $$PricingProfileSizesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<String> get profileId =>
+      $composableBuilder(column: $table.profileId, builder: (column) => column);
+
+  GeneratedColumn<String> get size =>
+      $composableBuilder(column: $table.size, builder: (column) => column);
+
+  GeneratedColumn<double> get multiplier => $composableBuilder(
+    column: $table.multiplier,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get definition => $composableBuilder(
+    column: $table.definition,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+}
+
+class $$PricingProfileSizesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PricingProfileSizesTable,
+          PricingProfileSizeRow,
+          $$PricingProfileSizesTableFilterComposer,
+          $$PricingProfileSizesTableOrderingComposer,
+          $$PricingProfileSizesTableAnnotationComposer,
+          $$PricingProfileSizesTableCreateCompanionBuilder,
+          $$PricingProfileSizesTableUpdateCompanionBuilder,
+          (
+            PricingProfileSizeRow,
+            BaseReferences<
+              _$AppDatabase,
+              $PricingProfileSizesTable,
+              PricingProfileSizeRow
+            >,
+          ),
+          PricingProfileSizeRow,
+          PrefetchHooks Function()
+        > {
+  $$PricingProfileSizesTableTableManager(
+    _$AppDatabase db,
+    $PricingProfileSizesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PricingProfileSizesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PricingProfileSizesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PricingProfileSizesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<String> profileId = const Value.absent(),
+                Value<String> size = const Value.absent(),
+                Value<double> multiplier = const Value.absent(),
+                Value<String> definition = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfileSizesCompanion(
+                id: id,
+                orgId: orgId,
+                profileId: profileId,
+                size: size,
+                multiplier: multiplier,
+                definition: definition,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orgId,
+                required String profileId,
+                required String size,
+                Value<double> multiplier = const Value.absent(),
+                Value<String> definition = const Value.absent(),
+                required int updatedAt,
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfileSizesCompanion.insert(
+                id: id,
+                orgId: orgId,
+                profileId: profileId,
+                size: size,
+                multiplier: multiplier,
+                definition: definition,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PricingProfileSizesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PricingProfileSizesTable,
+      PricingProfileSizeRow,
+      $$PricingProfileSizesTableFilterComposer,
+      $$PricingProfileSizesTableOrderingComposer,
+      $$PricingProfileSizesTableAnnotationComposer,
+      $$PricingProfileSizesTableCreateCompanionBuilder,
+      $$PricingProfileSizesTableUpdateCompanionBuilder,
+      (
+        PricingProfileSizeRow,
+        BaseReferences<
+          _$AppDatabase,
+          $PricingProfileSizesTable,
+          PricingProfileSizeRow
+        >,
+      ),
+      PricingProfileSizeRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PricingProfileComplexitiesTableCreateCompanionBuilder =
+    PricingProfileComplexitiesCompanion Function({
+      required String id,
+      required String orgId,
+      required String profileId,
+      required String level,
+      Value<double> multiplier,
+      Value<String> definition,
+      required int updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+typedef $$PricingProfileComplexitiesTableUpdateCompanionBuilder =
+    PricingProfileComplexitiesCompanion Function({
+      Value<String> id,
+      Value<String> orgId,
+      Value<String> profileId,
+      Value<String> level,
+      Value<double> multiplier,
+      Value<String> definition,
+      Value<int> updatedAt,
+      Value<bool> deleted,
+      Value<int> rowid,
+    });
+
+class $$PricingProfileComplexitiesTableFilterComposer
+    extends Composer<_$AppDatabase, $PricingProfileComplexitiesTable> {
+  $$PricingProfileComplexitiesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get multiplier => $composableBuilder(
+    column: $table.multiplier,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get definition => $composableBuilder(
+    column: $table.definition,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PricingProfileComplexitiesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PricingProfileComplexitiesTable> {
+  $$PricingProfileComplexitiesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get multiplier => $composableBuilder(
+    column: $table.multiplier,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get definition => $composableBuilder(
+    column: $table.definition,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PricingProfileComplexitiesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PricingProfileComplexitiesTable> {
+  $$PricingProfileComplexitiesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<String> get profileId =>
+      $composableBuilder(column: $table.profileId, builder: (column) => column);
+
+  GeneratedColumn<String> get level =>
+      $composableBuilder(column: $table.level, builder: (column) => column);
+
+  GeneratedColumn<double> get multiplier => $composableBuilder(
+    column: $table.multiplier,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get definition => $composableBuilder(
+    column: $table.definition,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+}
+
+class $$PricingProfileComplexitiesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PricingProfileComplexitiesTable,
+          PricingProfileComplexityRow,
+          $$PricingProfileComplexitiesTableFilterComposer,
+          $$PricingProfileComplexitiesTableOrderingComposer,
+          $$PricingProfileComplexitiesTableAnnotationComposer,
+          $$PricingProfileComplexitiesTableCreateCompanionBuilder,
+          $$PricingProfileComplexitiesTableUpdateCompanionBuilder,
+          (
+            PricingProfileComplexityRow,
+            BaseReferences<
+              _$AppDatabase,
+              $PricingProfileComplexitiesTable,
+              PricingProfileComplexityRow
+            >,
+          ),
+          PricingProfileComplexityRow,
+          PrefetchHooks Function()
+        > {
+  $$PricingProfileComplexitiesTableTableManager(
+    _$AppDatabase db,
+    $PricingProfileComplexitiesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PricingProfileComplexitiesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PricingProfileComplexitiesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PricingProfileComplexitiesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<String> profileId = const Value.absent(),
+                Value<String> level = const Value.absent(),
+                Value<double> multiplier = const Value.absent(),
+                Value<String> definition = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfileComplexitiesCompanion(
+                id: id,
+                orgId: orgId,
+                profileId: profileId,
+                level: level,
+                multiplier: multiplier,
+                definition: definition,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orgId,
+                required String profileId,
+                required String level,
+                Value<double> multiplier = const Value.absent(),
+                Value<String> definition = const Value.absent(),
+                required int updatedAt,
+                Value<bool> deleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PricingProfileComplexitiesCompanion.insert(
+                id: id,
+                orgId: orgId,
+                profileId: profileId,
+                level: level,
+                multiplier: multiplier,
+                definition: definition,
+                updatedAt: updatedAt,
+                deleted: deleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PricingProfileComplexitiesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PricingProfileComplexitiesTable,
+      PricingProfileComplexityRow,
+      $$PricingProfileComplexitiesTableFilterComposer,
+      $$PricingProfileComplexitiesTableOrderingComposer,
+      $$PricingProfileComplexitiesTableAnnotationComposer,
+      $$PricingProfileComplexitiesTableCreateCompanionBuilder,
+      $$PricingProfileComplexitiesTableUpdateCompanionBuilder,
+      (
+        PricingProfileComplexityRow,
+        BaseReferences<
+          _$AppDatabase,
+          $PricingProfileComplexitiesTable,
+          PricingProfileComplexityRow
+        >,
+      ),
+      PricingProfileComplexityRow,
       PrefetchHooks Function()
     >;
 typedef $$OutboxTableCreateCompanionBuilder =
@@ -11217,6 +13372,360 @@ typedef $$SyncStateTableProcessedTableManager =
       SyncStateRow,
       PrefetchHooks Function()
     >;
+typedef $$FinalizedDocumentsTableCreateCompanionBuilder =
+    FinalizedDocumentsCompanion Function({
+      required String id,
+      required String orgId,
+      required String quoteId,
+      required String docType,
+      required int createdAt,
+      required int updatedAt,
+      required String status,
+      required String localPath,
+      Value<String?> remotePath,
+      required String quoteSnapshot,
+      required String pricingSnapshot,
+      required String totalsSnapshot,
+      Value<int> rowid,
+    });
+typedef $$FinalizedDocumentsTableUpdateCompanionBuilder =
+    FinalizedDocumentsCompanion Function({
+      Value<String> id,
+      Value<String> orgId,
+      Value<String> quoteId,
+      Value<String> docType,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<String> status,
+      Value<String> localPath,
+      Value<String?> remotePath,
+      Value<String> quoteSnapshot,
+      Value<String> pricingSnapshot,
+      Value<String> totalsSnapshot,
+      Value<int> rowid,
+    });
+
+class $$FinalizedDocumentsTableFilterComposer
+    extends Composer<_$AppDatabase, $FinalizedDocumentsTable> {
+  $$FinalizedDocumentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quoteId => $composableBuilder(
+    column: $table.quoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get docType => $composableBuilder(
+    column: $table.docType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localPath => $composableBuilder(
+    column: $table.localPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remotePath => $composableBuilder(
+    column: $table.remotePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quoteSnapshot => $composableBuilder(
+    column: $table.quoteSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pricingSnapshot => $composableBuilder(
+    column: $table.pricingSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get totalsSnapshot => $composableBuilder(
+    column: $table.totalsSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FinalizedDocumentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $FinalizedDocumentsTable> {
+  $$FinalizedDocumentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orgId => $composableBuilder(
+    column: $table.orgId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quoteId => $composableBuilder(
+    column: $table.quoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get docType => $composableBuilder(
+    column: $table.docType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get localPath => $composableBuilder(
+    column: $table.localPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remotePath => $composableBuilder(
+    column: $table.remotePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quoteSnapshot => $composableBuilder(
+    column: $table.quoteSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pricingSnapshot => $composableBuilder(
+    column: $table.pricingSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get totalsSnapshot => $composableBuilder(
+    column: $table.totalsSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FinalizedDocumentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FinalizedDocumentsTable> {
+  $$FinalizedDocumentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get orgId =>
+      $composableBuilder(column: $table.orgId, builder: (column) => column);
+
+  GeneratedColumn<String> get quoteId =>
+      $composableBuilder(column: $table.quoteId, builder: (column) => column);
+
+  GeneratedColumn<String> get docType =>
+      $composableBuilder(column: $table.docType, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get localPath =>
+      $composableBuilder(column: $table.localPath, builder: (column) => column);
+
+  GeneratedColumn<String> get remotePath => $composableBuilder(
+    column: $table.remotePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get quoteSnapshot => $composableBuilder(
+    column: $table.quoteSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get pricingSnapshot => $composableBuilder(
+    column: $table.pricingSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get totalsSnapshot => $composableBuilder(
+    column: $table.totalsSnapshot,
+    builder: (column) => column,
+  );
+}
+
+class $$FinalizedDocumentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FinalizedDocumentsTable,
+          FinalizedDocumentRow,
+          $$FinalizedDocumentsTableFilterComposer,
+          $$FinalizedDocumentsTableOrderingComposer,
+          $$FinalizedDocumentsTableAnnotationComposer,
+          $$FinalizedDocumentsTableCreateCompanionBuilder,
+          $$FinalizedDocumentsTableUpdateCompanionBuilder,
+          (
+            FinalizedDocumentRow,
+            BaseReferences<
+              _$AppDatabase,
+              $FinalizedDocumentsTable,
+              FinalizedDocumentRow
+            >,
+          ),
+          FinalizedDocumentRow,
+          PrefetchHooks Function()
+        > {
+  $$FinalizedDocumentsTableTableManager(
+    _$AppDatabase db,
+    $FinalizedDocumentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FinalizedDocumentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FinalizedDocumentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FinalizedDocumentsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> orgId = const Value.absent(),
+                Value<String> quoteId = const Value.absent(),
+                Value<String> docType = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> localPath = const Value.absent(),
+                Value<String?> remotePath = const Value.absent(),
+                Value<String> quoteSnapshot = const Value.absent(),
+                Value<String> pricingSnapshot = const Value.absent(),
+                Value<String> totalsSnapshot = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FinalizedDocumentsCompanion(
+                id: id,
+                orgId: orgId,
+                quoteId: quoteId,
+                docType: docType,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                status: status,
+                localPath: localPath,
+                remotePath: remotePath,
+                quoteSnapshot: quoteSnapshot,
+                pricingSnapshot: pricingSnapshot,
+                totalsSnapshot: totalsSnapshot,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String orgId,
+                required String quoteId,
+                required String docType,
+                required int createdAt,
+                required int updatedAt,
+                required String status,
+                required String localPath,
+                Value<String?> remotePath = const Value.absent(),
+                required String quoteSnapshot,
+                required String pricingSnapshot,
+                required String totalsSnapshot,
+                Value<int> rowid = const Value.absent(),
+              }) => FinalizedDocumentsCompanion.insert(
+                id: id,
+                orgId: orgId,
+                quoteId: quoteId,
+                docType: docType,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                status: status,
+                localPath: localPath,
+                remotePath: remotePath,
+                quoteSnapshot: quoteSnapshot,
+                pricingSnapshot: pricingSnapshot,
+                totalsSnapshot: totalsSnapshot,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FinalizedDocumentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FinalizedDocumentsTable,
+      FinalizedDocumentRow,
+      $$FinalizedDocumentsTableFilterComposer,
+      $$FinalizedDocumentsTableOrderingComposer,
+      $$FinalizedDocumentsTableAnnotationComposer,
+      $$FinalizedDocumentsTableCreateCompanionBuilder,
+      $$FinalizedDocumentsTableUpdateCompanionBuilder,
+      (
+        FinalizedDocumentRow,
+        BaseReferences<
+          _$AppDatabase,
+          $FinalizedDocumentsTable,
+          FinalizedDocumentRow
+        >,
+      ),
+      FinalizedDocumentRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -11229,8 +13738,41 @@ class $AppDatabaseManager {
       $$QuoteItemsTableTableManager(_db, _db.quoteItems);
   $$OrgSettingsTableTableTableManager get orgSettingsTable =>
       $$OrgSettingsTableTableTableManager(_db, _db.orgSettingsTable);
+  $$PricingProfilesTableTableManager get pricingProfiles =>
+      $$PricingProfilesTableTableManager(_db, _db.pricingProfiles);
+  $$PricingProfileServiceTypesTableTableManager
+  get pricingProfileServiceTypes =>
+      $$PricingProfileServiceTypesTableTableManager(
+        _db,
+        _db.pricingProfileServiceTypes,
+      );
+  $$PricingProfileFrequenciesTableTableManager get pricingProfileFrequencies =>
+      $$PricingProfileFrequenciesTableTableManager(
+        _db,
+        _db.pricingProfileFrequencies,
+      );
+  $$PricingProfileRoomTypesTableTableManager get pricingProfileRoomTypes =>
+      $$PricingProfileRoomTypesTableTableManager(
+        _db,
+        _db.pricingProfileRoomTypes,
+      );
+  $$PricingProfileSubItemsTableTableManager get pricingProfileSubItems =>
+      $$PricingProfileSubItemsTableTableManager(
+        _db,
+        _db.pricingProfileSubItems,
+      );
+  $$PricingProfileSizesTableTableManager get pricingProfileSizes =>
+      $$PricingProfileSizesTableTableManager(_db, _db.pricingProfileSizes);
+  $$PricingProfileComplexitiesTableTableManager
+  get pricingProfileComplexities =>
+      $$PricingProfileComplexitiesTableTableManager(
+        _db,
+        _db.pricingProfileComplexities,
+      );
   $$OutboxTableTableManager get outbox =>
       $$OutboxTableTableManager(_db, _db.outbox);
   $$SyncStateTableTableManager get syncState =>
       $$SyncStateTableTableManager(_db, _db.syncState);
+  $$FinalizedDocumentsTableTableManager get finalizedDocuments =>
+      $$FinalizedDocumentsTableTableManager(_db, _db.finalizedDocuments);
 }
