@@ -421,12 +421,57 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
     return shouldLeave ?? false;
   }
 
+  void _syncFromQuote(Quote quote) {
+    _applyingRemote = true;
+    try {
+      quoteName = quote.quoteName;
+      quoteDate = quote.quoteDate.isEmpty ? _today() : quote.quoteDate;
+      customerName = quote.clientName;
+      serviceType = quote.serviceType;
+      frequency = quote.frequency;
+      lastProClean = quote.lastProClean;
+      status = quote.status;
+      address = quote.address;
+      totalSqFt = quote.totalSqFt;
+      useTotalSqFt = quote.useTotalSqFt;
+      estimatedSqFt = quote.estimatedSqFt;
+      petsPresent = quote.petsPresent;
+      homeOccupied = quote.homeOccupied;
+      entryCode = quote.entryCode;
+      paymentMethod = quote.paymentMethod;
+      feedbackDiscussed = quote.feedbackDiscussed;
+      laborRate = quote.laborRate;
+      taxEnabled = quote.taxEnabled;
+      ccEnabled = quote.ccEnabled;
+      taxRate = quote.taxRate;
+      ccRate = quote.ccRate;
+      if (quote.defaultRoomType.isNotEmpty) {
+        defaultRoomType = quote.defaultRoomType;
+      }
+      if (quote.defaultLevel.isNotEmpty) {
+        defaultLevel = quote.defaultLevel;
+      }
+      if (quote.defaultSize.isNotEmpty) {
+        defaultSize = quote.defaultSize;
+      }
+      if (quote.defaultComplexity.isNotEmpty) {
+        defaultComplexity = quote.defaultComplexity;
+      }
+      if (quote.subItemType.isNotEmpty) {
+        subItemType = quote.subItemType;
+      }
+      specialNotes = quote.specialNotes;
+      items
+        ..clear()
+        ..addAll(quote.items.map((item) => _QuoteItem.fromMap(item)));
+    } finally {
+      _applyingRemote = false;
+    }
+  }
+
   @override
   void _markDirty([VoidCallback? update]) {
     if (_applyingRemote) {
-      setState(() {
-        update?.call();
-      });
       return;
     }
     setState(() {

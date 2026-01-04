@@ -50,25 +50,38 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
     }
   }
 
-  void _load(Client? c, {bool notify = true}) {
-    clientId = c?.id;
-    final d = c?.toDraft() ?? ClientDraft();
-    firstName.text = d.firstName;
-    lastName.text = d.lastName;
-    street1.text = d.street1;
-    street2.text = d.street2;
-    city.text = d.city;
-    state.text = d.state;
-    zip.text = d.zip;
-    phone.text = d.phone;
-    email.text = d.email;
-    notes.text = d.notes;
+  void _load(
+    Client? c, {
+    bool notify = true,
+    bool applyingRemote = false,
+  }) {
+    if (applyingRemote) {
+      _applyingRemote = true;
+    }
+    try {
+      clientId = c?.id;
+      final d = c?.toDraft() ?? ClientDraft();
+      firstName.text = d.firstName;
+      lastName.text = d.lastName;
+      street1.text = d.street1;
+      street2.text = d.street2;
+      city.text = d.city;
+      state.text = d.state;
+      zip.text = d.zip;
+      phone.text = d.phone;
+      email.text = d.email;
+      notes.text = d.notes;
 
-    _baseline = _draft();
-    _isDirty = false;
+      _baseline = _draft();
+      _isDirty = false;
 
-    if (notify) {
-      setState(() {});
+      if (notify) {
+        setState(() {});
+      }
+    } finally {
+      if (applyingRemote) {
+        _applyingRemote = false;
+      }
     }
   }
 
