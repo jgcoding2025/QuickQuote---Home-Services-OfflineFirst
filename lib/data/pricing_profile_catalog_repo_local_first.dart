@@ -319,6 +319,217 @@ class PricingProfileCatalogRepositoryLocalFirst {
     );
   }
 
+  Future<void> updateRoomType({
+    required String id,
+    String? roomType,
+    String? description,
+    int? minutes,
+    int? squareFeet,
+  }) async {
+    final session = _sessionController.session;
+    final orgId = session.orgId;
+    if (orgId == null) {
+      throw StateError('Organization is not set yet.');
+    }
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final row =
+        await (_db.select(_db.pricingProfileRoomTypes)
+              ..where((tbl) => tbl.id.equals(id))
+              ..limit(1))
+            .getSingleOrNull();
+    if (row == null) {
+      throw StateError('Room type not found.');
+    }
+    await (_db.update(_db.pricingProfileRoomTypes)
+          ..where((tbl) => tbl.id.equals(id)))
+        .write(
+      PricingProfileRoomTypesCompanion(
+        roomType:
+            roomType == null ? const Value.absent() : Value(roomType),
+        description: description == null
+            ? const Value.absent()
+            : Value(description),
+        minutes: minutes == null ? const Value.absent() : Value(minutes),
+        squareFeet:
+            squareFeet == null ? const Value.absent() : Value(squareFeet),
+        updatedAt: Value(now),
+      ),
+    );
+    await _insertOutbox(
+      entityType: 'pricing_profile_room_type',
+      entityId: id,
+      opType: 'update',
+      payload: {
+        'id': id,
+        'orgId': orgId,
+        'profileId': row.profileId,
+        if (roomType != null) 'roomType': roomType,
+        if (description != null) 'description': description,
+        if (minutes != null) 'minutes': minutes,
+        if (squareFeet != null) 'squareFeet': squareFeet,
+        'updatedAt': now,
+        'deleted': false,
+      },
+      orgId: orgId,
+      updatedAt: now,
+    );
+  }
+
+  Future<void> updateSubItem({
+    required String id,
+    String? subItem,
+    String? description,
+    int? minutes,
+  }) async {
+    final session = _sessionController.session;
+    final orgId = session.orgId;
+    if (orgId == null) {
+      throw StateError('Organization is not set yet.');
+    }
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final row =
+        await (_db.select(_db.pricingProfileSubItems)
+              ..where((tbl) => tbl.id.equals(id))
+              ..limit(1))
+            .getSingleOrNull();
+    if (row == null) {
+      throw StateError('Add-on item not found.');
+    }
+    await (_db.update(_db.pricingProfileSubItems)
+          ..where((tbl) => tbl.id.equals(id)))
+        .write(
+      PricingProfileSubItemsCompanion(
+        subItem: subItem == null ? const Value.absent() : Value(subItem),
+        description: description == null
+            ? const Value.absent()
+            : Value(description),
+        minutes: minutes == null ? const Value.absent() : Value(minutes),
+        updatedAt: Value(now),
+      ),
+    );
+    await _insertOutbox(
+      entityType: 'pricing_profile_sub_item',
+      entityId: id,
+      opType: 'update',
+      payload: {
+        'id': id,
+        'orgId': orgId,
+        'profileId': row.profileId,
+        if (subItem != null) 'subItem': subItem,
+        if (description != null) 'description': description,
+        if (minutes != null) 'minutes': minutes,
+        'updatedAt': now,
+        'deleted': false,
+      },
+      orgId: orgId,
+      updatedAt: now,
+    );
+  }
+
+  Future<void> updateSize({
+    required String id,
+    String? size,
+    String? definition,
+    double? multiplier,
+  }) async {
+    final session = _sessionController.session;
+    final orgId = session.orgId;
+    if (orgId == null) {
+      throw StateError('Organization is not set yet.');
+    }
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final row =
+        await (_db.select(_db.pricingProfileSizes)
+              ..where((tbl) => tbl.id.equals(id))
+              ..limit(1))
+            .getSingleOrNull();
+    if (row == null) {
+      throw StateError('Size not found.');
+    }
+    await (_db.update(_db.pricingProfileSizes)
+          ..where((tbl) => tbl.id.equals(id)))
+        .write(
+      PricingProfileSizesCompanion(
+        size: size == null ? const Value.absent() : Value(size),
+        definition:
+            definition == null ? const Value.absent() : Value(definition),
+        multiplier: multiplier == null
+            ? const Value.absent()
+            : Value(multiplier),
+        updatedAt: Value(now),
+      ),
+    );
+    await _insertOutbox(
+      entityType: 'pricing_profile_size',
+      entityId: id,
+      opType: 'update',
+      payload: {
+        'id': id,
+        'orgId': orgId,
+        'profileId': row.profileId,
+        if (size != null) 'size': size,
+        if (definition != null) 'definition': definition,
+        if (multiplier != null) 'multiplier': multiplier,
+        'updatedAt': now,
+        'deleted': false,
+      },
+      orgId: orgId,
+      updatedAt: now,
+    );
+  }
+
+  Future<void> updateComplexity({
+    required String id,
+    String? level,
+    String? definition,
+    double? multiplier,
+  }) async {
+    final session = _sessionController.session;
+    final orgId = session.orgId;
+    if (orgId == null) {
+      throw StateError('Organization is not set yet.');
+    }
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final row =
+        await (_db.select(_db.pricingProfileComplexities)
+              ..where((tbl) => tbl.id.equals(id))
+              ..limit(1))
+            .getSingleOrNull();
+    if (row == null) {
+      throw StateError('Complexity not found.');
+    }
+    await (_db.update(_db.pricingProfileComplexities)
+          ..where((tbl) => tbl.id.equals(id)))
+        .write(
+      PricingProfileComplexitiesCompanion(
+        level: level == null ? const Value.absent() : Value(level),
+        definition:
+            definition == null ? const Value.absent() : Value(definition),
+        multiplier: multiplier == null
+            ? const Value.absent()
+            : Value(multiplier),
+        updatedAt: Value(now),
+      ),
+    );
+    await _insertOutbox(
+      entityType: 'pricing_profile_complexity',
+      entityId: id,
+      opType: 'update',
+      payload: {
+        'id': id,
+        'orgId': orgId,
+        'profileId': row.profileId,
+        if (level != null) 'level': level,
+        if (definition != null) 'definition': definition,
+        if (multiplier != null) 'multiplier': multiplier,
+        'updatedAt': now,
+        'deleted': false,
+      },
+      orgId: orgId,
+      updatedAt: now,
+    );
+  }
+
   PricingProfileServiceType _mapServiceType(
     PricingProfileServiceTypeRow row,
   ) {

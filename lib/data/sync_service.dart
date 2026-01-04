@@ -37,12 +37,15 @@ class SyncService {
   SyncStatus _current = SyncStatus.offline;
   Future<void>? _uploadInFlight;
   Future<void>? _downloadInFlight;
-  static const Duration downloadPollingInterval = Duration(seconds: 45);
+  static const Duration downloadPollingInterval = Duration(seconds: 3);
   static const Duration uploadDebounce = Duration(seconds: 2);
   static const Duration safetyUploadInterval = Duration(minutes: 10);
 
   Stream<SyncStatus> get statusStream => _statusController.stream;
   SyncStatus get currentStatus => _current;
+  bool get hasPeerOnline => _presenceService.hasPeerOnline;
+  Stream<bool> get hasPeerOnlineStream =>
+      _presenceService.hasPeerOnlineStream;
 
   void _setStatus(SyncStatus status) {
     if (_current == status) {
