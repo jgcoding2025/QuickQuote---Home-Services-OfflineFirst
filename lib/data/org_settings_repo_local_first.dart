@@ -161,6 +161,6 @@ class OrgSettingsRepositoryLocalFirst {
         ),
       );
     }
-    unawaited(_syncService.sync());
+    _syncService.requestUpload(reason: 'org_settings_change');
   }
 }

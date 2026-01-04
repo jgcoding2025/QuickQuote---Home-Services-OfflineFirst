@@ -4,7 +4,6 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
   PricingProfilesRepositoryLocalFirst get pricingProfilesRepo;
   PricingProfileCatalogRepositoryLocalFirst get pricingCatalogRepo;
 
-  final Map<String, PricingProfileCatalog> _lastCatalogs = {};
   Stream<List<PricingProfileHeader>>? _profilesStream;
   List<PricingProfileHeader> _lastProfiles = const [];
 
@@ -12,7 +11,11 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
     return _profilesStream ??= pricingProfilesRepo.streamProfiles();
   }
 
-  Widget _pricingProfilesCard(BuildContext context, OrgSettings settings) {
+  Widget _pricingProfilesCard(
+    BuildContext context,
+    OrgSettings settings,
+    _SettingsData data,
+  ) {
     return StreamBuilder<List<PricingProfileHeader>>(
       stream: profiles$(),
       builder: (context, snapshot) {
@@ -26,16 +29,15 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Create custom pricing profiles by duplicating Default.',
-            ),
+            const Text('Manage pricing tiers and profile catalogs.'),
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerLeft,
               child: FilledButton.icon(
-                onPressed: () => _showDuplicateProfileDialog(context),
+                onPressed: () =>
+                    _showDuplicateProfileDialog(context, profiles),
                 icon: const Icon(Icons.copy),
-                label: const Text('Duplicate Default'),
+                label: const Text('Duplicate Profile'),
               ),
             ),
             const SizedBox(height: 12),
@@ -46,6 +48,24 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
               isDefault: settings.defaultPricingProfileId == 'default',
               onSetDefault: () => _save(
                 settings.copyWith(defaultPricingProfileId: 'default'),
+              ),
+              onTap: () => _openPricingTierDetail(
+                context,
+                data,
+                settings,
+                PricingProfileHeader(
+                  id: 'default',
+                  orgId: '',
+                  name: 'Default',
+                  laborRate: settings.laborRate,
+                  taxEnabled: settings.taxEnabled,
+                  taxRate: settings.taxRate,
+                  ccEnabled: settings.ccEnabled,
+                  ccRate: settings.ccRate,
+                  updatedAt: 0,
+                  deleted: false,
+                ),
+                isDefault: true,
               ),
               isLocked: true,
             ),
@@ -64,7 +84,12 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
                   onSetDefault: () => _save(
                     settings.copyWith(defaultPricingProfileId: profile.id),
                   ),
-                  onEdit: () => _showEditProfileDialog(context, profile),
+                  onTap: () => _openPricingTierDetail(
+                    context,
+                    data,
+                    settings,
+                    profile,
+                  ),
                   onDelete: () => _confirmDeleteProfile(context, profile),
                 ),
               ),
@@ -80,14 +105,15 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
     required String subtitle,
     required bool isDefault,
     required VoidCallback onSetDefault,
+    VoidCallback? onTap,
     bool isLocked = false,
-    VoidCallback? onEdit,
     VoidCallback? onDelete,
   }) {
     return Card(
       child: ListTile(
         title: Text(title),
         subtitle: Text(subtitle),
+        onTap: onTap,
         leading: isDefault
             ? const Icon(Icons.check_circle, color: Colors.green)
             : const Icon(Icons.circle_outlined),
@@ -102,12 +128,6 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
               ),
             if (!isLocked)
               IconButton(
-                tooltip: 'Edit',
-                onPressed: onEdit,
-                icon: const Icon(Icons.edit_outlined),
-              ),
-            if (!isLocked)
-              IconButton(
                 tooltip: 'Delete',
                 onPressed: onDelete,
                 icon: const Icon(Icons.delete_outline),
@@ -118,39 +138,103 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
     );
   }
 
-  Future<void> _showDuplicateProfileDialog(BuildContext context) async {
+  Future<void> _showDuplicateProfileDialog(
+    BuildContext context,
+    List<PricingProfileHeader> profiles,
+  ) async {
     final controller = TextEditingController(text: 'Custom Profile');
+    var selectedSourceId = 'default';
     final name = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Duplicate Default'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(labelText: 'Profile name'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Duplicate Profile'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                value: selectedSourceId,
+                items: [
+                  const DropdownMenuItem(
+                    value: 'default',
+                    child: Text('Default'),
+                  ),
+                  ...profiles.map(
+                    (profile) => DropdownMenuItem(
+                      value: profile.id,
+                      child: Text(profile.name),
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    selectedSourceId = value ?? 'default';
+                  });
+                },
+                decoration: const InputDecoration(labelText: 'Source profile'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller,
+                decoration: const InputDecoration(labelText: 'Profile name'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(
+                context,
+                '${selectedSourceId}::${controller.text}',
+              ),
+              child: const Text('Create'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('Create'),
-          ),
-        ],
       ),
     );
     if (name == null) {
       return;
     }
+    final parts = name.split('::');
+    final sourceProfileId = parts.isNotEmpty ? parts.first : 'default';
+    final desiredName = parts.length > 1 ? parts[1] : '';
     try {
-      await pricingProfilesRepo.createProfileByDuplicatingDefault(name);
+      await pricingProfilesRepo.createProfileByDuplicatingProfile(
+        sourceProfileId,
+        desiredName,
+      );
       if (!mounted) return;
       _snack(this.context, 'Pricing profile created.');
     } catch (e) {
       if (!mounted) return;
       _snack(this.context, 'Unable to create profile.');
     }
+  }
+
+  void _openPricingTierDetail(
+    BuildContext context,
+    _SettingsData data,
+    OrgSettings settings,
+    PricingProfileHeader profile, {
+    bool isDefault = false,
+  }) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PricingTierDetailPage(
+          profileId: profile.id,
+          initialProfile: profile,
+          isDefault: isDefault,
+          orgSettings: settings,
+          pricingProfilesRepo: pricingProfilesRepo,
+          pricingCatalogRepo: pricingCatalogRepo,
+          settingsData: data,
+        ),
+      ),
+    );
   }
 
   Future<void> _confirmDeleteProfile(
@@ -182,312 +266,4 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
     await pricingProfilesRepo.deleteProfile(profile.id);
   }
 
-  Future<void> _showEditProfileDialog(
-    BuildContext context,
-    PricingProfileHeader profile,
-  ) async {
-    final nameController = TextEditingController(text: profile.name);
-    final laborController =
-        TextEditingController(text: profile.laborRate.toStringAsFixed(2));
-    final taxController =
-        TextEditingController(text: profile.taxRate.toStringAsFixed(2));
-    final ccController =
-        TextEditingController(text: profile.ccRate.toStringAsFixed(2));
-    var taxEnabled = profile.taxEnabled;
-    var ccEnabled = profile.ccEnabled;
-    final catalogStream = pricingCatalogRepo.streamCatalog(profile.id);
-    final cachedCatalog = _lastCatalogs[profile.id];
-
-    await showDialog<void>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setLocalState) {
-            return AlertDialog(
-              title: Text('Edit ${profile.name}'),
-              content: SizedBox(
-                width: 520,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextField(
-                        controller: nameController,
-                        decoration:
-                            const InputDecoration(labelText: 'Profile name'),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: laborController,
-                        decoration: const InputDecoration(
-                          labelText: 'Labor rate (\$/hr)',
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                      SwitchListTile(
-                        value: taxEnabled,
-                        onChanged: (v) =>
-                            setLocalState(() => taxEnabled = v),
-                        title: const Text('Tax enabled'),
-                      ),
-                      if (taxEnabled)
-                        TextField(
-                          controller: taxController,
-                          decoration: const InputDecoration(
-                            labelText: 'Tax rate (decimal)',
-                          ),
-                          keyboardType: TextInputType.number,
-                        ),
-                      SwitchListTile(
-                        value: ccEnabled,
-                        onChanged: (v) =>
-                            setLocalState(() => ccEnabled = v),
-                        title: const Text('Credit card fee enabled'),
-                      ),
-                      if (ccEnabled)
-                        TextField(
-                          controller: ccController,
-                          decoration: const InputDecoration(
-                            labelText: 'CC rate (decimal)',
-                          ),
-                          keyboardType: TextInputType.number,
-                        ),
-                      const SizedBox(height: 12),
-                      StreamBuilder<PricingProfileCatalog>(
-                        stream: catalogStream,
-                        initialData: cachedCatalog,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            _lastCatalogs[profile.id] = snapshot.data!;
-                          }
-                          final catalog = snapshot.data ?? cachedCatalog;
-                          final isWaiting =
-                              snapshot.connectionState == ConnectionState.waiting;
-
-                          Widget buildServiceTypes() {
-                            if (catalog == null) {
-                              return Text(
-                                isWaiting
-                                    ? 'Loading...'
-                                    : 'No service types found.',
-                              );
-                            }
-                            if (catalog.serviceTypes.isEmpty) {
-                              return const Text('No service types found.');
-                            }
-                            final sorted = catalog.serviceTypes.toList()
-                              ..sort((a, b) => a.row.compareTo(b.row));
-                            return Column(
-                              children: sorted
-                                  .map(
-                                    (service) => ListTile(
-                                      dense: true,
-                                      title: Text(service.serviceType),
-                                      subtitle: Text(
-                                        '\$${service.pricePerSqFt.toStringAsFixed(2)} / sq ft • ${service.multiplier.toStringAsFixed(2)}x',
-                                      ),
-                                      trailing: IconButton(
-                                        icon: const Icon(Icons.edit),
-                                        onPressed: () => _editServiceType(
-                                          context,
-                                          service,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                            );
-                          }
-
-                          Widget buildFrequencies() {
-                            if (catalog == null) {
-                              return Text(
-                                isWaiting
-                                    ? 'Loading...'
-                                    : 'No frequencies found.',
-                              );
-                            }
-                            if (catalog.frequencies.isEmpty) {
-                              return const Text('No frequencies found.');
-                            }
-                            return Column(
-                              children: catalog.frequencies
-                                  .map(
-                                    (freq) => ListTile(
-                                      dense: true,
-                                      title: Text(
-                                        '${freq.frequency} (${freq.serviceType})',
-                                      ),
-                                      subtitle: Text(
-                                        '${freq.multiplier.toStringAsFixed(2)}x',
-                                      ),
-                                      trailing: IconButton(
-                                        icon: const Icon(Icons.edit),
-                                        onPressed: () => _editFrequency(
-                                          context,
-                                          freq,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                            );
-                          }
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Service Types',
-                                style: Theme.of(context).textTheme.titleSmall,
-                              ),
-                              const SizedBox(height: 8),
-                              buildServiceTypes(),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Frequencies',
-                                style: Theme.of(context).textTheme.titleSmall,
-                              ),
-                              const SizedBox(height: 8),
-                              buildFrequencies(),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Close'),
-                ),
-                FilledButton(
-                  onPressed: () async {
-                    final laborRate =
-                        double.tryParse(laborController.text.trim());
-                    final taxRate =
-                        double.tryParse(taxController.text.trim());
-                    final ccRate =
-                        double.tryParse(ccController.text.trim());
-                    await pricingProfilesRepo.updateProfileHeader(
-                      profile.id,
-                      name: nameController.text.trim(),
-                      laborRate: laborRate ?? profile.laborRate,
-                      taxEnabled: taxEnabled,
-                      taxRate: taxRate ?? profile.taxRate,
-                      ccEnabled: ccEnabled,
-                      ccRate: ccRate ?? profile.ccRate,
-                    );
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text('Save'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Future<void> _editServiceType(
-    BuildContext context,
-    PricingProfileServiceType service,
-  ) async {
-    final priceController =
-        TextEditingController(text: service.pricePerSqFt.toStringAsFixed(2));
-    final multiplierController =
-        TextEditingController(text: service.multiplier.toStringAsFixed(2));
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Edit ${service.serviceType}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: priceController,
-              decoration:
-                  const InputDecoration(labelText: 'Price per sq ft'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: multiplierController,
-              decoration: const InputDecoration(labelText: 'Multiplier'),
-              keyboardType: TextInputType.number,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              final price =
-                  double.tryParse(priceController.text.trim()) ??
-                      service.pricePerSqFt;
-              final multiplier =
-                  double.tryParse(multiplierController.text.trim()) ??
-                      service.multiplier;
-              await pricingCatalogRepo.updateServiceType(
-                id: service.id,
-                pricePerSqFt: price,
-                multiplier: multiplier,
-              );
-              if (context.mounted) {
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _editFrequency(
-    BuildContext context,
-    PricingProfileFrequency frequency,
-  ) async {
-    final multiplierController =
-        TextEditingController(text: frequency.multiplier.toStringAsFixed(2));
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Edit ${frequency.frequency}'),
-        content: TextField(
-          controller: multiplierController,
-          decoration: const InputDecoration(labelText: 'Multiplier'),
-          keyboardType: TextInputType.number,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              final multiplier =
-                  double.tryParse(multiplierController.text.trim()) ??
-                      frequency.multiplier;
-              await pricingCatalogRepo.updateFrequency(
-                id: frequency.id,
-                multiplier: multiplier,
-              );
-              if (context.mounted) {
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-  }
 }

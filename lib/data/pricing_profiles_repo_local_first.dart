@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import 'local_db.dart';
 import 'org_settings_models.dart';
+import 'pricing_profile_catalog_seed.dart';
 import 'pricing_profile_models.dart';
 import 'session_controller.dart';
 import 'sync_service.dart';
@@ -78,6 +79,15 @@ class PricingProfilesRepositoryLocalFirst {
     return controller.stream;
   }
 
+  Future<void> ensureDefaultCatalogSeeded() async {
+    final session = _sessionController.session;
+    final orgId = session.orgId;
+    if (orgId == null) {
+      return;
+    }
+    await _ensureDefaultCatalogSeeded(orgId);
+  }
+
   Future<PricingProfileHeader?> getProfileById(String profileId) async {
     final session = _sessionController.session;
     final orgId = session.orgId;
@@ -100,22 +110,29 @@ class PricingProfilesRepositoryLocalFirst {
   Future<PricingProfileHeader> createProfileByDuplicatingDefault(
     String name,
   ) async {
+    return createProfileByDuplicatingProfile('default', name);
+  }
+
+  Future<PricingProfileHeader> createProfileByDuplicatingProfile(
+    String sourceProfileId,
+    String name,
+  ) async {
     final session = _sessionController.session;
     final orgId = session.orgId;
     if (orgId == null) {
       throw StateError('Organization is not set yet.');
     }
+    final resolvedSourceId =
+        sourceProfileId.trim().isEmpty ? 'default' : sourceProfileId;
+    await _ensureDefaultCatalogSeeded(orgId);
     final now = DateTime.now().millisecondsSinceEpoch;
     final newId = _uuid.v4();
     final orgSettings = await _loadOrgSettings(orgId);
-    final defaultProfileId = orgSettings.defaultPricingProfileId.isEmpty
-        ? 'default'
-        : orgSettings.defaultPricingProfileId;
     final serviceTypes =
         await (_db.select(_db.pricingProfileServiceTypes)..where(
               (tbl) =>
                   tbl.orgId.equals(orgId) &
-                  tbl.profileId.equals(defaultProfileId) &
+                  tbl.profileId.equals(resolvedSourceId) &
                   tbl.deleted.equals(false),
             ))
             .get();
@@ -123,7 +140,7 @@ class PricingProfilesRepositoryLocalFirst {
         await (_db.select(_db.pricingProfileFrequencies)..where(
               (tbl) =>
                   tbl.orgId.equals(orgId) &
-                  tbl.profileId.equals(defaultProfileId) &
+                  tbl.profileId.equals(resolvedSourceId) &
                   tbl.deleted.equals(false),
             ))
             .get();
@@ -131,7 +148,7 @@ class PricingProfilesRepositoryLocalFirst {
         await (_db.select(_db.pricingProfileRoomTypes)..where(
               (tbl) =>
                   tbl.orgId.equals(orgId) &
-                  tbl.profileId.equals(defaultProfileId) &
+                  tbl.profileId.equals(resolvedSourceId) &
                   tbl.deleted.equals(false),
             ))
             .get();
@@ -139,7 +156,7 @@ class PricingProfilesRepositoryLocalFirst {
         await (_db.select(_db.pricingProfileSubItems)..where(
               (tbl) =>
                   tbl.orgId.equals(orgId) &
-                  tbl.profileId.equals(defaultProfileId) &
+                  tbl.profileId.equals(resolvedSourceId) &
                   tbl.deleted.equals(false),
             ))
             .get();
@@ -147,7 +164,7 @@ class PricingProfilesRepositoryLocalFirst {
         await (_db.select(_db.pricingProfileSizes)..where(
               (tbl) =>
                   tbl.orgId.equals(orgId) &
-                  tbl.profileId.equals(defaultProfileId) &
+                  tbl.profileId.equals(resolvedSourceId) &
                   tbl.deleted.equals(false),
             ))
             .get();
@@ -155,14 +172,18 @@ class PricingProfilesRepositoryLocalFirst {
         await (_db.select(_db.pricingProfileComplexities)..where(
               (tbl) =>
                   tbl.orgId.equals(orgId) &
-                  tbl.profileId.equals(defaultProfileId) &
+                  tbl.profileId.equals(resolvedSourceId) &
                   tbl.deleted.equals(false),
             ))
             .get();
+    final resolvedName = await _uniqueProfileName(
+      orgId,
+      name.trim().isEmpty ? 'Custom Profile' : name.trim(),
+    );
     final profileRow = PricingProfilesCompanion(
       id: Value(newId),
       orgId: Value(orgId),
-      name: Value(name.trim().isEmpty ? 'Custom Profile' : name.trim()),
+      name: Value(resolvedName),
       laborRate: Value(orgSettings.laborRate),
       taxEnabled: Value(orgSettings.taxEnabled),
       taxRate: Value(orgSettings.taxRate),
@@ -452,7 +473,7 @@ class PricingProfilesRepositoryLocalFirst {
     return PricingProfileHeader(
       id: newId,
       orgId: orgId,
-      name: profileRow.name.value,
+      name: resolvedName,
       laborRate: profileRow.laborRate.value,
       taxEnabled: profileRow.taxEnabled.value,
       taxRate: profileRow.taxRate.value,
@@ -582,6 +603,61 @@ class PricingProfilesRepositoryLocalFirst {
     );
   }
 
+  Future<void> _ensureDefaultCatalogSeeded(String orgId) async {
+    final existing =
+        await (_db.select(_db.pricingProfileServiceTypes)
+              ..where(
+                (tbl) =>
+                    tbl.orgId.equals(orgId) &
+                    tbl.profileId.equals('default') &
+                    tbl.deleted.equals(false),
+              )
+              ..limit(1))
+            .getSingleOrNull();
+    if (existing != null) {
+      return;
+    }
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final seeder = PricingProfileCatalogSeeder(
+      db: _db,
+      uuid: _uuid,
+      insertOutbox: _insertOutbox,
+    );
+    final data = await seeder.loadSeedData();
+    await seeder.insertCatalogRows(
+      orgId: orgId,
+      profileId: 'default',
+      updatedAt: now,
+      data: data,
+    );
+  }
+
+  Future<String> _uniqueProfileName(String orgId, String baseName) async {
+    final existing = await (_db.select(_db.pricingProfiles)
+          ..where((tbl) => tbl.orgId.equals(orgId)))
+        .get();
+    final names = existing.map((row) => row.name).toList();
+    if (!names.contains(baseName)) {
+      return baseName;
+    }
+    final escaped = RegExp.escape(baseName);
+    final matcher = RegExp('^$escaped(?: (\\d+))?\$');
+    var maxSuffix = 1;
+    for (final name in names) {
+      final match = matcher.firstMatch(name);
+      if (match == null) {
+        continue;
+      }
+      final suffix = int.tryParse(match.group(1) ?? '');
+      if (suffix == null) {
+        maxSuffix = maxSuffix < 2 ? 2 : maxSuffix;
+      } else if (suffix >= maxSuffix) {
+        maxSuffix = suffix + 1;
+      }
+    }
+    return '$baseName $maxSuffix';
+  }
+
   Future<void> _insertOutbox({
     required String entityType,
     required String entityId,
@@ -628,6 +704,6 @@ class PricingProfilesRepositoryLocalFirst {
             ),
           );
     }
-    unawaited(_syncService.sync());
+    _syncService.requestUpload(reason: 'pricing_profile_change');
   }
 }
