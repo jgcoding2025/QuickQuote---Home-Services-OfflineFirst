@@ -26,7 +26,7 @@ class SyncService {
   bool _isOnlineState = false;
   bool _pollingEnabled = true;
   SyncStatus _current = SyncStatus.offline;
-  Future<void>? _inFlightSync;
+  Future<void>? _inFlight;
   DateTime? _nextAllowedSyncAt;
   static const Duration pollingInterval = Duration(seconds: 3);
   static const Duration syncBackoff = Duration(seconds: 3);
@@ -66,8 +66,7 @@ class SyncService {
   }
 
   Future<void> sync() {
-    return _inFlightSync ??=
-        _syncImpl().whenComplete(() => _inFlightSync = null);
+    return _inFlight ??= _syncImpl().whenComplete(() => _inFlight = null);
   }
 
   Future<void> _syncImpl() async {
