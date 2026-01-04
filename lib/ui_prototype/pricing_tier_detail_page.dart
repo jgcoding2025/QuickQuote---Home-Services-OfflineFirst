@@ -25,13 +25,6 @@ class PricingTierDetailPage extends StatefulWidget {
 }
 
 class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
-  String? _selectedServiceTypeId;
-  String? _selectedFrequencyId;
-  String? _selectedRoomTypeId;
-  String? _selectedSubItemId;
-  String? _selectedSizeId;
-  String? _selectedComplexityId;
-
   @override
   void initState() {
     super.initState();
@@ -62,37 +55,37 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _sectionCard(
+                  _sectionTile(
                     context,
                     title: 'Labor Rate, Taxes, and Fees',
                     child: _laborAndFeesSection(profile, isEditable),
                   ),
                   const SizedBox(height: 16),
-                  _sectionCard(
+                  _sectionTile(
                     context,
                     title: 'Plan Tiers',
                     child: _planTiersSection(context),
                   ),
                   const SizedBox(height: 16),
-                  _sectionCard(
+                  _sectionTile(
                     context,
                     title: 'Service Types',
                     child: _serviceTypeSection(catalog, isEditable),
                   ),
                   const SizedBox(height: 16),
-                  _sectionCard(
+                  _sectionTile(
                     context,
                     title: 'Room Type Standards',
                     child: _roomTypeSection(catalog, isEditable),
                   ),
                   const SizedBox(height: 16),
-                  _sectionCard(
+                  _sectionTile(
                     context,
                     title: 'Add-on Items',
                     child: _subItemSection(catalog, isEditable),
                   ),
                   const SizedBox(height: 16),
-                  _sectionCard(
+                  _sectionTile(
                     context,
                     title: 'Complexity, Size, and Frequency',
                     child: Column(
@@ -115,27 +108,25 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
-  Widget _sectionCard(
+  Widget _sectionTile(
     BuildContext context, {
     required String title,
     required Widget child,
   }) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 12),
-            child,
-          ],
-        ),
+      child: ExpansionTile(
+        title: Text(title, style: Theme.of(context).textTheme.titleMedium),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        children: [
+          const SizedBox(height: 8),
+          child,
+        ],
       ),
     );
   }
 
   Widget _laborAndFeesSection(PricingProfileHeader profile, bool isEditable) {
+    final nameController = TextEditingController(text: profile.name);
     final laborController = TextEditingController(
       text: profile.laborRate.toStringAsFixed(2),
     );
@@ -151,7 +142,14 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     return StatefulBuilder(
       builder: (context, setLocalState) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            TextField(
+              controller: nameController,
+              enabled: isEditable,
+              decoration: const InputDecoration(labelText: 'Profile name'),
+            ),
+            const SizedBox(height: 12),
             TextField(
               controller: laborController,
               enabled: isEditable,
@@ -206,6 +204,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                     final ccRate = double.tryParse(ccController.text.trim());
                     await widget.pricingProfilesRepo.updateProfileHeader(
                       widget.profileId,
+                      name: nameController.text.trim(),
                       laborRate: laborRate ?? profile.laborRate,
                       taxEnabled: taxEnabled,
                       taxRate: taxRate ?? profile.taxRate,
@@ -264,47 +263,30 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     if (catalog.serviceTypes.isEmpty) {
       return const Text('No service types found.');
     }
-    final selected = _selectItem(
-      catalog.serviceTypes,
-      _selectedServiceTypeId,
-    );
-    _selectedServiceTypeId = selected.id;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        DropdownButtonFormField<String>(
-          value: _selectedServiceTypeId,
-          items: catalog.serviceTypes
-              .map(
-                (service) => DropdownMenuItem(
-                  value: service.id,
-                  child: Text(service.serviceType),
-                ),
-              )
-              .toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedServiceTypeId = value;
-            });
-          },
-          decoration: const InputDecoration(labelText: 'Service type'),
-        ),
-        const SizedBox(height: 8),
-        Text('Description: ${selected.description}'),
-        Text(
-          'Price: \$${selected.pricePerSqFt.toStringAsFixed(2)} / sq ft',
-        ),
-        Text('Multiplier: ${selected.multiplier.toStringAsFixed(2)}x'),
-        if (isEditable)
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => _editServiceType(context, selected),
-              child: const Text('Edit'),
-            ),
-          ),
+    final sorted = catalog.serviceTypes.toList()
+      ..sort((a, b) => a.row.compareTo(b.row));
+    return _buildTable(
+      context,
+      headers: [
+        'Service type',
+        'Description',
+        '\$/Sq.Ft.',
+        'Multiplier',
+        if (isEditable) 'Edit',
       ],
+      rows: sorted.map((service) {
+        return [
+          service.serviceType,
+          service.description,
+          service.pricePerSqFt.toStringAsFixed(2),
+          service.multiplier.toStringAsFixed(2),
+          if (isEditable)
+            _editCell(
+              context,
+              onTap: () => _editServiceType(context, service),
+            ),
+        ];
+      }).toList(),
     );
   }
 
@@ -315,43 +297,26 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     if (catalog.frequencies.isEmpty) {
       return const Text('No frequencies found.');
     }
-    final selected = _selectItem(
-      catalog.frequencies,
-      _selectedFrequencyId,
-    );
-    _selectedFrequencyId = selected.id;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        DropdownButtonFormField<String>(
-          value: _selectedFrequencyId,
-          items: catalog.frequencies
-              .map(
-                (freq) => DropdownMenuItem(
-                  value: freq.id,
-                  child: Text('${freq.frequency} (${freq.serviceType})'),
-                ),
-              )
-              .toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedFrequencyId = value;
-            });
-          },
-          decoration: const InputDecoration(labelText: 'Frequency'),
-        ),
-        const SizedBox(height: 8),
-        Text('Multiplier: ${selected.multiplier.toStringAsFixed(2)}x'),
-        if (isEditable)
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => _editFrequency(context, selected),
-              child: const Text('Edit'),
-            ),
-          ),
+    return _buildTable(
+      context,
+      headers: [
+        'Service type',
+        'Frequency',
+        'Multiplier',
+        if (isEditable) 'Edit',
       ],
+      rows: catalog.frequencies.map((freq) {
+        return [
+          freq.serviceType,
+          freq.frequency,
+          freq.multiplier.toStringAsFixed(2),
+          if (isEditable)
+            _editCell(
+              context,
+              onTap: () => _editFrequency(context, freq),
+            ),
+        ];
+      }).toList(),
     );
   }
 
@@ -362,45 +327,30 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     if (catalog.roomTypes.isEmpty) {
       return const Text('No room types found.');
     }
-    final selected = _selectItem(
-      catalog.roomTypes,
-      _selectedRoomTypeId,
-    );
-    _selectedRoomTypeId = selected.id;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        DropdownButtonFormField<String>(
-          value: _selectedRoomTypeId,
-          items: catalog.roomTypes
-              .map(
-                (room) => DropdownMenuItem(
-                  value: room.id,
-                  child: Text(room.roomType),
-                ),
-              )
-              .toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedRoomTypeId = value;
-            });
-          },
-          decoration: const InputDecoration(labelText: 'Room type'),
-        ),
-        const SizedBox(height: 8),
-        Text('Description: ${selected.description}'),
-        Text('Minutes: ${selected.minutes}'),
-        Text('Sq. Ft.: ${selected.squareFeet}'),
-        if (isEditable)
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => _editRoomType(context, selected),
-              child: const Text('Edit'),
-            ),
-          ),
+    final sorted = catalog.roomTypes.toList()
+      ..sort((a, b) => a.row.compareTo(b.row));
+    return _buildTable(
+      context,
+      headers: [
+        'Room type',
+        'Description',
+        'Minutes',
+        'Sq.Ft.',
+        if (isEditable) 'Edit',
       ],
+      rows: sorted.map((room) {
+        return [
+          room.roomType,
+          room.description,
+          room.minutes.toString(),
+          room.squareFeet.toString(),
+          if (isEditable)
+            _editCell(
+              context,
+              onTap: () => _editRoomType(context, room),
+            ),
+        ];
+      }).toList(),
     );
   }
 
@@ -411,44 +361,26 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     if (catalog.subItems.isEmpty) {
       return const Text('No add-on items found.');
     }
-    final selected = _selectItem(
-      catalog.subItems,
-      _selectedSubItemId,
-    );
-    _selectedSubItemId = selected.id;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        DropdownButtonFormField<String>(
-          value: _selectedSubItemId,
-          items: catalog.subItems
-              .map(
-                (item) => DropdownMenuItem(
-                  value: item.id,
-                  child: Text(item.subItem),
-                ),
-              )
-              .toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedSubItemId = value;
-            });
-          },
-          decoration: const InputDecoration(labelText: 'Add-on item'),
-        ),
-        const SizedBox(height: 8),
-        Text('Description: ${selected.description}'),
-        Text('Minutes: ${selected.minutes}'),
-        if (isEditable)
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => _editSubItem(context, selected),
-              child: const Text('Edit'),
-            ),
-          ),
+    return _buildTable(
+      context,
+      headers: [
+        'Add-on item',
+        'Description',
+        'Minutes',
+        if (isEditable) 'Edit',
       ],
+      rows: catalog.subItems.map((item) {
+        return [
+          item.subItem,
+          item.description,
+          item.minutes.toString(),
+          if (isEditable)
+            _editCell(
+              context,
+              onTap: () => _editSubItem(context, item),
+            ),
+        ];
+      }).toList(),
     );
   }
 
@@ -459,44 +391,26 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     if (catalog.sizes.isEmpty) {
       return const Text('No size standards found.');
     }
-    final selected = _selectItem(
-      catalog.sizes,
-      _selectedSizeId,
-    );
-    _selectedSizeId = selected.id;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        DropdownButtonFormField<String>(
-          value: _selectedSizeId,
-          items: catalog.sizes
-              .map(
-                (item) => DropdownMenuItem(
-                  value: item.id,
-                  child: Text(item.size),
-                ),
-              )
-              .toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedSizeId = value;
-            });
-          },
-          decoration: const InputDecoration(labelText: 'Size'),
-        ),
-        const SizedBox(height: 8),
-        Text('Definition: ${selected.definition}'),
-        Text('Multiplier: ${selected.multiplier.toStringAsFixed(2)}x'),
-        if (isEditable)
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => _editSize(context, selected),
-              child: const Text('Edit'),
-            ),
-          ),
+    return _buildTable(
+      context,
+      headers: [
+        'Size',
+        'Definition',
+        'Multiplier',
+        if (isEditable) 'Edit',
       ],
+      rows: catalog.sizes.map((item) {
+        return [
+          item.size,
+          item.definition,
+          item.multiplier.toStringAsFixed(2),
+          if (isEditable)
+            _editCell(
+              context,
+              onTap: () => _editSize(context, item),
+            ),
+        ];
+      }).toList(),
     );
   }
 
@@ -507,44 +421,26 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     if (catalog.complexities.isEmpty) {
       return const Text('No complexity standards found.');
     }
-    final selected = _selectItem(
-      catalog.complexities,
-      _selectedComplexityId,
-    );
-    _selectedComplexityId = selected.id;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        DropdownButtonFormField<String>(
-          value: _selectedComplexityId,
-          items: catalog.complexities
-              .map(
-                (item) => DropdownMenuItem(
-                  value: item.id,
-                  child: Text(item.level),
-                ),
-              )
-              .toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedComplexityId = value;
-            });
-          },
-          decoration: const InputDecoration(labelText: 'Complexity'),
-        ),
-        const SizedBox(height: 8),
-        Text('Definition: ${selected.definition}'),
-        Text('Multiplier: ${selected.multiplier.toStringAsFixed(2)}x'),
-        if (isEditable)
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => _editComplexity(context, selected),
-              child: const Text('Edit'),
-            ),
-          ),
+    return _buildTable(
+      context,
+      headers: [
+        'Complexity',
+        'Definition',
+        'Multiplier',
+        if (isEditable) 'Edit',
       ],
+      rows: catalog.complexities.map((item) {
+        return [
+          item.level,
+          item.definition,
+          item.multiplier.toStringAsFixed(2),
+          if (isEditable)
+            _editCell(
+              context,
+              onTap: () => _editComplexity(context, item),
+            ),
+        ];
+      }).toList(),
     );
   }
 
@@ -865,8 +761,37 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     );
   }
 
+  Widget _buildTable(
+    BuildContext context, {
+    required List<String> headers,
+    required List<List<Object>> rows,
+  }) {
+    final theme = Theme.of(context);
+    return Table(
+      border: TableBorder.all(color: Colors.grey.shade400, width: 1),
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        _tableRow(
+          headers,
+          isHeader: true,
+          headerColor: theme.colorScheme.surfaceContainerHighest,
+          headerTextColor: theme.colorScheme.onSurfaceVariant,
+        ),
+        ...rows.map((cells) => _tableRow(cells)),
+      ],
+    );
+  }
+
+  Widget _editCell(BuildContext context, {required VoidCallback onTap}) {
+    return IconButton(
+      icon: const Icon(Icons.edit),
+      tooltip: 'Edit',
+      onPressed: onTap,
+    );
+  }
+
   TableRow _tableRow(
-    List<String> cells, {
+    List<Object> cells, {
     bool isHeader = false,
     Color? rowColor,
     Color? headerColor,
@@ -889,42 +814,31 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           .map(
             (cell) => Padding(
               padding: const EdgeInsets.all(8),
-              child: Text(
-                cell,
-                softWrap: !isHeader,
-                overflow: isHeader ? TextOverflow.ellipsis : null,
-                style: TextStyle(
-                  fontWeight: isHeader ? FontWeight.w600 : FontWeight.w400,
-                  color: isHeader
-                      ? effectiveHeaderTextColor
-                      : rowColor == null
-                          ? null
-                          : ThemeData.estimateBrightnessForColor(rowColor) ==
-                                  Brightness.dark
-                              ? Colors.white
-                              : Colors.black,
-                ),
-              ),
+              child: cell is Widget
+                  ? cell
+                  : Text(
+                      cell.toString(),
+                      softWrap: !isHeader,
+                      overflow: isHeader ? TextOverflow.ellipsis : null,
+                      style: TextStyle(
+                        fontWeight: isHeader
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                        color: isHeader
+                            ? effectiveHeaderTextColor
+                            : rowColor == null
+                                ? null
+                                : ThemeData.estimateBrightnessForColor(
+                                          rowColor,
+                                        ) ==
+                                        Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                      ),
+                    ),
             ),
           )
           .toList(),
     );
-  }
-
-  T _selectItem<T extends Object>(
-    List<T> items,
-    String? selectedId,
-  ) {
-    if (items.isEmpty) {
-      throw StateError('No items available.');
-    }
-    if (selectedId != null) {
-      final match = items.cast<dynamic>().firstWhere(
-        (item) => item.id == selectedId,
-        orElse: () => items.first,
-      );
-      return match as T;
-    }
-    return items.first;
   }
 }
