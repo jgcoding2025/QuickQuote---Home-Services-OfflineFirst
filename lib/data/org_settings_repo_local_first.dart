@@ -7,18 +7,22 @@ import 'package:uuid/uuid.dart';
 import 'local_db.dart';
 import 'org_settings_models.dart';
 import 'session_controller.dart';
+import 'sync_service.dart';
 
 class OrgSettingsRepositoryLocalFirst {
   OrgSettingsRepositoryLocalFirst({
     required AppDatabase db,
     required SessionController sessionController,
+    required SyncService syncService,
     Uuid? uuid,
   })  : _db = db,
         _sessionController = sessionController,
+        _syncService = syncService,
         _uuid = uuid ?? const Uuid();
 
   final AppDatabase _db;
   final SessionController _sessionController;
+  final SyncService _syncService;
   final Uuid _uuid;
 
   Stream<OrgSettings> stream() async* {
@@ -108,5 +112,6 @@ class OrgSettingsRepositoryLocalFirst {
         status: const Value('pending'),
       ),
     );
+    unawaited(_syncService.sync());
   }
 }

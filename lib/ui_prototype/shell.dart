@@ -28,7 +28,7 @@ class _PrototypeShellState extends State<PrototypeShell> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: StreamBuilder<SyncStatus>(
               stream: deps.syncService.statusStream,
-              initialData: SyncStatus.offline,
+              initialData: deps.syncService.currentStatus,
               builder: (context, snap) {
                 final status = switch (snap.data) {
                   SyncStatus.online => _SyncStatus.online,

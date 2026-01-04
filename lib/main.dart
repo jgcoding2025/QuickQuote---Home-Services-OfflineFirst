@@ -39,14 +39,17 @@ void main() async {
   final clientsRepository = ClientsRepositoryLocalFirst(
     db: db,
     sessionController: sessionController,
+    syncService: syncService,
   );
   final quotesRepository = QuotesRepositoryLocalFirst(
     db: db,
     sessionController: sessionController,
+    syncService: syncService,
   );
   final orgSettingsRepository = OrgSettingsRepositoryLocalFirst(
     db: db,
     sessionController: sessionController,
+    syncService: syncService,
   );
   final appController = AppController(
     db: db,
