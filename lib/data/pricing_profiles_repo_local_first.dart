@@ -17,10 +17,10 @@ class PricingProfilesRepositoryLocalFirst {
     required SessionController sessionController,
     required SyncService syncService,
     Uuid? uuid,
-  })  : _db = db,
-        _sessionController = sessionController,
-        _syncService = syncService,
-        _uuid = uuid ?? const Uuid();
+  }) : _db = db,
+       _sessionController = sessionController,
+       _syncService = syncService,
+       _uuid = uuid ?? const Uuid();
 
   final AppDatabase _db;
   final SessionController _sessionController;
@@ -29,7 +29,7 @@ class PricingProfilesRepositoryLocalFirst {
 
   Stream<List<PricingProfileHeader>> streamProfiles() async* {
     final controller = StreamController<List<PricingProfileHeader>>();
-    StreamSubscription<List<PricingProfileRow>>? dataSub;
+    StreamSubscription<List<PricingProfileHeader>>? dataSub;
 
     void listenSession(AppSession? session) {
       dataSub?.cancel();
@@ -37,21 +37,17 @@ class PricingProfilesRepositoryLocalFirst {
         controller.add(const []);
         return;
       }
-      dataSub = (_db.select(_db.pricingProfiles)
-            ..where(
-              (tbl) =>
-                  tbl.orgId.equals(session.orgId!) &
-                  tbl.deleted.equals(false),
-            )
-            ..orderBy([(tbl) => OrderingTerm.asc(tbl.name)]))
-          .watch()
-          .map(
-            (rows) => rows.map(_mapHeader).toList(),
-          )
-          .listen(
-            controller.add,
-            onError: controller.addError,
-          );
+      dataSub =
+          (_db.select(_db.pricingProfiles)
+                ..where(
+                  (tbl) =>
+                      tbl.orgId.equals(session.orgId!) &
+                      tbl.deleted.equals(false),
+                )
+                ..orderBy([(tbl) => OrderingTerm.asc(tbl.name)]))
+              .watch()
+              .map((rows) => rows.map(_mapHeader).toList())
+              .listen(controller.add, onError: controller.addError);
     }
 
     listenSession(_sessionController.value);
@@ -74,8 +70,7 @@ class PricingProfilesRepositoryLocalFirst {
     final row =
         await (_db.select(_db.pricingProfiles)
               ..where(
-                (tbl) =>
-                    tbl.orgId.equals(orgId) & tbl.id.equals(profileId),
+                (tbl) => tbl.orgId.equals(orgId) & tbl.id.equals(profileId),
               )
               ..limit(1))
             .getSingleOrNull();
@@ -175,26 +170,24 @@ class PricingProfilesRepositoryLocalFirst {
     }
     final now = DateTime.now().millisecondsSinceEpoch;
     await (_db.update(_db.pricingProfiles)
-          ..where(
-            (tbl) =>
-                tbl.orgId.equals(orgId) & tbl.id.equals(profileId),
-          ))
+          ..where((tbl) => tbl.orgId.equals(orgId) & tbl.id.equals(profileId)))
         .write(
-      PricingProfilesCompanion(
-        name: name == null ? const Value.absent() : Value(name.trim()),
-        laborRate: laborRate == null
-            ? const Value.absent()
-            : Value(laborRate),
-        taxEnabled:
-            taxEnabled == null ? const Value.absent() : Value(taxEnabled),
-        taxRate:
-            taxRate == null ? const Value.absent() : Value(taxRate),
-        ccEnabled:
-            ccEnabled == null ? const Value.absent() : Value(ccEnabled),
-        ccRate: ccRate == null ? const Value.absent() : Value(ccRate),
-        updatedAt: Value(now),
-      ),
-    );
+          PricingProfilesCompanion(
+            name: name == null ? const Value.absent() : Value(name.trim()),
+            laborRate: laborRate == null
+                ? const Value.absent()
+                : Value(laborRate),
+            taxEnabled: taxEnabled == null
+                ? const Value.absent()
+                : Value(taxEnabled),
+            taxRate: taxRate == null ? const Value.absent() : Value(taxRate),
+            ccEnabled: ccEnabled == null
+                ? const Value.absent()
+                : Value(ccEnabled),
+            ccRate: ccRate == null ? const Value.absent() : Value(ccRate),
+            updatedAt: Value(now),
+          ),
+        );
     await _insertOutbox(
       entityType: 'pricing_profile',
       entityId: profileId,
@@ -224,16 +217,13 @@ class PricingProfilesRepositoryLocalFirst {
     }
     final now = DateTime.now().millisecondsSinceEpoch;
     await (_db.update(_db.pricingProfiles)
-          ..where(
-            (tbl) =>
-                tbl.orgId.equals(orgId) & tbl.id.equals(profileId),
-          ))
+          ..where((tbl) => tbl.orgId.equals(orgId) & tbl.id.equals(profileId)))
         .write(
-      PricingProfilesCompanion(
-        deleted: const Value(true),
-        updatedAt: Value(now),
-      ),
-    );
+          PricingProfilesCompanion(
+            deleted: const Value(true),
+            updatedAt: Value(now),
+          ),
+        );
     await _insertOutbox(
       entityType: 'pricing_profile',
       entityId: profileId,
@@ -303,8 +293,9 @@ class PricingProfilesRepositoryLocalFirst {
               ..limit(1))
             .getSingleOrNull();
     if (existing != null) {
-      await (_db.update(_db.outbox)..where((tbl) => tbl.id.equals(existing.id)))
-          .write(
+      await (_db.update(
+        _db.outbox,
+      )..where((tbl) => tbl.id.equals(existing.id))).write(
         OutboxCompanion(
           opType: Value(opType),
           payload: Value(jsonEncode(payload)),
@@ -313,18 +304,20 @@ class PricingProfilesRepositoryLocalFirst {
         ),
       );
     } else {
-      await _db.into(_db.outbox).insert(
-        OutboxCompanion(
-          id: Value(_uuid.v4()),
-          entityType: Value(entityType),
-          entityId: Value(entityId),
-          opType: Value(opType),
-          payload: Value(jsonEncode(payload)),
-          updatedAt: Value(updatedAt),
-          orgId: Value(orgId),
-          status: const Value('pending'),
-        ),
-      );
+      await _db
+          .into(_db.outbox)
+          .insert(
+            OutboxCompanion(
+              id: Value(_uuid.v4()),
+              entityType: Value(entityType),
+              entityId: Value(entityId),
+              opType: Value(opType),
+              payload: Value(jsonEncode(payload)),
+              updatedAt: Value(updatedAt),
+              orgId: Value(orgId),
+              status: const Value('pending'),
+            ),
+          );
     }
     unawaited(_syncService.sync());
   }
