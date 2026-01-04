@@ -139,7 +139,8 @@ class _ClientEditorPageState extends State<ClientEditorPage>
   @override
   Widget build(BuildContext context) {
     final isExisting = clientId != null;
-    final quotesRepo = AppDependencies.of(context).quotesRepository;
+    final deps = AppDependencies.of(context);
+    final quotesRepo = deps.quotesRepository;
 
     return PopScope(
       canPop:
@@ -167,34 +168,59 @@ class _ClientEditorPageState extends State<ClientEditorPage>
       child: Scaffold(
         appBar: AppBar(
           title: Text(isExisting ? 'Client Details' : 'New Client'),
+          bottom: kDebugMode
+              ? PreferredSize(
+                  preferredSize:
+                      const Size.fromHeight(DebugSyncBanner.preferredHeight),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: DebugSyncBanner(
+                      onInfo: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const SettingsPage(),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : null,
         ),
-        body: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            if (_hasRemoteUpdate)
-              Card(
-                color: Theme.of(context).colorScheme.secondaryContainer,
-                child: ListTile(
-                  leading: const Icon(Icons.sync),
-                  title: const Text('Updated on another device'),
-                  subtitle:
-                      const Text('Refresh to load the latest changes.'),
-                  trailing: TextButton(
-                    onPressed: _refreshFromRemote,
-                    child: const Text('Refresh'),
+        body: RefreshIndicator(
+          onRefresh: () => deps.syncService.downloadNow(
+            reason: 'pull_to_refresh:client_editor',
+          ),
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              if (_hasRemoteUpdate)
+                Card(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  child: ListTile(
+                    leading: const Icon(Icons.sync),
+                    title: const Text('Updated on another device'),
+                    subtitle:
+                        const Text('Refresh to load the latest changes.'),
+                    trailing: TextButton(
+                      onPressed: _refreshFromRemote,
+                      child: const Text('Refresh'),
+                    ),
                   ),
                 ),
+              if (_hasRemoteUpdate) const SizedBox(height: 12),
+              ..._buildClientDetailsForm(),
+              const SizedBox(height: 16),
+              _buildSaveActions(),
+              const SizedBox(height: 24),
+              _buildQuotesSection(
+                isExisting: isExisting,
+                quotesRepo: quotesRepo,
               ),
-            if (_hasRemoteUpdate) const SizedBox(height: 12),
-            ..._buildClientDetailsForm(),
-            const SizedBox(height: 16),
-            _buildSaveActions(),
-            const SizedBox(height: 24),
-            _buildQuotesSection(isExisting: isExisting, quotesRepo: quotesRepo),
-            const SizedBox(height: 12),
-            _buildNewQuoteButton(isExisting),
-            const SizedBox(height: 24),
-          ],
+              const SizedBox(height: 12),
+              _buildNewQuoteButton(isExisting),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );

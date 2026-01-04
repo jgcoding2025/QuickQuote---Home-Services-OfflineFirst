@@ -13,6 +13,26 @@ import 'session_controller.dart';
 
 enum SyncStatus { online, offline, syncing, error }
 
+enum DebugState { paused, enabled, syncing, error, manual, armed, active }
+
+class SyncDebugInfo {
+  const SyncDebugInfo({
+    required this.uploadLabel,
+    required this.downloadLabel,
+    required this.uploadState,
+    required this.downloadState,
+    required this.lastUploadAt,
+    required this.lastDownloadAt,
+  });
+
+  final String uploadLabel;
+  final String downloadLabel;
+  final DebugState uploadState;
+  final DebugState downloadState;
+  final DateTime? lastUploadAt;
+  final DateTime? lastDownloadAt;
+}
+
 class SyncService {
   SyncService({
     required AppDatabase db,
@@ -26,6 +46,7 @@ class SyncService {
   final SessionController _sessionController;
   final PresenceService _presenceService;
   final _statusController = StreamController<SyncStatus>.broadcast();
+  final ValueNotifier<int> _debugTick = ValueNotifier<int>(0);
   StreamSubscription<dynamic>? _connectivitySub;
   StreamSubscription<AppSession?>? _sessionSub;
   StreamSubscription<bool>? _presenceSub;
@@ -33,19 +54,32 @@ class SyncService {
   Timer? _uploadDebounceTimer;
   Timer? _uploadSafetyTimer;
   bool _isOnlineState = false;
-  bool _downloadPollingEnabled = true;
+  bool _downloadPollingEnabled = false;
   SyncStatus _current = SyncStatus.offline;
   Future<void>? _uploadInFlight;
   Future<void>? _downloadInFlight;
   static const Duration downloadPollingInterval = Duration(seconds: 3);
   static const Duration uploadDebounce = Duration(seconds: 2);
   static const Duration safetyUploadInterval = Duration(minutes: 10);
+  Duration _downloadPollingInterval = downloadPollingInterval;
+  DateTime? _lastUploadAtLocal;
+  DateTime? _lastDownloadAtLocal;
+  DateTime? _nextAllowedSyncAt;
 
   Stream<SyncStatus> get statusStream => _statusController.stream;
   SyncStatus get currentStatus => _current;
   bool get hasPeerOnline => _presenceService.hasPeerOnline;
   Stream<bool> get hasPeerOnlineStream =>
       _presenceService.hasPeerOnlineStream;
+  ValueListenable<int> get debugTick => _debugTick;
+  DateTime? get lastUploadAtLocal => _lastUploadAtLocal;
+  DateTime? get lastDownloadAtLocal => _lastDownloadAtLocal;
+  bool get isPollingEnabled => _downloadPollingEnabled;
+  bool get isPollingActive => _downloadPollingTimer != null;
+  Duration get pollingInterval => _downloadPollingInterval;
+  Duration get uploadDebounceInterval => uploadDebounce;
+  Duration get safetyUploadEvery => safetyUploadInterval;
+  DateTime? get nextAllowedSyncAt => _nextAllowedSyncAt;
 
   void _setStatus(SyncStatus status) {
     if (_current == status) {
@@ -53,6 +87,7 @@ class SyncService {
     }
     _current = status;
     _statusController.add(status);
+    _notifyDebug();
   }
 
   Future<void> start() async {
@@ -65,6 +100,7 @@ class SyncService {
       if (!isOnline) {
         _setStatus(SyncStatus.offline);
       }
+      _notifyDebug();
       _syncPresenceAndPolling();
       if (isOnline) {
         requestUpload(reason: 'connectivity_online');
@@ -81,6 +117,7 @@ class SyncService {
         unawaited(downloadNow(reason: 'peer_online'));
       }
       _updateDownloadPolling();
+      _notifyDebug();
     });
     _syncPresenceAndPolling();
     _startUploadSafetyTimer();
@@ -96,6 +133,7 @@ class SyncService {
     _uploadSafetyTimer?.cancel();
     await _presenceService.dispose();
     await _statusController.close();
+    _debugTick.dispose();
   }
 
   Future<void> sync({String reason = 'manual'}) async {
@@ -111,7 +149,11 @@ class SyncService {
 
   void requestUpload({String reason = 'unspecified'}) {
     _uploadDebounceTimer?.cancel();
+    _nextAllowedSyncAt = DateTime.now().add(uploadDebounce);
+    _notifyDebug();
     _uploadDebounceTimer = Timer(uploadDebounce, () {
+      _nextAllowedSyncAt = null;
+      _notifyDebug();
       unawaited(uploadNow(reason: reason));
     });
   }
@@ -136,15 +178,22 @@ class SyncService {
     await downloadNow(reason: 'download_once');
   }
 
-  void startPolling() {
+  void startPolling({Duration? interval}) {
     _downloadPollingEnabled = true;
+    if (interval != null && interval != _downloadPollingInterval) {
+      _downloadPollingInterval = interval;
+      _downloadPollingTimer?.cancel();
+      _downloadPollingTimer = null;
+    }
     _updateDownloadPolling();
+    _notifyDebug();
   }
 
   void stopPolling() {
     _downloadPollingEnabled = false;
     _downloadPollingTimer?.cancel();
     _downloadPollingTimer = null;
+    _notifyDebug();
   }
 
   Future<void> _uploadOnce(String reason) async {
@@ -155,10 +204,17 @@ class SyncService {
     if (session == null || session.orgId == null) {
       return;
     }
+    _nextAllowedSyncAt = null;
+    _notifyDebug();
     _setStatus(SyncStatus.syncing);
     try {
       await _uploadOutbox(session.orgId!);
+      _lastUploadAtLocal = DateTime.now();
       _setStatus(SyncStatus.online);
+      _notifyDebug();
+      if (_presenceService.hasPeerOnline) {
+        unawaited(downloadNow(reason: 'post_upload_peer_online'));
+      }
     } catch (e, st) {
       debugPrint('OUTBOX UPLOAD ERROR ($reason): $e');
       debugPrint('$st');
@@ -177,7 +233,9 @@ class SyncService {
     _setStatus(SyncStatus.syncing);
     try {
       await _downloadChanges(session.orgId!);
+      _lastDownloadAtLocal = DateTime.now();
       _setStatus(SyncStatus.online);
+      _notifyDebug();
     } catch (e, st) {
       debugPrint('DOWNLOAD ERROR ($reason): $e');
       debugPrint('$st');
@@ -994,14 +1052,19 @@ class SyncService {
     final canBeOnline = _canSyncNow();
     _presenceService.updateSession(orgId: orgId, canBeOnline: canBeOnline);
     _updateDownloadPolling();
+    _notifyDebug();
   }
 
   void _updateDownloadPolling() {
     if (!_downloadPollingEnabled) {
+      _downloadPollingTimer?.cancel();
+      _downloadPollingTimer = null;
+      _notifyDebug();
       return;
     }
     if (_shouldPollDownloads()) {
-      _downloadPollingTimer ??= Timer.periodic(downloadPollingInterval, (_) {
+      _downloadPollingTimer ??=
+          Timer.periodic(_downloadPollingInterval, (_) {
         if (_shouldPollDownloads()) {
           unawaited(downloadNow(reason: 'polling'));
         }
@@ -1010,6 +1073,7 @@ class SyncService {
       _downloadPollingTimer?.cancel();
       _downloadPollingTimer = null;
     }
+    _notifyDebug();
   }
 
   void _startUploadSafetyTimer() {
@@ -1030,6 +1094,81 @@ class SyncService {
   }
 
   bool _shouldPollDownloads() => _canSyncNow() && _presenceService.hasPeerOnline;
+
+  SyncDebugInfo get debugInfo {
+    final canSync = _canSyncNow();
+    final safetyLabel = _uploadSafetyTimer != null
+        ? ' + safety (${_formatDuration(safetyUploadInterval)})'
+        : '';
+    final uploadLabel = !canSync
+        ? 'paused'
+        : 'debounced (${_formatDuration(uploadDebounce)})$safetyLabel';
+    final downloadLabel = !canSync
+        ? 'paused'
+        : !_downloadPollingEnabled
+            ? 'manual'
+            : !_presenceService.hasPeerOnline
+                ? 'armed (peer offline)'
+                : 'every ${_downloadPollingInterval.inSeconds}s';
+    final uploadState = _current == SyncStatus.error
+        ? DebugState.error
+        : !canSync
+            ? DebugState.paused
+            : _uploadInFlight != null
+                ? DebugState.syncing
+                : DebugState.enabled;
+    final downloadState = _current == SyncStatus.error
+        ? DebugState.error
+        : !canSync
+            ? DebugState.paused
+            : !_downloadPollingEnabled
+                ? DebugState.manual
+                : !_presenceService.hasPeerOnline
+                    ? DebugState.armed
+                    : DebugState.active;
+    return SyncDebugInfo(
+      uploadLabel: uploadLabel,
+      downloadLabel: downloadLabel,
+      uploadState: uploadState,
+      downloadState: downloadState,
+      lastUploadAt: _lastUploadAtLocal,
+      lastDownloadAt: _lastDownloadAtLocal,
+    );
+  }
+
+  List<String> debugBlockingReasons() {
+    final reasons = <String>[];
+    if (!_isOnlineState) {
+      reasons.add('Offline connectivity');
+    }
+    final session = _sessionController.value;
+    if (session == null) {
+      reasons.add('No session');
+    }
+    final orgId = session?.orgId;
+    if (orgId == null || orgId.isEmpty) {
+      reasons.add('orgId missing');
+    }
+    if (session?.isGuest ?? false) {
+      reasons.add('Guest session');
+    }
+    if (FirebaseAuth.instance.currentUser == null) {
+      reasons.add('FirebaseAuth user null');
+    }
+    if (_nextAllowedSyncAt != null &&
+        _nextAllowedSyncAt!.isAfter(DateTime.now())) {
+      reasons.add(
+        'Sync throttled until ${_formatLocalTime(_nextAllowedSyncAt!)}',
+      );
+    }
+    if (!_downloadPollingEnabled) {
+      reasons.add('Polling disabled');
+    }
+    if (_downloadPollingEnabled && !_presenceService.hasPeerOnline) {
+      reasons.add('Peer offline (Live Mode requires peer online)');
+    }
+    return reasons;
+  }
 
   DocumentReference<Map<String, dynamic>>? _docForEntity(
     String orgId,
@@ -1164,5 +1303,28 @@ class SyncService {
 
   String _string(dynamic value) {
     return value?.toString() ?? '';
+  }
+
+  void _notifyDebug() {
+    if (!_debugTick.hasListeners) {
+      _debugTick.value += 1;
+      return;
+    }
+    _debugTick.value += 1;
+  }
+
+  String _formatDuration(Duration duration) {
+    if (duration.inMinutes >= 1) {
+      return '${duration.inMinutes}m';
+    }
+    return '${duration.inSeconds}s';
+  }
+
+  String _formatLocalTime(DateTime time) {
+    final local = time.toLocal();
+    final hh = local.hour.toString().padLeft(2, '0');
+    final mm = local.minute.toString().padLeft(2, '0');
+    final ss = local.second.toString().padLeft(2, '0');
+    return '$hh:$mm:$ss';
   }
 }
