@@ -381,26 +381,27 @@ class SyncService {
   }
 
   Future<void> _downloadPricingProfiles(String orgId) async {
-    await _downloadPricingProfileHeaders(orgId);
-    await _downloadPricingProfileServiceTypes(orgId);
-    await _downloadPricingProfileFrequencies(orgId);
-    await _downloadPricingProfileRoomTypes(orgId);
-    await _downloadPricingProfileSubItems(orgId);
-    await _downloadPricingProfileSizes(orgId);
-    await _downloadPricingProfileComplexities(orgId);
+    final profileIds = await _downloadPricingProfileHeaders(orgId);
+    await _downloadPricingProfileServiceTypes(orgId, profileIds);
+    await _downloadPricingProfileFrequencies(orgId, profileIds);
+    await _downloadPricingProfileRoomTypes(orgId, profileIds);
+    await _downloadPricingProfileSubItems(orgId, profileIds);
+    await _downloadPricingProfileSizes(orgId, profileIds);
+    await _downloadPricingProfileComplexities(orgId, profileIds);
   }
 
-  Future<void> _downloadPricingProfileHeaders(String orgId) async {
+  Future<List<String>> _downloadPricingProfileHeaders(String orgId) async {
     final lastSync = await _db.getLastSync('pricing_profile', orgId);
     final snap = await FirebaseFirestore.instance
         .collection('orgs')
         .doc(orgId)
         .collection('pricingProfiles')
-        .where('updatedAt', isGreaterThan: lastSync)
         .get();
+    final profileIds = <String>[];
     var maxUpdatedAt = lastSync;
     for (final doc in snap.docs) {
       final data = doc.data();
+      profileIds.add(doc.id);
       final updatedAt = (data['updatedAt'] as int?) ?? 0;
       final hasPending = await _hasPendingOutbox(
         entityType: 'pricing_profile',
@@ -438,60 +439,66 @@ class SyncService {
           );
     }
     await _db.setSyncState('pricing_profile', orgId, maxUpdatedAt);
+    return profileIds;
   }
 
-  Future<void> _downloadPricingProfileServiceTypes(String orgId) async {
+  Future<void> _downloadPricingProfileServiceTypes(
+    String orgId,
+    List<String> profileIds,
+  ) async {
     final lastSync =
         await _db.getLastSync('pricing_profile_service_type', orgId);
-    final snap = await FirebaseFirestore.instance
-        .collectionGroup('serviceTypes')
-        .where('orgId', isEqualTo: orgId)
-        .where('updatedAt', isGreaterThan: lastSync)
-        .get();
     var maxUpdatedAt = lastSync;
-    for (final doc in snap.docs) {
-      final data = doc.data();
-      final profileId = _string(data['profileId']);
-      if (profileId.isEmpty) {
-        continue;
+    for (final profileId in profileIds) {
+      final snap = await FirebaseFirestore.instance
+          .collection('orgs')
+          .doc(orgId)
+          .collection('pricingProfiles')
+          .doc(profileId)
+          .collection('serviceTypes')
+          .where('updatedAt', isGreaterThan: lastSync)
+          .orderBy('updatedAt')
+          .get();
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final updatedAt = (data['updatedAt'] as int?) ?? 0;
+        final hasPending = await _hasPendingOutbox(
+          entityType: 'pricing_profile_service_type',
+          entityId: doc.id,
+          orgId: orgId,
+        );
+        if (hasPending) {
+          continue;
+        }
+        if (updatedAt > maxUpdatedAt) {
+          maxUpdatedAt = updatedAt;
+        }
+        final existing =
+            await (_db.select(_db.pricingProfileServiceTypes)
+                  ..where((tbl) => tbl.id.equals(doc.id))
+                  ..limit(1))
+                .getSingleOrNull();
+        if (existing != null && existing.updatedAt >= updatedAt) {
+          continue;
+        }
+        await _db.into(_db.pricingProfileServiceTypes).insertOnConflictUpdate(
+              PricingProfileServiceTypesCompanion(
+                id: Value(doc.id),
+                orgId: Value(orgId),
+                profileId: Value(profileId),
+                row: Value((data['row'] as num?)?.toInt() ?? 0),
+                category: Value(_string(data['category']).isEmpty
+                    ? 'General'
+                    : _string(data['category'])),
+                serviceType: Value(_string(data['serviceType'])),
+                description: Value(_string(data['description'])),
+                pricePerSqFt: Value(_num(data['pricePerSqFt'])),
+                multiplier: Value(_num(data['multiplier'], fallback: 1)),
+                updatedAt: Value(updatedAt),
+                deleted: Value(data['deleted'] == true),
+              ),
+            );
       }
-      final updatedAt = (data['updatedAt'] as int?) ?? 0;
-      final hasPending = await _hasPendingOutbox(
-        entityType: 'pricing_profile_service_type',
-        entityId: doc.id,
-        orgId: orgId,
-      );
-      if (hasPending) {
-        continue;
-      }
-      if (updatedAt > maxUpdatedAt) {
-        maxUpdatedAt = updatedAt;
-      }
-      final existing =
-          await (_db.select(_db.pricingProfileServiceTypes)
-                ..where((tbl) => tbl.id.equals(doc.id))
-                ..limit(1))
-              .getSingleOrNull();
-      if (existing != null && existing.updatedAt >= updatedAt) {
-        continue;
-      }
-      await _db.into(_db.pricingProfileServiceTypes).insertOnConflictUpdate(
-            PricingProfileServiceTypesCompanion(
-              id: Value(doc.id),
-              orgId: Value(orgId),
-              profileId: Value(profileId),
-              row: Value((data['row'] as num?)?.toInt() ?? 0),
-              category: Value(_string(data['category']).isEmpty
-                  ? 'General'
-                  : _string(data['category'])),
-              serviceType: Value(_string(data['serviceType'])),
-              description: Value(_string(data['description'])),
-              pricePerSqFt: Value(_num(data['pricePerSqFt'])),
-              multiplier: Value(_num(data['multiplier'], fallback: 1)),
-              updatedAt: Value(updatedAt),
-              deleted: Value(data['deleted'] == true),
-            ),
-          );
     }
     await _db.setSyncState(
       'pricing_profile_service_type',
@@ -500,53 +507,58 @@ class SyncService {
     );
   }
 
-  Future<void> _downloadPricingProfileFrequencies(String orgId) async {
+  Future<void> _downloadPricingProfileFrequencies(
+    String orgId,
+    List<String> profileIds,
+  ) async {
     final lastSync =
         await _db.getLastSync('pricing_profile_frequency', orgId);
-    final snap = await FirebaseFirestore.instance
-        .collectionGroup('frequencies')
-        .where('orgId', isEqualTo: orgId)
-        .where('updatedAt', isGreaterThan: lastSync)
-        .get();
     var maxUpdatedAt = lastSync;
-    for (final doc in snap.docs) {
-      final data = doc.data();
-      final profileId = _string(data['profileId']);
-      if (profileId.isEmpty) {
-        continue;
+    for (final profileId in profileIds) {
+      final snap = await FirebaseFirestore.instance
+          .collection('orgs')
+          .doc(orgId)
+          .collection('pricingProfiles')
+          .doc(profileId)
+          .collection('frequencies')
+          .where('updatedAt', isGreaterThan: lastSync)
+          .orderBy('updatedAt')
+          .get();
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final updatedAt = (data['updatedAt'] as int?) ?? 0;
+        final hasPending = await _hasPendingOutbox(
+          entityType: 'pricing_profile_frequency',
+          entityId: doc.id,
+          orgId: orgId,
+        );
+        if (hasPending) {
+          continue;
+        }
+        if (updatedAt > maxUpdatedAt) {
+          maxUpdatedAt = updatedAt;
+        }
+        final existing =
+            await (_db.select(_db.pricingProfileFrequencies)
+                  ..where((tbl) => tbl.id.equals(doc.id))
+                  ..limit(1))
+                .getSingleOrNull();
+        if (existing != null && existing.updatedAt >= updatedAt) {
+          continue;
+        }
+        await _db.into(_db.pricingProfileFrequencies).insertOnConflictUpdate(
+              PricingProfileFrequenciesCompanion(
+                id: Value(doc.id),
+                orgId: Value(orgId),
+                profileId: Value(profileId),
+                serviceType: Value(_string(data['serviceType'])),
+                frequency: Value(_string(data['frequency'])),
+                multiplier: Value(_num(data['multiplier'], fallback: 1)),
+                updatedAt: Value(updatedAt),
+                deleted: Value(data['deleted'] == true),
+              ),
+            );
       }
-      final updatedAt = (data['updatedAt'] as int?) ?? 0;
-      final hasPending = await _hasPendingOutbox(
-        entityType: 'pricing_profile_frequency',
-        entityId: doc.id,
-        orgId: orgId,
-      );
-      if (hasPending) {
-        continue;
-      }
-      if (updatedAt > maxUpdatedAt) {
-        maxUpdatedAt = updatedAt;
-      }
-      final existing =
-          await (_db.select(_db.pricingProfileFrequencies)
-                ..where((tbl) => tbl.id.equals(doc.id))
-                ..limit(1))
-              .getSingleOrNull();
-      if (existing != null && existing.updatedAt >= updatedAt) {
-        continue;
-      }
-      await _db.into(_db.pricingProfileFrequencies).insertOnConflictUpdate(
-            PricingProfileFrequenciesCompanion(
-              id: Value(doc.id),
-              orgId: Value(orgId),
-              profileId: Value(profileId),
-              serviceType: Value(_string(data['serviceType'])),
-              frequency: Value(_string(data['frequency'])),
-              multiplier: Value(_num(data['multiplier'], fallback: 1)),
-              updatedAt: Value(updatedAt),
-              deleted: Value(data['deleted'] == true),
-            ),
-          );
     }
     await _db.setSyncState(
       'pricing_profile_frequency',
@@ -555,58 +567,63 @@ class SyncService {
     );
   }
 
-  Future<void> _downloadPricingProfileRoomTypes(String orgId) async {
+  Future<void> _downloadPricingProfileRoomTypes(
+    String orgId,
+    List<String> profileIds,
+  ) async {
     final lastSync =
         await _db.getLastSync('pricing_profile_room_type', orgId);
-    final snap = await FirebaseFirestore.instance
-        .collectionGroup('roomTypes')
-        .where('orgId', isEqualTo: orgId)
-        .where('updatedAt', isGreaterThan: lastSync)
-        .get();
     var maxUpdatedAt = lastSync;
-    for (final doc in snap.docs) {
-      final data = doc.data();
-      final profileId = _string(data['profileId']);
-      if (profileId.isEmpty) {
-        continue;
+    for (final profileId in profileIds) {
+      final snap = await FirebaseFirestore.instance
+          .collection('orgs')
+          .doc(orgId)
+          .collection('pricingProfiles')
+          .doc(profileId)
+          .collection('roomTypes')
+          .where('updatedAt', isGreaterThan: lastSync)
+          .orderBy('updatedAt')
+          .get();
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final updatedAt = (data['updatedAt'] as int?) ?? 0;
+        final hasPending = await _hasPendingOutbox(
+          entityType: 'pricing_profile_room_type',
+          entityId: doc.id,
+          orgId: orgId,
+        );
+        if (hasPending) {
+          continue;
+        }
+        if (updatedAt > maxUpdatedAt) {
+          maxUpdatedAt = updatedAt;
+        }
+        final existing =
+            await (_db.select(_db.pricingProfileRoomTypes)
+                  ..where((tbl) => tbl.id.equals(doc.id))
+                  ..limit(1))
+                .getSingleOrNull();
+        if (existing != null && existing.updatedAt >= updatedAt) {
+          continue;
+        }
+        await _db.into(_db.pricingProfileRoomTypes).insertOnConflictUpdate(
+              PricingProfileRoomTypesCompanion(
+                id: Value(doc.id),
+                orgId: Value(orgId),
+                profileId: Value(profileId),
+                row: Value((data['row'] as num?)?.toInt() ?? 0),
+                category: Value(_string(data['category']).isEmpty
+                    ? 'General'
+                    : _string(data['category'])),
+                roomType: Value(_string(data['roomType'])),
+                description: Value(_string(data['description'])),
+                minutes: Value((data['minutes'] as num?)?.toInt() ?? 0),
+                squareFeet: Value((data['squareFeet'] as num?)?.toInt() ?? 0),
+                updatedAt: Value(updatedAt),
+                deleted: Value(data['deleted'] == true),
+              ),
+            );
       }
-      final updatedAt = (data['updatedAt'] as int?) ?? 0;
-      final hasPending = await _hasPendingOutbox(
-        entityType: 'pricing_profile_room_type',
-        entityId: doc.id,
-        orgId: orgId,
-      );
-      if (hasPending) {
-        continue;
-      }
-      if (updatedAt > maxUpdatedAt) {
-        maxUpdatedAt = updatedAt;
-      }
-      final existing =
-          await (_db.select(_db.pricingProfileRoomTypes)
-                ..where((tbl) => tbl.id.equals(doc.id))
-                ..limit(1))
-              .getSingleOrNull();
-      if (existing != null && existing.updatedAt >= updatedAt) {
-        continue;
-      }
-      await _db.into(_db.pricingProfileRoomTypes).insertOnConflictUpdate(
-            PricingProfileRoomTypesCompanion(
-              id: Value(doc.id),
-              orgId: Value(orgId),
-              profileId: Value(profileId),
-              row: Value((data['row'] as num?)?.toInt() ?? 0),
-              category: Value(_string(data['category']).isEmpty
-                  ? 'General'
-                  : _string(data['category'])),
-              roomType: Value(_string(data['roomType'])),
-              description: Value(_string(data['description'])),
-              minutes: Value((data['minutes'] as num?)?.toInt() ?? 0),
-              squareFeet: Value((data['squareFeet'] as num?)?.toInt() ?? 0),
-              updatedAt: Value(updatedAt),
-              deleted: Value(data['deleted'] == true),
-            ),
-          );
     }
     await _db.setSyncState(
       'pricing_profile_room_type',
@@ -615,56 +632,61 @@ class SyncService {
     );
   }
 
-  Future<void> _downloadPricingProfileSubItems(String orgId) async {
+  Future<void> _downloadPricingProfileSubItems(
+    String orgId,
+    List<String> profileIds,
+  ) async {
     final lastSync =
         await _db.getLastSync('pricing_profile_sub_item', orgId);
-    final snap = await FirebaseFirestore.instance
-        .collectionGroup('subItems')
-        .where('orgId', isEqualTo: orgId)
-        .where('updatedAt', isGreaterThan: lastSync)
-        .get();
     var maxUpdatedAt = lastSync;
-    for (final doc in snap.docs) {
-      final data = doc.data();
-      final profileId = _string(data['profileId']);
-      if (profileId.isEmpty) {
-        continue;
+    for (final profileId in profileIds) {
+      final snap = await FirebaseFirestore.instance
+          .collection('orgs')
+          .doc(orgId)
+          .collection('pricingProfiles')
+          .doc(profileId)
+          .collection('subItems')
+          .where('updatedAt', isGreaterThan: lastSync)
+          .orderBy('updatedAt')
+          .get();
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final updatedAt = (data['updatedAt'] as int?) ?? 0;
+        final hasPending = await _hasPendingOutbox(
+          entityType: 'pricing_profile_sub_item',
+          entityId: doc.id,
+          orgId: orgId,
+        );
+        if (hasPending) {
+          continue;
+        }
+        if (updatedAt > maxUpdatedAt) {
+          maxUpdatedAt = updatedAt;
+        }
+        final existing =
+            await (_db.select(_db.pricingProfileSubItems)
+                  ..where((tbl) => tbl.id.equals(doc.id))
+                  ..limit(1))
+                .getSingleOrNull();
+        if (existing != null && existing.updatedAt >= updatedAt) {
+          continue;
+        }
+        await _db.into(_db.pricingProfileSubItems).insertOnConflictUpdate(
+              PricingProfileSubItemsCompanion(
+                id: Value(doc.id),
+                orgId: Value(orgId),
+                profileId: Value(profileId),
+                category: Value(_string(data['category']).isEmpty
+                    ? 'General'
+                    : _string(data['category'])),
+                subItem: Value(_string(data['subItem'])),
+                description: Value(_string(data['description'])),
+                minutes: Value((data['minutes'] as num?)?.toInt() ?? 0),
+                updatedAt: Value(updatedAt),
+                deleted: Value(data['deleted'] == true),
+              ),
+            );
       }
-      final updatedAt = (data['updatedAt'] as int?) ?? 0;
-      final hasPending = await _hasPendingOutbox(
-        entityType: 'pricing_profile_sub_item',
-        entityId: doc.id,
-        orgId: orgId,
-      );
-      if (hasPending) {
-        continue;
-      }
-      if (updatedAt > maxUpdatedAt) {
-        maxUpdatedAt = updatedAt;
-      }
-      final existing =
-          await (_db.select(_db.pricingProfileSubItems)
-                ..where((tbl) => tbl.id.equals(doc.id))
-                ..limit(1))
-              .getSingleOrNull();
-      if (existing != null && existing.updatedAt >= updatedAt) {
-        continue;
-      }
-      await _db.into(_db.pricingProfileSubItems).insertOnConflictUpdate(
-            PricingProfileSubItemsCompanion(
-              id: Value(doc.id),
-              orgId: Value(orgId),
-              profileId: Value(profileId),
-              category: Value(_string(data['category']).isEmpty
-                  ? 'General'
-                  : _string(data['category'])),
-              subItem: Value(_string(data['subItem'])),
-              description: Value(_string(data['description'])),
-              minutes: Value((data['minutes'] as num?)?.toInt() ?? 0),
-              updatedAt: Value(updatedAt),
-              deleted: Value(data['deleted'] == true),
-            ),
-          );
     }
     await _db.setSyncState(
       'pricing_profile_sub_item',
@@ -673,53 +695,58 @@ class SyncService {
     );
   }
 
-  Future<void> _downloadPricingProfileSizes(String orgId) async {
+  Future<void> _downloadPricingProfileSizes(
+    String orgId,
+    List<String> profileIds,
+  ) async {
     final lastSync =
         await _db.getLastSync('pricing_profile_size', orgId);
-    final snap = await FirebaseFirestore.instance
-        .collectionGroup('sizes')
-        .where('orgId', isEqualTo: orgId)
-        .where('updatedAt', isGreaterThan: lastSync)
-        .get();
     var maxUpdatedAt = lastSync;
-    for (final doc in snap.docs) {
-      final data = doc.data();
-      final profileId = _string(data['profileId']);
-      if (profileId.isEmpty) {
-        continue;
+    for (final profileId in profileIds) {
+      final snap = await FirebaseFirestore.instance
+          .collection('orgs')
+          .doc(orgId)
+          .collection('pricingProfiles')
+          .doc(profileId)
+          .collection('sizes')
+          .where('updatedAt', isGreaterThan: lastSync)
+          .orderBy('updatedAt')
+          .get();
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final updatedAt = (data['updatedAt'] as int?) ?? 0;
+        final hasPending = await _hasPendingOutbox(
+          entityType: 'pricing_profile_size',
+          entityId: doc.id,
+          orgId: orgId,
+        );
+        if (hasPending) {
+          continue;
+        }
+        if (updatedAt > maxUpdatedAt) {
+          maxUpdatedAt = updatedAt;
+        }
+        final existing =
+            await (_db.select(_db.pricingProfileSizes)
+                  ..where((tbl) => tbl.id.equals(doc.id))
+                  ..limit(1))
+                .getSingleOrNull();
+        if (existing != null && existing.updatedAt >= updatedAt) {
+          continue;
+        }
+        await _db.into(_db.pricingProfileSizes).insertOnConflictUpdate(
+              PricingProfileSizesCompanion(
+                id: Value(doc.id),
+                orgId: Value(orgId),
+                profileId: Value(profileId),
+                size: Value(_string(data['size'])),
+                multiplier: Value(_num(data['multiplier'], fallback: 1)),
+                definition: Value(_string(data['definition'])),
+                updatedAt: Value(updatedAt),
+                deleted: Value(data['deleted'] == true),
+              ),
+            );
       }
-      final updatedAt = (data['updatedAt'] as int?) ?? 0;
-      final hasPending = await _hasPendingOutbox(
-        entityType: 'pricing_profile_size',
-        entityId: doc.id,
-        orgId: orgId,
-      );
-      if (hasPending) {
-        continue;
-      }
-      if (updatedAt > maxUpdatedAt) {
-        maxUpdatedAt = updatedAt;
-      }
-      final existing =
-          await (_db.select(_db.pricingProfileSizes)
-                ..where((tbl) => tbl.id.equals(doc.id))
-                ..limit(1))
-              .getSingleOrNull();
-      if (existing != null && existing.updatedAt >= updatedAt) {
-        continue;
-      }
-      await _db.into(_db.pricingProfileSizes).insertOnConflictUpdate(
-            PricingProfileSizesCompanion(
-              id: Value(doc.id),
-              orgId: Value(orgId),
-              profileId: Value(profileId),
-              size: Value(_string(data['size'])),
-              multiplier: Value(_num(data['multiplier'], fallback: 1)),
-              definition: Value(_string(data['definition'])),
-              updatedAt: Value(updatedAt),
-              deleted: Value(data['deleted'] == true),
-            ),
-          );
     }
     await _db.setSyncState(
       'pricing_profile_size',
@@ -728,53 +755,58 @@ class SyncService {
     );
   }
 
-  Future<void> _downloadPricingProfileComplexities(String orgId) async {
+  Future<void> _downloadPricingProfileComplexities(
+    String orgId,
+    List<String> profileIds,
+  ) async {
     final lastSync =
         await _db.getLastSync('pricing_profile_complexity', orgId);
-    final snap = await FirebaseFirestore.instance
-        .collectionGroup('complexities')
-        .where('orgId', isEqualTo: orgId)
-        .where('updatedAt', isGreaterThan: lastSync)
-        .get();
     var maxUpdatedAt = lastSync;
-    for (final doc in snap.docs) {
-      final data = doc.data();
-      final profileId = _string(data['profileId']);
-      if (profileId.isEmpty) {
-        continue;
+    for (final profileId in profileIds) {
+      final snap = await FirebaseFirestore.instance
+          .collection('orgs')
+          .doc(orgId)
+          .collection('pricingProfiles')
+          .doc(profileId)
+          .collection('complexities')
+          .where('updatedAt', isGreaterThan: lastSync)
+          .orderBy('updatedAt')
+          .get();
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final updatedAt = (data['updatedAt'] as int?) ?? 0;
+        final hasPending = await _hasPendingOutbox(
+          entityType: 'pricing_profile_complexity',
+          entityId: doc.id,
+          orgId: orgId,
+        );
+        if (hasPending) {
+          continue;
+        }
+        if (updatedAt > maxUpdatedAt) {
+          maxUpdatedAt = updatedAt;
+        }
+        final existing =
+            await (_db.select(_db.pricingProfileComplexities)
+                  ..where((tbl) => tbl.id.equals(doc.id))
+                  ..limit(1))
+                .getSingleOrNull();
+        if (existing != null && existing.updatedAt >= updatedAt) {
+          continue;
+        }
+        await _db.into(_db.pricingProfileComplexities).insertOnConflictUpdate(
+              PricingProfileComplexitiesCompanion(
+                id: Value(doc.id),
+                orgId: Value(orgId),
+                profileId: Value(profileId),
+                level: Value(_string(data['level'])),
+                multiplier: Value(_num(data['multiplier'], fallback: 1)),
+                definition: Value(_string(data['definition'])),
+                updatedAt: Value(updatedAt),
+                deleted: Value(data['deleted'] == true),
+              ),
+            );
       }
-      final updatedAt = (data['updatedAt'] as int?) ?? 0;
-      final hasPending = await _hasPendingOutbox(
-        entityType: 'pricing_profile_complexity',
-        entityId: doc.id,
-        orgId: orgId,
-      );
-      if (hasPending) {
-        continue;
-      }
-      if (updatedAt > maxUpdatedAt) {
-        maxUpdatedAt = updatedAt;
-      }
-      final existing =
-          await (_db.select(_db.pricingProfileComplexities)
-                ..where((tbl) => tbl.id.equals(doc.id))
-                ..limit(1))
-              .getSingleOrNull();
-      if (existing != null && existing.updatedAt >= updatedAt) {
-        continue;
-      }
-      await _db.into(_db.pricingProfileComplexities).insertOnConflictUpdate(
-            PricingProfileComplexitiesCompanion(
-              id: Value(doc.id),
-              orgId: Value(orgId),
-              profileId: Value(profileId),
-              level: Value(_string(data['level'])),
-              multiplier: Value(_num(data['multiplier'], fallback: 1)),
-              definition: Value(_string(data['definition'])),
-              updatedAt: Value(updatedAt),
-              deleted: Value(data['deleted'] == true),
-            ),
-          );
     }
     await _db.setSyncState(
       'pricing_profile_complexity',

@@ -4,9 +4,24 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
   PricingProfilesRepositoryLocalFirst get pricingProfilesRepo;
   PricingProfileCatalogRepositoryLocalFirst get pricingCatalogRepo;
 
+  final Map<String, Stream<PricingProfileCatalog>> _catalogStreams = {};
+  Stream<List<PricingProfileHeader>>? _profilesStream;
+
+  Stream<PricingProfileCatalog> _catalog$(String profileId) {
+    return _catalogStreams.putIfAbsent(
+      profileId,
+      () => pricingCatalogRepo.streamCatalog(profileId).asBroadcastStream(),
+    );
+  }
+
+  Stream<List<PricingProfileHeader>> profiles$() {
+    return _profilesStream ??=
+        pricingProfilesRepo.streamProfiles().asBroadcastStream();
+  }
+
   Widget _pricingProfilesCard(BuildContext context, OrgSettings settings) {
     return StreamBuilder<List<PricingProfileHeader>>(
-      stream: pricingProfilesRepo.streamProfiles(),
+      stream: profiles$(),
       builder: (context, snapshot) {
         final profiles = snapshot.data ?? const [];
         return Column(
@@ -243,7 +258,7 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
                       ),
                       const SizedBox(height: 8),
                       StreamBuilder<PricingProfileCatalog>(
-                        stream: pricingCatalogRepo.streamCatalog(profile.id),
+                        stream: _catalog$(profile.id),
                         builder: (context, snapshot) {
                           final catalog =
                               snapshot.data ?? PricingProfileCatalog.empty();
@@ -281,7 +296,7 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
                       ),
                       const SizedBox(height: 8),
                       StreamBuilder<PricingProfileCatalog>(
-                        stream: pricingCatalogRepo.streamCatalog(profile.id),
+                        stream: _catalog$(profile.id),
                         builder: (context, snapshot) {
                           final catalog =
                               snapshot.data ?? PricingProfileCatalog.empty();
