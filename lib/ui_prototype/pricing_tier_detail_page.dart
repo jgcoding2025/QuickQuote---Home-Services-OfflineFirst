@@ -18,7 +18,7 @@ class PricingTierDetailPage extends StatefulWidget {
   final OrgSettings orgSettings;
   final PricingProfilesRepositoryLocalFirst pricingProfilesRepo;
   final PricingProfileCatalogRepositoryLocalFirst pricingCatalogRepo;
-  final _SettingsData settingsData;
+  final SettingsData settingsData;
 
   @override
   State<PricingTierDetailPage> createState() => _PricingTierDetailPageState();
@@ -579,7 +579,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         builder: (context, setState) => AlertDialog(
           title: const Text('Edit Service Type'),
           content: DropdownButtonFormField<String>(
-            value: selected.id,
+            initialValue: selected.id,
             items: items
                 .map(
                   (item) => DropdownMenuItem(
@@ -663,7 +663,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         builder: (context, setState) => AlertDialog(
           title: const Text('Edit Frequency'),
           content: DropdownButtonFormField<String>(
-            value: selected.id,
+            initialValue: selected.id,
             items: items
                 .map(
                   (item) => DropdownMenuItem(
@@ -767,7 +767,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         builder: (context, setState) => AlertDialog(
           title: const Text('Edit Room Type'),
           content: DropdownButtonFormField<String>(
-            value: selected.id,
+            initialValue: selected.id,
             items: items
                 .map(
                   (item) => DropdownMenuItem(
@@ -861,7 +861,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         builder: (context, setState) => AlertDialog(
           title: const Text('Edit Add-on Item'),
           content: DropdownButtonFormField<String>(
-            value: selected.id,
+            initialValue: selected.id,
             items: items
                 .map(
                   (item) => DropdownMenuItem(
@@ -957,7 +957,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         builder: (context, setState) => AlertDialog(
           title: const Text('Edit Size'),
           content: DropdownButtonFormField<String>(
-            value: selected.id,
+            initialValue: selected.id,
             items: items
                 .map(
                   (item) => DropdownMenuItem(
@@ -1053,7 +1053,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         builder: (context, setState) => AlertDialog(
           title: const Text('Edit Complexity'),
           content: DropdownButtonFormField<String>(
-            value: selected.id,
+            initialValue: selected.id,
             items: items
                 .map(
                   (item) => DropdownMenuItem(
@@ -1102,7 +1102,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
-                value: selected.name,
+                initialValue: selected.name,
                 items: _planTiers
                     .map(
                       (tier) => DropdownMenuItem(

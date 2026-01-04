@@ -28,7 +28,7 @@ class FinalizedDocumentsRepositoryLocalFirst {
 
   Stream<List<FinalizedDocument>> streamForQuote(String quoteId) async* {
     final controller = StreamController<List<FinalizedDocument>>();
-    StreamSubscription<List<FinalizedDocumentRow>>? dataSub;
+    StreamSubscription<List<FinalizedDocument>>? dataSub;
 
     Future<void> listenSession(AppSession? session) async {
       await dataSub?.cancel();

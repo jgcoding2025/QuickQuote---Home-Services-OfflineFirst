@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,6 @@ import 'data/quote_models.dart';
 import 'data/quotes_repo_local_first.dart';
 import 'data/session_controller.dart';
 import 'data/sync_service.dart';
-import 'pdf/pdf_service.dart';
 import 'util/debouncer.dart';
 
 part 'ui_prototype/app.dart';

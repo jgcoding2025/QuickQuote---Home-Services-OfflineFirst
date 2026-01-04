@@ -287,7 +287,7 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
                 pricingProfileId = 'default';
               }
               return DropdownButtonFormField<String>(
-                value: pricingProfileId,
+                initialValue: pricingProfileId,
                 items: items,
                 isExpanded: true,
                 onChanged: (value) {
@@ -394,7 +394,7 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
 
                       await _quotesRepo.setQuote(newId, draft, isNew: true);
 
-                      if (!mounted) return;
+                      if (!context.mounted) return;
 
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(

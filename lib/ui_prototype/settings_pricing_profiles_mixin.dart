@@ -14,7 +14,7 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
   Widget _pricingProfilesCard(
     BuildContext context,
     OrgSettings settings,
-    _SettingsData data,
+    SettingsData data,
   ) {
     return StreamBuilder<List<PricingProfileHeader>>(
       stream: profiles$(),
@@ -153,7 +153,7 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
-                value: selectedSourceId,
+                initialValue: selectedSourceId,
                 items: [
                   const DropdownMenuItem(
                     value: 'default',
@@ -188,7 +188,7 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
             FilledButton(
               onPressed: () => Navigator.pop(
                 context,
-                '${selectedSourceId}::${controller.text}',
+                '$selectedSourceId::${controller.text}',
               ),
               child: const Text('Create'),
             ),
@@ -217,7 +217,7 @@ mixin _SettingsPricingProfilesMixin on _SettingsStateAccess {
 
   void _openPricingTierDetail(
     BuildContext context,
-    _SettingsData data,
+    SettingsData data,
     OrgSettings settings,
     PricingProfileHeader profile, {
     bool isDefault = false,

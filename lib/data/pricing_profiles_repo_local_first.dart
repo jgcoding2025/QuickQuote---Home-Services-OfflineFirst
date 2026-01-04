@@ -31,10 +31,8 @@ class PricingProfilesRepositoryLocalFirst {
     late final StreamController<List<PricingProfileHeader>> controller;
     StreamSubscription<List<PricingProfileHeader>>? dataSub;
     StreamSubscription<AppSession?>? sessionSub;
-    List<PricingProfileHeader> last = const [];
 
     void emitProfiles(List<PricingProfileHeader> profiles) {
-      last = profiles;
       if (!controller.isClosed) {
         controller.add(profiles);
       }
