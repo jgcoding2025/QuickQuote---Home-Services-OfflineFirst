@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'app_dependencies.dart';
 import 'data/app_controller.dart';
 import 'data/clients_repo_local_first.dart';
+import 'data/finalized_documents_repo_local_first.dart';
 import 'data/local_db.dart';
 import 'data/org_settings_repo_local_first.dart';
 import 'data/pricing_profile_catalog_repo_local_first.dart';
@@ -16,6 +17,7 @@ import 'data/presence_service.dart';
 import 'data/session_controller.dart';
 import 'data/sync_service.dart';
 import 'firebase_options.dart';
+import 'pdf/pdf_service.dart';
 import 'ui_prototype.dart';
 
 void main() async {
@@ -70,6 +72,17 @@ void main() async {
         sessionController: sessionController,
         syncService: syncService,
       );
+  final finalizedDocumentsRepository = FinalizedDocumentsRepositoryLocalFirst(
+    db: db,
+    sessionController: sessionController,
+    syncService: syncService,
+  );
+  final pdfService = PdfService(
+    finalizedDocsRepository: finalizedDocumentsRepository,
+    pricingProfilesRepository: pricingProfilesRepository,
+    pricingProfileCatalogRepository: pricingProfileCatalogRepository,
+    orgSettingsRepository: orgSettingsRepository,
+  );
   final appController = AppController(
     db: db,
     sessionController: sessionController,
@@ -89,6 +102,8 @@ void main() async {
       orgSettingsRepository: orgSettingsRepository,
       pricingProfilesRepository: pricingProfilesRepository,
       pricingProfileCatalogRepository: pricingProfileCatalogRepository,
+      finalizedDocumentsRepository: finalizedDocumentsRepository,
+      pdfService: pdfService,
       syncService: syncService,
       appController: appController,
       child: const UiPrototypeApp(),

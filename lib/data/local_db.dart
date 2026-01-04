@@ -241,6 +241,25 @@ class SyncState extends Table {
   Set<Column<Object>>? get primaryKey => {id, orgId};
 }
 
+@DataClassName('FinalizedDocumentRow')
+class FinalizedDocuments extends Table {
+  TextColumn get id => text()();
+  TextColumn get orgId => text()();
+  TextColumn get quoteId => text()();
+  TextColumn get docType => text()();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+  TextColumn get status => text()();
+  TextColumn get localPath => text()();
+  TextColumn get remotePath => text().nullable()();
+  TextColumn get quoteSnapshot => text()();
+  TextColumn get pricingSnapshot => text()();
+  TextColumn get totalsSnapshot => text()();
+
+  @override
+  Set<Column<Object>>? get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Clients,
@@ -256,13 +275,14 @@ class SyncState extends Table {
     PricingProfileComplexities,
     Outbox,
     SyncState,
+    FinalizedDocuments,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -286,6 +306,9 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(pricingProfileSubItems);
             await m.createTable(pricingProfileSizes);
             await m.createTable(pricingProfileComplexities);
+          }
+          if (from < 3) {
+            await m.createTable(finalizedDocuments);
           }
         },
       );
@@ -439,6 +462,9 @@ class AppDatabase extends _$AppDatabase {
     );
     await (update(syncState)..where((tbl) => tbl.orgId.equals(fromOrgId)))
         .write(SyncStateCompanion(orgId: Value(toOrgId)));
+    await (update(finalizedDocuments)
+          ..where((tbl) => tbl.orgId.equals(fromOrgId)))
+        .write(FinalizedDocumentsCompanion(orgId: Value(toOrgId)));
   }
 
   static LazyDatabase _openConnection() {

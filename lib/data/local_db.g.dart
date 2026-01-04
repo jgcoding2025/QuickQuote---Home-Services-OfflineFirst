@@ -8434,6 +8434,728 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateRow> {
   }
 }
 
+class $FinalizedDocumentsTable extends FinalizedDocuments
+    with TableInfo<$FinalizedDocumentsTable, FinalizedDocumentRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FinalizedDocumentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _orgIdMeta = const VerificationMeta('orgId');
+  @override
+  late final GeneratedColumn<String> orgId = GeneratedColumn<String>(
+    'org_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quoteIdMeta = const VerificationMeta(
+    'quoteId',
+  );
+  @override
+  late final GeneratedColumn<String> quoteId = GeneratedColumn<String>(
+    'quote_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _docTypeMeta = const VerificationMeta(
+    'docType',
+  );
+  @override
+  late final GeneratedColumn<String> docType = GeneratedColumn<String>(
+    'doc_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _localPathMeta = const VerificationMeta(
+    'localPath',
+  );
+  @override
+  late final GeneratedColumn<String> localPath = GeneratedColumn<String>(
+    'local_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _remotePathMeta = const VerificationMeta(
+    'remotePath',
+  );
+  @override
+  late final GeneratedColumn<String> remotePath = GeneratedColumn<String>(
+    'remote_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _quoteSnapshotMeta = const VerificationMeta(
+    'quoteSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> quoteSnapshot = GeneratedColumn<String>(
+    'quote_snapshot',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pricingSnapshotMeta = const VerificationMeta(
+    'pricingSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> pricingSnapshot = GeneratedColumn<String>(
+    'pricing_snapshot',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _totalsSnapshotMeta = const VerificationMeta(
+    'totalsSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> totalsSnapshot = GeneratedColumn<String>(
+    'totals_snapshot',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    orgId,
+    quoteId,
+    docType,
+    createdAt,
+    updatedAt,
+    status,
+    localPath,
+    remotePath,
+    quoteSnapshot,
+    pricingSnapshot,
+    totalsSnapshot,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'finalized_documents';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FinalizedDocumentRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('org_id')) {
+      context.handle(
+        _orgIdMeta,
+        orgId.isAcceptableOrUnknown(data['org_id']!, _orgIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orgIdMeta);
+    }
+    if (data.containsKey('quote_id')) {
+      context.handle(
+        _quoteIdMeta,
+        quoteId.isAcceptableOrUnknown(data['quote_id']!, _quoteIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_quoteIdMeta);
+    }
+    if (data.containsKey('doc_type')) {
+      context.handle(
+        _docTypeMeta,
+        docType.isAcceptableOrUnknown(data['doc_type']!, _docTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_docTypeMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('local_path')) {
+      context.handle(
+        _localPathMeta,
+        localPath.isAcceptableOrUnknown(data['local_path']!, _localPathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_localPathMeta);
+    }
+    if (data.containsKey('remote_path')) {
+      context.handle(
+        _remotePathMeta,
+        remotePath.isAcceptableOrUnknown(data['remote_path']!, _remotePathMeta),
+      );
+    }
+    if (data.containsKey('quote_snapshot')) {
+      context.handle(
+        _quoteSnapshotMeta,
+        quoteSnapshot.isAcceptableOrUnknown(
+          data['quote_snapshot']!,
+          _quoteSnapshotMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_quoteSnapshotMeta);
+    }
+    if (data.containsKey('pricing_snapshot')) {
+      context.handle(
+        _pricingSnapshotMeta,
+        pricingSnapshot.isAcceptableOrUnknown(
+          data['pricing_snapshot']!,
+          _pricingSnapshotMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_pricingSnapshotMeta);
+    }
+    if (data.containsKey('totals_snapshot')) {
+      context.handle(
+        _totalsSnapshotMeta,
+        totalsSnapshot.isAcceptableOrUnknown(
+          data['totals_snapshot']!,
+          _totalsSnapshotMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_totalsSnapshotMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FinalizedDocumentRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FinalizedDocumentRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      orgId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}org_id'],
+      )!,
+      quoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quote_id'],
+      )!,
+      docType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}doc_type'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      localPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_path'],
+      )!,
+      remotePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_path'],
+      ),
+      quoteSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quote_snapshot'],
+      )!,
+      pricingSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pricing_snapshot'],
+      )!,
+      totalsSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}totals_snapshot'],
+      )!,
+    );
+  }
+
+  @override
+  $FinalizedDocumentsTable createAlias(String alias) {
+    return $FinalizedDocumentsTable(attachedDatabase, alias);
+  }
+}
+
+class FinalizedDocumentRow extends DataClass
+    implements Insertable<FinalizedDocumentRow> {
+  final String id;
+  final String orgId;
+  final String quoteId;
+  final String docType;
+  final int createdAt;
+  final int updatedAt;
+  final String status;
+  final String localPath;
+  final String? remotePath;
+  final String quoteSnapshot;
+  final String pricingSnapshot;
+  final String totalsSnapshot;
+  const FinalizedDocumentRow({
+    required this.id,
+    required this.orgId,
+    required this.quoteId,
+    required this.docType,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.status,
+    required this.localPath,
+    this.remotePath,
+    required this.quoteSnapshot,
+    required this.pricingSnapshot,
+    required this.totalsSnapshot,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['org_id'] = Variable<String>(orgId);
+    map['quote_id'] = Variable<String>(quoteId);
+    map['doc_type'] = Variable<String>(docType);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['status'] = Variable<String>(status);
+    map['local_path'] = Variable<String>(localPath);
+    if (!nullToAbsent || remotePath != null) {
+      map['remote_path'] = Variable<String?>(remotePath);
+    }
+    map['quote_snapshot'] = Variable<String>(quoteSnapshot);
+    map['pricing_snapshot'] = Variable<String>(pricingSnapshot);
+    map['totals_snapshot'] = Variable<String>(totalsSnapshot);
+    return map;
+  }
+
+  FinalizedDocumentsCompanion toCompanion(bool nullToAbsent) {
+    return FinalizedDocumentsCompanion(
+      id: Value(id),
+      orgId: Value(orgId),
+      quoteId: Value(quoteId),
+      docType: Value(docType),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      status: Value(status),
+      localPath: Value(localPath),
+      remotePath: remotePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remotePath),
+      quoteSnapshot: Value(quoteSnapshot),
+      pricingSnapshot: Value(pricingSnapshot),
+      totalsSnapshot: Value(totalsSnapshot),
+    );
+  }
+
+  factory FinalizedDocumentRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FinalizedDocumentRow(
+      id: serializer.fromJson<String>(json['id']),
+      orgId: serializer.fromJson<String>(json['orgId']),
+      quoteId: serializer.fromJson<String>(json['quoteId']),
+      docType: serializer.fromJson<String>(json['docType']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      status: serializer.fromJson<String>(json['status']),
+      localPath: serializer.fromJson<String>(json['localPath']),
+      remotePath: serializer.fromJson<String?>(json['remotePath']),
+      quoteSnapshot: serializer.fromJson<String>(json['quoteSnapshot']),
+      pricingSnapshot: serializer.fromJson<String>(json['pricingSnapshot']),
+      totalsSnapshot: serializer.fromJson<String>(json['totalsSnapshot']),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'orgId': serializer.toJson<String>(orgId),
+      'quoteId': serializer.toJson<String>(quoteId),
+      'docType': serializer.toJson<String>(docType),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'status': serializer.toJson<String>(status),
+      'localPath': serializer.toJson<String>(localPath),
+      'remotePath': serializer.toJson<String?>(remotePath),
+      'quoteSnapshot': serializer.toJson<String>(quoteSnapshot),
+      'pricingSnapshot': serializer.toJson<String>(pricingSnapshot),
+      'totalsSnapshot': serializer.toJson<String>(totalsSnapshot),
+    };
+  }
+
+  FinalizedDocumentRow copyWith({
+    String? id,
+    String? orgId,
+    String? quoteId,
+    String? docType,
+    int? createdAt,
+    int? updatedAt,
+    String? status,
+    String? localPath,
+    Value<String?> remotePath = const Value.absent(),
+    String? quoteSnapshot,
+    String? pricingSnapshot,
+    String? totalsSnapshot,
+  }) => FinalizedDocumentRow(
+    id: id ?? this.id,
+    orgId: orgId ?? this.orgId,
+    quoteId: quoteId ?? this.quoteId,
+    docType: docType ?? this.docType,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    status: status ?? this.status,
+    localPath: localPath ?? this.localPath,
+    remotePath: remotePath.present ? remotePath.value : this.remotePath,
+    quoteSnapshot: quoteSnapshot ?? this.quoteSnapshot,
+    pricingSnapshot: pricingSnapshot ?? this.pricingSnapshot,
+    totalsSnapshot: totalsSnapshot ?? this.totalsSnapshot,
+  );
+
+  FinalizedDocumentRow copyWithCompanion(FinalizedDocumentsCompanion data) {
+    return FinalizedDocumentRow(
+      id: data.id.present ? data.id.value : id,
+      orgId: data.orgId.present ? data.orgId.value : orgId,
+      quoteId: data.quoteId.present ? data.quoteId.value : quoteId,
+      docType: data.docType.present ? data.docType.value : docType,
+      createdAt: data.createdAt.present ? data.createdAt.value : createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : updatedAt,
+      status: data.status.present ? data.status.value : status,
+      localPath: data.localPath.present ? data.localPath.value : localPath,
+      remotePath: data.remotePath.present
+          ? data.remotePath.value
+          : remotePath,
+      quoteSnapshot: data.quoteSnapshot.present
+          ? data.quoteSnapshot.value
+          : quoteSnapshot,
+      pricingSnapshot: data.pricingSnapshot.present
+          ? data.pricingSnapshot.value
+          : pricingSnapshot,
+      totalsSnapshot: data.totalsSnapshot.present
+          ? data.totalsSnapshot.value
+          : totalsSnapshot,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FinalizedDocumentRow(')
+          ..write('id: $id, ')
+          ..write('orgId: $orgId, ')
+          ..write('quoteId: $quoteId, ')
+          ..write('docType: $docType, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('status: $status, ')
+          ..write('localPath: $localPath, ')
+          ..write('remotePath: $remotePath, ')
+          ..write('quoteSnapshot: $quoteSnapshot, ')
+          ..write('pricingSnapshot: $pricingSnapshot, ')
+          ..write('totalsSnapshot: $totalsSnapshot')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    orgId,
+    quoteId,
+    docType,
+    createdAt,
+    updatedAt,
+    status,
+    localPath,
+    remotePath,
+    quoteSnapshot,
+    pricingSnapshot,
+    totalsSnapshot,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FinalizedDocumentRow &&
+          other.id == id &&
+          other.orgId == orgId &&
+          other.quoteId == quoteId &&
+          other.docType == docType &&
+          other.createdAt == createdAt &&
+          other.updatedAt == updatedAt &&
+          other.status == status &&
+          other.localPath == localPath &&
+          other.remotePath == remotePath &&
+          other.quoteSnapshot == quoteSnapshot &&
+          other.pricingSnapshot == pricingSnapshot &&
+          other.totalsSnapshot == totalsSnapshot);
+}
+
+class FinalizedDocumentsCompanion
+    extends UpdateCompanion<FinalizedDocumentRow> {
+  final Value<String> id;
+  final Value<String> orgId;
+  final Value<String> quoteId;
+  final Value<String> docType;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<String> status;
+  final Value<String> localPath;
+  final Value<String?> remotePath;
+  final Value<String> quoteSnapshot;
+  final Value<String> pricingSnapshot;
+  final Value<String> totalsSnapshot;
+  final Value<int> rowid;
+  const FinalizedDocumentsCompanion({
+    this.id = const Value.absent(),
+    this.orgId = const Value.absent(),
+    this.quoteId = const Value.absent(),
+    this.docType = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.status = const Value.absent(),
+    this.localPath = const Value.absent(),
+    this.remotePath = const Value.absent(),
+    this.quoteSnapshot = const Value.absent(),
+    this.pricingSnapshot = const Value.absent(),
+    this.totalsSnapshot = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FinalizedDocumentsCompanion.insert({
+    required String id,
+    required String orgId,
+    required String quoteId,
+    required String docType,
+    required int createdAt,
+    required int updatedAt,
+    required String status,
+    required String localPath,
+    this.remotePath = const Value.absent(),
+    required String quoteSnapshot,
+    required String pricingSnapshot,
+    required String totalsSnapshot,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       orgId = Value(orgId),
+       quoteId = Value(quoteId),
+       docType = Value(docType),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       status = Value(status),
+       localPath = Value(localPath),
+       quoteSnapshot = Value(quoteSnapshot),
+       pricingSnapshot = Value(pricingSnapshot),
+       totalsSnapshot = Value(totalsSnapshot);
+  static Insertable<FinalizedDocumentRow> custom({
+    Expression<String>? id,
+    Expression<String>? orgId,
+    Expression<String>? quoteId,
+    Expression<String>? docType,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<String>? status,
+    Expression<String>? localPath,
+    Expression<String>? remotePath,
+    Expression<String>? quoteSnapshot,
+    Expression<String>? pricingSnapshot,
+    Expression<String>? totalsSnapshot,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (orgId != null) 'org_id': orgId,
+      if (quoteId != null) 'quote_id': quoteId,
+      if (docType != null) 'doc_type': docType,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (status != null) 'status': status,
+      if (localPath != null) 'local_path': localPath,
+      if (remotePath != null) 'remote_path': remotePath,
+      if (quoteSnapshot != null) 'quote_snapshot': quoteSnapshot,
+      if (pricingSnapshot != null) 'pricing_snapshot': pricingSnapshot,
+      if (totalsSnapshot != null) 'totals_snapshot': totalsSnapshot,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FinalizedDocumentsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? orgId,
+    Value<String>? quoteId,
+    Value<String>? docType,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<String>? status,
+    Value<String>? localPath,
+    Value<String?>? remotePath,
+    Value<String>? quoteSnapshot,
+    Value<String>? pricingSnapshot,
+    Value<String>? totalsSnapshot,
+    Value<int>? rowid,
+  }) {
+    return FinalizedDocumentsCompanion(
+      id: id ?? this.id,
+      orgId: orgId ?? this.orgId,
+      quoteId: quoteId ?? this.quoteId,
+      docType: docType ?? this.docType,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      status: status ?? this.status,
+      localPath: localPath ?? this.localPath,
+      remotePath: remotePath ?? this.remotePath,
+      quoteSnapshot: quoteSnapshot ?? this.quoteSnapshot,
+      pricingSnapshot: pricingSnapshot ?? this.pricingSnapshot,
+      totalsSnapshot: totalsSnapshot ?? this.totalsSnapshot,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (orgId.present) {
+      map['org_id'] = Variable<String>(orgId.value);
+    }
+    if (quoteId.present) {
+      map['quote_id'] = Variable<String>(quoteId.value);
+    }
+    if (docType.present) {
+      map['doc_type'] = Variable<String>(docType.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (localPath.present) {
+      map['local_path'] = Variable<String>(localPath.value);
+    }
+    if (remotePath.present) {
+      map['remote_path'] = Variable<String?>(remotePath.value);
+    }
+    if (quoteSnapshot.present) {
+      map['quote_snapshot'] = Variable<String>(quoteSnapshot.value);
+    }
+    if (pricingSnapshot.present) {
+      map['pricing_snapshot'] = Variable<String>(pricingSnapshot.value);
+    }
+    if (totalsSnapshot.present) {
+      map['totals_snapshot'] = Variable<String>(totalsSnapshot.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FinalizedDocumentsCompanion(')
+          ..write('id: $id, ')
+          ..write('orgId: $orgId, ')
+          ..write('quoteId: $quoteId, ')
+          ..write('docType: $docType, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('status: $status, ')
+          ..write('localPath: $localPath, ')
+          ..write('remotePath: $remotePath, ')
+          ..write('quoteSnapshot: $quoteSnapshot, ')
+          ..write('pricingSnapshot: $pricingSnapshot, ')
+          ..write('totalsSnapshot: $totalsSnapshot, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -8460,6 +9182,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $PricingProfileComplexitiesTable(this);
   late final $OutboxTable outbox = $OutboxTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
+  late final $FinalizedDocumentsTable finalizedDocuments =
+      $FinalizedDocumentsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -8478,6 +9202,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     pricingProfileComplexities,
     outbox,
     syncState,
+    finalizedDocuments,
   ];
 }
 
