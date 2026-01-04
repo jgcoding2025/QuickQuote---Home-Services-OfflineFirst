@@ -27,9 +27,9 @@ class PricingProfilesRepositoryLocalFirst {
   final Uuid _uuid;
 
   Stream<List<PricingProfileHeader>> streamProfiles() {
-    final controller =
-        StreamController<List<PricingProfileHeader>>.broadcast();
+    late final StreamController<List<PricingProfileHeader>> controller;
     StreamSubscription<List<PricingProfileHeader>>? dataSub;
+    StreamSubscription<AppSession?>? sessionSub;
     List<PricingProfileHeader> last = const [];
 
     void emitProfiles(List<PricingProfileHeader> profiles) {
@@ -41,32 +41,39 @@ class PricingProfilesRepositoryLocalFirst {
 
     void listenSession(AppSession? session) {
       dataSub?.cancel();
+      dataSub = null;
+
       if (session == null || session.orgId == null) {
-        if (last.isEmpty) {
-          emitProfiles(const []);
-        }
+        // Always emit something so first listeners don't wait forever.
+        emitProfiles(const []);
         return;
       }
+
+      final orgId = session.orgId!;
       dataSub =
           (_db.select(_db.pricingProfiles)
                 ..where(
-                  (tbl) =>
-                      tbl.orgId.equals(session.orgId!) &
-                      tbl.deleted.equals(false),
+                  (tbl) => tbl.orgId.equals(orgId) & tbl.deleted.equals(false),
                 )
-                ..orderBy([(tbl) => OrderingTerm.asc(tbl.name)]))
+                ..orderBy([(t) => OrderingTerm(expression: t.name)]))
               .watch()
               .map((rows) => rows.map(_mapHeader).toList())
               .listen(emitProfiles, onError: controller.addError);
     }
 
-    listenSession(_sessionController.value);
-    final sessionSub = _sessionController.stream.listen(listenSession);
-
-    controller.onCancel = () async {
-      await dataSub?.cancel();
-      await sessionSub.cancel();
-    };
+    controller = StreamController<List<PricingProfileHeader>>.broadcast(
+      onListen: () {
+        // IMPORTANT: broadcast events emitted before subscription are dropped.
+        listenSession(_sessionController.value);
+        sessionSub = _sessionController.stream.listen(listenSession);
+      },
+      onCancel: () async {
+        await dataSub?.cancel();
+        dataSub = null;
+        await sessionSub?.cancel();
+        sessionSub = null;
+      },
+    );
 
     return controller.stream;
   }
@@ -101,63 +108,56 @@ class PricingProfilesRepositoryLocalFirst {
     final now = DateTime.now().millisecondsSinceEpoch;
     final newId = _uuid.v4();
     final orgSettings = await _loadOrgSettings(orgId);
-    final defaultProfileId =
-        orgSettings.defaultPricingProfileId.isEmpty
-            ? 'default'
-            : orgSettings.defaultPricingProfileId;
+    final defaultProfileId = orgSettings.defaultPricingProfileId.isEmpty
+        ? 'default'
+        : orgSettings.defaultPricingProfileId;
     final serviceTypes =
-        await (_db.select(_db.pricingProfileServiceTypes)
-              ..where(
-                (tbl) =>
-                    tbl.orgId.equals(orgId) &
-                    tbl.profileId.equals(defaultProfileId) &
-                    tbl.deleted.equals(false),
-              ))
+        await (_db.select(_db.pricingProfileServiceTypes)..where(
+              (tbl) =>
+                  tbl.orgId.equals(orgId) &
+                  tbl.profileId.equals(defaultProfileId) &
+                  tbl.deleted.equals(false),
+            ))
             .get();
     final frequencies =
-        await (_db.select(_db.pricingProfileFrequencies)
-              ..where(
-                (tbl) =>
-                    tbl.orgId.equals(orgId) &
-                    tbl.profileId.equals(defaultProfileId) &
-                    tbl.deleted.equals(false),
-              ))
+        await (_db.select(_db.pricingProfileFrequencies)..where(
+              (tbl) =>
+                  tbl.orgId.equals(orgId) &
+                  tbl.profileId.equals(defaultProfileId) &
+                  tbl.deleted.equals(false),
+            ))
             .get();
     final roomTypes =
-        await (_db.select(_db.pricingProfileRoomTypes)
-              ..where(
-                (tbl) =>
-                    tbl.orgId.equals(orgId) &
-                    tbl.profileId.equals(defaultProfileId) &
-                    tbl.deleted.equals(false),
-              ))
+        await (_db.select(_db.pricingProfileRoomTypes)..where(
+              (tbl) =>
+                  tbl.orgId.equals(orgId) &
+                  tbl.profileId.equals(defaultProfileId) &
+                  tbl.deleted.equals(false),
+            ))
             .get();
     final subItems =
-        await (_db.select(_db.pricingProfileSubItems)
-              ..where(
-                (tbl) =>
-                    tbl.orgId.equals(orgId) &
-                    tbl.profileId.equals(defaultProfileId) &
-                    tbl.deleted.equals(false),
-              ))
+        await (_db.select(_db.pricingProfileSubItems)..where(
+              (tbl) =>
+                  tbl.orgId.equals(orgId) &
+                  tbl.profileId.equals(defaultProfileId) &
+                  tbl.deleted.equals(false),
+            ))
             .get();
     final sizes =
-        await (_db.select(_db.pricingProfileSizes)
-              ..where(
-                (tbl) =>
-                    tbl.orgId.equals(orgId) &
-                    tbl.profileId.equals(defaultProfileId) &
-                    tbl.deleted.equals(false),
-              ))
+        await (_db.select(_db.pricingProfileSizes)..where(
+              (tbl) =>
+                  tbl.orgId.equals(orgId) &
+                  tbl.profileId.equals(defaultProfileId) &
+                  tbl.deleted.equals(false),
+            ))
             .get();
     final complexities =
-        await (_db.select(_db.pricingProfileComplexities)
-              ..where(
-                (tbl) =>
-                    tbl.orgId.equals(orgId) &
-                    tbl.profileId.equals(defaultProfileId) &
-                    tbl.deleted.equals(false),
-              ))
+        await (_db.select(_db.pricingProfileComplexities)..where(
+              (tbl) =>
+                  tbl.orgId.equals(orgId) &
+                  tbl.profileId.equals(defaultProfileId) &
+                  tbl.deleted.equals(false),
+            ))
             .get();
     final profileRow = PricingProfilesCompanion(
       id: Value(newId),

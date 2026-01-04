@@ -29,6 +29,7 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
 
   @override
   late Future<_QuoteSettingsData> _settingsFuture;
+  bool _settingsFutureReady = false;
   @override
   List<_ServiceTypeStandard> _serviceTypeStandards = const [];
   @override
@@ -170,7 +171,7 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   void initState() {
     super.initState();
     _syncFromQuote(widget.quote);
-    _settingsFuture = _loadQuoteSettingsData();
+    // _settingsFuture = _loadQuoteSettingsData();
     _startRemoteWatch();
   }
 
@@ -190,6 +191,11 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
     _pricingProfilesRepo = deps.pricingProfilesRepository;
     _orgSettingsRepo = deps.orgSettingsRepository;
 
+    if (!_settingsFutureReady) {
+      _settingsFuture = _loadQuoteSettingsData();
+      _settingsFutureReady = true;
+    }
+
     _profilesSub ??= _pricingProfilesRepo.streamProfiles().listen((profiles) {
       setState(() {
         _pricingProfiles = profiles;
@@ -204,9 +210,9 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
   }
 
   void _startRemoteWatch() {
-    _remoteSubscription = widget.repo
-        .watchQuoteById(widget.quote.id)
-        .listen((quote) {
+    _remoteSubscription = widget.repo.watchQuoteById(widget.quote.id).listen((
+      quote,
+    ) {
       if (!mounted || quote == null) return;
       if (!_isDirty) {
         _applyRemoteQuote(quote);
@@ -227,6 +233,7 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
     setState(() {
       pricingProfileId = profileId;
       _settingsFuture = _loadQuoteSettingsData();
+      _settingsFutureReady = true;
       _isDirty = true;
       _autoSaveGeneration += 1;
     });
@@ -326,6 +333,7 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
       if (wasMissing) {
         setState(() {
           _settingsFuture = _loadQuoteSettingsData();
+          _settingsFutureReady = true;
         });
       }
       return;
@@ -344,11 +352,7 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
       );
       return;
     }
-    _setPricingProfileStatus(
-      missing: true,
-      deleted: false,
-      name: header.name,
-    );
+    _setPricingProfileStatus(missing: true, deleted: false, name: header.name);
   }
 
   @override
