@@ -259,8 +259,9 @@ class _SettingsPageState extends State<SettingsPage>
                         final name = data['name'] as String?;
                         final active = data['active'] as bool? ?? true;
                         final isSelf = doc.id == session?.userId;
-                        final displayName =
-                            (name == null || name.isEmpty) ? email : name;
+                        final displayName = (name == null || name.isEmpty)
+                            ? 'Member'
+                            : name;
                         final displayRole = _formatRole(role);
                         return Card(
                           child: ListTile(
