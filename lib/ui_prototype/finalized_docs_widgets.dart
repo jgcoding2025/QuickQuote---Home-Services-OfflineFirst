@@ -1,6 +1,6 @@
 part of '../ui_prototype.dart';
 
-class FinalizedDocumentsSection extends StatelessWidget {
+class FinalizedDocumentsSection extends StatefulWidget {
   const FinalizedDocumentsSection({
     super.key,
     required this.quoteId,
@@ -9,8 +9,57 @@ class FinalizedDocumentsSection extends StatelessWidget {
   final String quoteId;
 
   @override
-  Widget build(BuildContext context) {
+  State<FinalizedDocumentsSection> createState() =>
+      _FinalizedDocumentsSectionState();
+}
+
+class _FinalizedDocumentsSectionState extends State<FinalizedDocumentsSection> {
+  Stream<List<FinalizedDocument>>? _docsStream;
+  StreamSubscription<List<FinalizedDocument>>? _docsSubscription;
+  StreamController<List<FinalizedDocument>>? _docsController;
+  FinalizedDocumentsRepositoryLocalFirst? _repo;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     final repo = AppDependencies.of(context).finalizedDocumentsRepository;
+    if (_repo != repo || _docsStream == null) {
+      _repo = repo;
+      _attachDocsStream();
+    }
+  }
+
+  @override
+  void didUpdateWidget(FinalizedDocumentsSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.quoteId != widget.quoteId) {
+      _attachDocsStream();
+    }
+  }
+
+  void _attachDocsStream() {
+    _docsSubscription?.cancel();
+    _docsController?.close();
+    final controller = StreamController<List<FinalizedDocument>>.broadcast();
+    _docsController = controller;
+    final repo = _repo ?? AppDependencies.of(context).finalizedDocumentsRepository;
+    _docsSubscription = repo.streamForQuote(widget.quoteId).listen(
+          controller.add,
+          onError: controller.addError,
+        );
+    // Broadcast controller keeps one source subscription alive across rebuilds.
+    _docsStream = controller.stream;
+  }
+
+  @override
+  void dispose() {
+    _docsSubscription?.cancel();
+    _docsController?.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       child: ExpansionTile(
         shape: const Border(),
@@ -22,7 +71,7 @@ class FinalizedDocumentsSection extends StatelessWidget {
         childrenPadding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
         children: [
           StreamBuilder<List<FinalizedDocument>>(
-            stream: repo.streamForQuote(quoteId),
+            stream: _docsStream,
             builder: (context, snapshot) {
               final docs = snapshot.data ?? const <FinalizedDocument>[];
               if (docs.isEmpty) {
