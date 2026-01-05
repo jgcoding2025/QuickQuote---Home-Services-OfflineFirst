@@ -91,19 +91,66 @@ class _FinalizedDocumentsSectionState extends State<FinalizedDocumentsSection> {
               return Column(
                 children: docs
                     .map(
-                      (doc) => Card(
-                        child: ListTile(
-                          leading: Icon(
-                            doc.docType == 'invoice'
-                                ? Icons.receipt_long
-                                : Icons.description_outlined,
+                      (doc) => Dismissible(
+                        key: ValueKey(doc.id),
+                        direction: DismissDirection.endToStart,
+                        confirmDismiss: (_) async {
+                          return await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('Delete document?'),
+                                  content: Text(
+                                    'Delete ${doc.title.toLowerCase()}?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(ctx, false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    FilledButton(
+                                      onPressed: () =>
+                                          Navigator.pop(ctx, true),
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                ),
+                              ) ??
+                              false;
+                        },
+                        onDismissed: (_) {
+                          final repo =
+                              _repo ??
+                                  AppDependencies.of(context)
+                                      .finalizedDocumentsRepository;
+                          repo.deleteFinalizedDocument(doc.id).catchError((e) {
+                            debugPrint('Delete finalized doc failed: $e');
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Deleted ${doc.title}'),
+                            ),
+                          );
+                        },
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: const Icon(Icons.delete_outline),
+                        ),
+                        child: Card(
+                          child: ListTile(
+                            leading: Icon(
+                              doc.docType == 'invoice'
+                                  ? Icons.receipt_long
+                                  : Icons.description_outlined,
+                            ),
+                            title: Text(doc.title),
+                            subtitle: Text(
+                              'Created ${_formatTimestamp(doc.createdAt)} • ${doc.status}',
+                            ),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () => _openFinalizedDocument(context, doc),
                           ),
-                          title: Text(doc.title),
-                          subtitle: Text(
-                            'Created ${_formatTimestamp(doc.createdAt)} • ${doc.status}',
-                          ),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () => _openFinalizedDocument(context, doc),
                         ),
                       ),
                     )

@@ -7,6 +7,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:uuid/uuid.dart';
 
+import '../data/occupants_rules_loader.dart';
 import '../data/finalized_document_models.dart';
 import '../data/finalized_documents_repo_local_first.dart';
 import '../data/org_settings_repo_local_first.dart';
@@ -44,9 +45,11 @@ class PdfService {
     final quoteSnapshot = _finalizedDocsRepository.buildQuoteSnapshot(quote);
     final pricingSnapshot =
         await buildPricingSnapshot(quote.pricingProfileId);
+    final occupantsRules = await OccupantsRulesLoader.load();
     final totals = calculateTotals(
       quoteSnapshot: quoteSnapshot,
       pricingSnapshot: pricingSnapshot,
+      occupantsRules: occupantsRules,
     );
     final totalsSnapshot = _finalizedDocsRepository.buildTotalsSnapshot(
       minutes: totals.minutes,
@@ -67,6 +70,7 @@ class PdfService {
       totalsSnapshot: totalsSnapshot,
       createdAt: createdAt,
       documentNumber: documentNumber,
+      occupantsRules: occupantsRules,
     );
     final localPath = await _savePdf(
       orgId: orgId,
@@ -118,18 +122,42 @@ class PdfService {
   TotalsSnapshot calculateTotals({
     required Map<String, dynamic> quoteSnapshot,
     required Map<String, dynamic> pricingSnapshot,
+    OccupantsRules? occupantsRules,
   }) {
+    final resolvedRules = occupantsRules ?? OccupantsRules.defaults;
     final items = quoteSnapshot['items'] is List
         ? (quoteSnapshot['items'] as List)
             .whereType<Map<String, dynamic>>()
             .toList()
         : const <Map<String, dynamic>>[];
+    final petsPresent = quoteSnapshot['petsPresent'] == true;
+    final pets = quoteSnapshot['pets'] is List
+        ? (quoteSnapshot['pets'] as List)
+            .whereType<Map<String, dynamic>>()
+            .toList()
+        : const <Map<String, dynamic>>[];
+    final petCount = petsPresent
+        ? pets.where((pet) => pet['excluded'] != true).length
+        : 0;
+    final petMinutes = petCount * resolvedRules.petMinutesDefault;
+    final householdMembers = quoteSnapshot['householdMembers'] is List
+        ? (quoteSnapshot['householdMembers'] as List)
+            .whereType<Map<String, dynamic>>()
+            .toList()
+        : const <Map<String, dynamic>>[];
+    final extraHousehold =
+        (householdMembers.length - resolvedRules.householdFreeCount)
+            .clamp(0, householdMembers.length)
+            .toInt();
+    final householdMinutes =
+        extraHousehold * resolvedRules.householdExtraMinutesPerPerson;
     final totalMinutes = items.fold<double>(0, (total, item) {
       final include = item['include'] == true;
       final qty = (item['qty'] as num?)?.toDouble() ?? 1;
       final minutes = (item['minutes'] as num?)?.toDouble() ?? 0;
       return total + (include ? minutes * qty : 0);
     });
+    final occupantMinutes = petMinutes + householdMinutes;
     final serviceType = quoteSnapshot['serviceType']?.toString() ?? '';
     final frequency = quoteSnapshot['frequency']?.toString() ?? '';
     final serviceTypeMultiplier = _serviceTypeMultiplier(
@@ -142,7 +170,9 @@ class PdfService {
       pricingSnapshot,
     );
     final adjustedMinutes =
-        totalMinutes * serviceTypeMultiplier * frequencyMultiplier;
+        (totalMinutes + occupantMinutes) *
+            serviceTypeMultiplier *
+            frequencyMultiplier;
     final hours = adjustedMinutes / 60.0;
     final laborRate =
         (quoteSnapshot['laborRate'] as num?)?.toDouble() ?? 0.0;
@@ -302,6 +332,7 @@ class PdfService {
     required Map<String, dynamic> totalsSnapshot,
     required DateTime createdAt,
     required String documentNumber,
+    required OccupantsRules occupantsRules,
   }) async {
     final pdf = pw.Document();
     final title = docType == FinalizedDocumentType.invoice
@@ -386,6 +417,11 @@ class PdfService {
           pw.SizedBox(height: 6),
           _itemsTable(items),
           pw.SizedBox(height: 16),
+          _occupantsSection(
+            quoteSnapshot: quoteSnapshot,
+            occupantsRules: occupantsRules,
+          ),
+          pw.SizedBox(height: 16),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
@@ -466,6 +502,119 @@ class PdfService {
         ],
       ),
     );
+  }
+
+  pw.Widget _occupantsSection({
+    required Map<String, dynamic> quoteSnapshot,
+    required OccupantsRules occupantsRules,
+  }) {
+    final petsPresent = quoteSnapshot['petsPresent'] == true;
+    final pets = quoteSnapshot['pets'] is List
+        ? (quoteSnapshot['pets'] as List)
+            .whereType<Map<String, dynamic>>()
+            .toList()
+        : const <Map<String, dynamic>>[];
+    final householdMembers = quoteSnapshot['householdMembers'] is List
+        ? (quoteSnapshot['householdMembers'] as List)
+            .whereType<Map<String, dynamic>>()
+            .toList()
+        : const <Map<String, dynamic>>[];
+    final includedPets =
+        petsPresent ? pets.where((pet) => pet['excluded'] != true).length : 0;
+    final petMinutes = includedPets * occupantsRules.petMinutesDefault;
+    final extraHousehold =
+        (householdMembers.length - occupantsRules.householdFreeCount)
+            .clamp(0, householdMembers.length)
+            .toInt();
+    final householdMinutes =
+        extraHousehold * occupantsRules.householdExtraMinutesPerPerson;
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text('Occupants',
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 6),
+        pw.Text(
+          petsPresent
+              ? 'Pets: $includedPets included ($petMinutes min)'
+              : 'Pets: Disabled',
+        ),
+        if (petsPresent)
+          ..._occupantsList(
+            items: pets,
+            emptyLabel: 'No pets recorded.',
+            titleBuilder: (item) {
+              final name = item['name']?.toString() ?? '';
+              final type = item['type']?.toString() ?? '';
+              return type.isEmpty ? name : '$name • $type';
+            },
+            noteBuilder: (item) {
+              final excluded = item['excluded'] == true;
+              final notes = item['notes']?.toString() ?? '';
+              final parts = <String>[];
+              if (excluded) {
+                parts.add('Excluded from minutes');
+              }
+              if (notes.trim().isNotEmpty) {
+                parts.add('Notes: $notes');
+              }
+              return parts.isEmpty ? null : parts.join(' • ');
+            },
+          ),
+        pw.SizedBox(height: 8),
+        pw.Text(
+          'Household: ${householdMembers.length} members ($householdMinutes min)',
+        ),
+        ..._occupantsList(
+          items: householdMembers,
+          emptyLabel: 'No household members recorded.',
+          titleBuilder: (item) {
+            final name = item['name']?.toString() ?? '';
+            final relationship = item['relationship']?.toString() ?? '';
+            return relationship.isEmpty ? name : '$name • $relationship';
+          },
+          noteBuilder: (item) {
+            final notes = item['notes']?.toString() ?? '';
+            return notes.trim().isEmpty ? null : 'Notes: $notes';
+          },
+        ),
+      ],
+    );
+  }
+
+  List<pw.Widget> _occupantsList({
+    required List<Map<String, dynamic>> items,
+    required String emptyLabel,
+    required String Function(Map<String, dynamic>) titleBuilder,
+    String? Function(Map<String, dynamic>)? noteBuilder,
+  }) {
+    if (items.isEmpty) {
+      return [
+        pw.Padding(
+          padding: const pw.EdgeInsets.only(left: 12, top: 2),
+          child: pw.Text(emptyLabel),
+        ),
+      ];
+    }
+    return items.map((item) {
+      final title = titleBuilder(item);
+      final note = noteBuilder == null ? null : noteBuilder(item);
+      return pw.Padding(
+        padding: const pw.EdgeInsets.only(left: 12, top: 2),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text('• $title'),
+            if (note != null && note.trim().isNotEmpty)
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(left: 10, top: 2),
+                child: pw.Text(note),
+              ),
+          ],
+        ),
+      );
+    }).toList();
   }
 
   Future<String> _savePdf({

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
@@ -173,6 +174,41 @@ class FinalizedDocumentsRepositoryLocalFirst {
     );
   }
 
+  Future<void> deleteFinalizedDocument(String id) async {
+    final session = _sessionController.session;
+    final orgId = session.orgId;
+    if (orgId == null) {
+      throw StateError('Organization is not set yet.');
+    }
+    final existing =
+        await (_db.select(_db.finalizedDocuments)
+              ..where((tbl) => tbl.id.equals(id))
+              ..limit(1))
+            .getSingleOrNull();
+    if (existing == null) {
+      return;
+    }
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await (_db.delete(_db.finalizedDocuments)..where((tbl) => tbl.id.equals(id)))
+        .go();
+    await _deleteLocalFile(existing.localPath);
+    await _insertOutbox(
+      entityType: 'finalized_document',
+      entityId: id,
+      opType: 'delete',
+      payload: {
+        'id': id,
+        'orgId': orgId,
+        'quoteId': existing.quoteId,
+        'docType': existing.docType,
+        'updatedAt': now,
+        'deleted': true,
+      },
+      orgId: orgId,
+      updatedAt: now,
+    );
+  }
+
   FinalizedDocument _mapRow(FinalizedDocumentRow row) {
     return FinalizedDocument(
       id: row.id,
@@ -246,6 +282,18 @@ class FinalizedDocumentsRepositoryLocalFirst {
       'ccFee': ccFee,
       'total': total,
     };
+  }
+
+  Future<void> _deleteLocalFile(String path) async {
+    if (path.trim().isEmpty) {
+      return;
+    }
+    try {
+      final file = File(path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (_) {}
   }
 
   Future<void> _insertOutbox({
