@@ -12,6 +12,7 @@ import 'app_dependencies.dart';
 import 'data/client_models.dart';
 import 'data/clients_repo_local_first.dart';
 import 'data/finalized_document_models.dart';
+import 'data/finalized_documents_repo_local_first.dart';
 import 'data/metrics_collector.dart';
 import 'data/org_settings_models.dart';
 import 'data/org_settings_repo_local_first.dart';

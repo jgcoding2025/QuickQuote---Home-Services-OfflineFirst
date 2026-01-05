@@ -1,10 +1,7 @@
 part of '../ui_prototype.dart';
 
 class FinalizedDocumentsSection extends StatefulWidget {
-  const FinalizedDocumentsSection({
-    super.key,
-    required this.quoteId,
-  });
+  const FinalizedDocumentsSection({super.key, required this.quoteId});
 
   final String quoteId;
 
@@ -18,6 +15,7 @@ class _FinalizedDocumentsSectionState extends State<FinalizedDocumentsSection> {
   StreamSubscription<List<FinalizedDocument>>? _docsSubscription;
   StreamController<List<FinalizedDocument>>? _docsController;
   FinalizedDocumentsRepositoryLocalFirst? _repo;
+  List<FinalizedDocument>? _latestDocs;
 
   @override
   void didChangeDependencies() {
@@ -40,15 +38,28 @@ class _FinalizedDocumentsSectionState extends State<FinalizedDocumentsSection> {
   void _attachDocsStream() {
     _docsSubscription?.cancel();
     _docsController?.close();
-    final controller = StreamController<List<FinalizedDocument>>.broadcast();
+
+    StreamController<List<FinalizedDocument>>? controller;
+
+    controller = StreamController<List<FinalizedDocument>>.broadcast(
+      onListen: () {
+        final cached = _latestDocs;
+        if (cached != null) {
+          controller!.add(cached);
+        }
+      },
+    );
+
     _docsController = controller;
-    final repo = _repo ?? AppDependencies.of(context).finalizedDocumentsRepository;
-    _docsSubscription = repo.streamForQuote(widget.quoteId).listen(
-          controller.add,
-          onError: controller.addError,
-        );
-    // Broadcast controller keeps one source subscription alive across rebuilds.
     _docsStream = controller.stream;
+
+    final repo =
+        _repo ?? AppDependencies.of(context).finalizedDocumentsRepository;
+
+    _docsSubscription = repo.streamForQuote(widget.quoteId).listen((docs) {
+      _latestDocs = docs;
+      controller!.add(docs);
+    }, onError: controller!.addError);
   }
 
   @override
@@ -107,10 +118,7 @@ class _FinalizedDocumentsSectionState extends State<FinalizedDocumentsSection> {
 }
 
 class FinalizedDocumentViewerPage extends StatefulWidget {
-  const FinalizedDocumentViewerPage({
-    super.key,
-    required this.document,
-  });
+  const FinalizedDocumentViewerPage({super.key, required this.document});
 
   final FinalizedDocument document;
 
@@ -154,10 +162,7 @@ class _FinalizedDocumentViewerPageState
   }
 }
 
-void _openFinalizedDocument(
-  BuildContext context,
-  FinalizedDocument document,
-) {
+void _openFinalizedDocument(BuildContext context, FinalizedDocument document) {
   Navigator.of(context).push(
     MaterialPageRoute(
       builder: (_) => FinalizedDocumentViewerPage(document: document),
