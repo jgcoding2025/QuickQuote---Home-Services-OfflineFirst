@@ -19,6 +19,7 @@ class _SettingsPageState extends State<SettingsPage>
   bool _inviteLoading = false;
   String? _inviteCode;
   String? _inviteError;
+  MetricsRange _metricsRange = MetricsRange.last20Minutes;
 
   String _formatRole(String role) {
     if (role == 'owner') {
@@ -89,6 +90,12 @@ class _SettingsPageState extends State<SettingsPage>
                       context,
                       title: 'Pricing Tiers',
                       child: _pricingProfilesCard(context, s, data),
+                    ),
+                    const SizedBox(height: 24),
+                    _settingsSection(
+                      context,
+                      title: 'Read/Writes to Database',
+                      child: _readWriteMetricsCard(context),
                     ),
                   ],
                 );
@@ -181,6 +188,96 @@ class _SettingsPageState extends State<SettingsPage>
     );
   }
 
+  Widget _readWriteMetricsCard(BuildContext context) {
+    final deps = AppDependencies.of(context);
+    final metricsCollector = deps.metricsCollector;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        StreamBuilder<SyncStatus>(
+          stream: deps.syncService.statusStream,
+          initialData: deps.syncService.currentStatus,
+          builder: (context, snap) {
+            return StreamBuilder<bool>(
+              stream: deps.syncService.hasPeerOnlineStream,
+              initialData: deps.syncService.hasPeerOnline,
+              builder: (context, peerSnap) {
+                final bannerState = resolveSyncBannerState(
+                  status: snap.data ?? SyncStatus.offline,
+                  hasPeerOnline: peerSnap.data ?? false,
+                );
+                final definition = bannerState.definition;
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(definition.icon, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${definition.title} — ${definition.description}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        TextButton.icon(
+          onPressed: () => _showSyncStatusHelp(context),
+          icon: const Icon(Icons.info_outline),
+          label: const Text('What do these statuses mean?'),
+        ),
+        const SizedBox(height: 12),
+        _metricsRangeSelector(context),
+        const SizedBox(height: 12),
+        FutureBuilder<List<MetricsBucket>>(
+          future: metricsCollector.snapshot(_metricsRange),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return const Text('Unable to load usage data.');
+            }
+            final buckets = snapshot.data ?? const <MetricsBucket>[];
+            return _MetricsGraphPanel(
+              buckets: buckets,
+              range: _metricsRange,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _metricsRangeSelector(BuildContext context) {
+    return SegmentedButton<MetricsRange>(
+      segments: const [
+        ButtonSegment(
+          value: MetricsRange.last20Minutes,
+          label: Text('20 minutes'),
+        ),
+        ButtonSegment(
+          value: MetricsRange.last1Hour,
+          label: Text('1 hour'),
+        ),
+        ButtonSegment(
+          value: MetricsRange.last24Hours,
+          label: Text('1 day'),
+        ),
+      ],
+      selected: {_metricsRange},
+      onSelectionChanged: (selection) {
+        setState(() {
+          _metricsRange = selection.first;
+        });
+      },
+    );
+  }
+
   Widget _accountCard(BuildContext context) {
     final deps = AppDependencies.of(context);
     return ValueListenableBuilder<AppSession?>(
@@ -201,7 +298,13 @@ class _SettingsPageState extends State<SettingsPage>
                   : FirebaseFirestore.instance
                         .collection('orgs')
                         .doc(orgId)
-                        .snapshots(),
+                        .snapshots()
+                        .map((snapshot) {
+                        unawaited(
+                          deps.metricsCollector.recordRead(),
+                        );
+                        return snapshot;
+                      }),
               builder: (context, snapshot) {
                 final name = snapshot.data?.data()?['name'] as String?;
                 return Text('Org: ${name ?? orgId ?? 'None'}');
@@ -238,7 +341,15 @@ class _SettingsPageState extends State<SettingsPage>
                     .collection('orgs')
                     .doc(orgId)
                     .collection('members')
-                    .snapshots(),
+                    .snapshots()
+                    .map((snapshot) {
+                  unawaited(
+                    deps.metricsCollector.recordRead(
+                      count: snapshot.docs.length,
+                    ),
+                  );
+                  return snapshot;
+                }),
                 builder: (context, snapshot) {
                   final members = snapshot.data?.docs ?? const [];
                   if (members.isEmpty) {
@@ -433,4 +544,280 @@ class _SettingsPageState extends State<SettingsPage>
       if (mounted) _snack(context, 'Save failed: $e');
     } finally {}
   }
+}
+
+class _MetricsGraphPanel extends StatelessWidget {
+  const _MetricsGraphPanel({
+    required this.buckets,
+    required this.range,
+  });
+
+  final List<MetricsBucket> buckets;
+  final MetricsRange range;
+
+  @override
+  Widget build(BuildContext context) {
+    if (buckets.isEmpty) {
+      return const Text('No recent database activity recorded.');
+    }
+    final totals = _metricsTotals(buckets);
+    final readColor = Theme.of(context).colorScheme.primary;
+    final writeColor = Theme.of(context).colorScheme.tertiary;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 480;
+        final graph = _ReadWriteGraph(
+          buckets: buckets,
+          readColor: readColor,
+          writeColor: writeColor,
+          height: isCompact ? 120 : 160,
+        );
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _rangeLabel(range),
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 16,
+              runSpacing: 8,
+              children: [
+                _LegendChip(
+                  color: readColor,
+                  label: 'Reads (${totals.reads})',
+                ),
+                _LegendChip(
+                  color: writeColor,
+                  label: 'Writes (${totals.writes})',
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            graph,
+            if (isCompact) ...[
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: OutlinedButton(
+                  onPressed: () => _showMetricsDialog(context),
+                  child: const Text('View Graph'),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  void _showMetricsDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          title: Text('Database activity • ${_rangeLabel(range)}'),
+          content: SizedBox(
+            width: 520,
+            child: _ReadWriteGraph(
+              buckets: buckets,
+              readColor: theme.colorScheme.primary,
+              writeColor: theme.colorScheme.tertiary,
+              height: 240,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ReadWriteGraph extends StatelessWidget {
+  const _ReadWriteGraph({
+    required this.buckets,
+    required this.readColor,
+    required this.writeColor,
+    required this.height,
+  });
+
+  final List<MetricsBucket> buckets;
+  final Color readColor;
+  final Color writeColor;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxValue = buckets.fold<int>(
+      0,
+      (max, bucket) {
+        final localMax = bucket.reads > bucket.writes
+            ? bucket.reads
+            : bucket.writes;
+        return localMax > max ? localMax : max;
+      },
+    );
+    if (maxValue == 0) {
+      return SizedBox(
+        height: height,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Text(
+              'No reads or writes yet',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
+      );
+    }
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: CustomPaint(
+        painter: _ReadWriteGraphPainter(
+          buckets: buckets,
+          readColor: readColor,
+          writeColor: writeColor,
+          gridColor: Theme.of(context).colorScheme.outlineVariant,
+        ),
+      ),
+    );
+  }
+}
+
+class _ReadWriteGraphPainter extends CustomPainter {
+  _ReadWriteGraphPainter({
+    required this.buckets,
+    required this.readColor,
+    required this.writeColor,
+    required this.gridColor,
+  });
+
+  final List<MetricsBucket> buckets;
+  final Color readColor;
+  final Color writeColor;
+  final Color gridColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (buckets.isEmpty) {
+      return;
+    }
+    final maxValue = buckets.fold<int>(
+      0,
+      (max, bucket) {
+        final localMax = bucket.reads > bucket.writes
+            ? bucket.reads
+            : bucket.writes;
+        return localMax > max ? localMax : max;
+      },
+    );
+    if (maxValue == 0) {
+      return;
+    }
+
+    final baselinePaint = Paint()
+      ..color = gridColor
+      ..strokeWidth = 1;
+    canvas.drawLine(
+      Offset(0, size.height),
+      Offset(size.width, size.height),
+      baselinePaint,
+    );
+
+    final bucketWidth = size.width / buckets.length;
+    final barWidth = bucketWidth * 0.35;
+    final gap = bucketWidth * 0.1;
+    final padding = bucketWidth * 0.1;
+
+    for (var i = 0; i < buckets.length; i++) {
+      final bucket = buckets[i];
+      final startX = i * bucketWidth + padding;
+      final readHeight = (bucket.reads / maxValue) * size.height;
+      final writeHeight = (bucket.writes / maxValue) * size.height;
+      final readRect = Rect.fromLTWH(
+        startX,
+        size.height - readHeight,
+        barWidth,
+        readHeight,
+      );
+      final writeRect = Rect.fromLTWH(
+        startX + barWidth + gap,
+        size.height - writeHeight,
+        barWidth,
+        writeHeight,
+      );
+      canvas.drawRect(readRect, Paint()..color = readColor);
+      canvas.drawRect(writeRect, Paint()..color = writeColor);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ReadWriteGraphPainter oldDelegate) {
+    return oldDelegate.buckets != buckets ||
+        oldDelegate.readColor != readColor ||
+        oldDelegate.writeColor != writeColor ||
+        oldDelegate.gridColor != gridColor;
+  }
+}
+
+class _LegendChip extends StatelessWidget {
+  const _LegendChip({required this.color, required this.label});
+
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+      ],
+    );
+  }
+}
+
+String _rangeLabel(MetricsRange range) {
+  switch (range) {
+    case MetricsRange.last20Minutes:
+      return 'Last 20 minutes';
+    case MetricsRange.last1Hour:
+      return 'Last 1 hour';
+    case MetricsRange.last24Hours:
+      return 'Last 24 hours';
+  }
+}
+
+({int reads, int writes}) _metricsTotals(List<MetricsBucket> buckets) {
+  var reads = 0;
+  var writes = 0;
+  for (final bucket in buckets) {
+    reads += bucket.reads;
+    writes += bucket.writes;
+  }
+  return (reads: reads, writes: writes);
 }
