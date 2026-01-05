@@ -1,6 +1,6 @@
 part of '../ui_prototype.dart';
 
-class FinalizedDocumentsSection extends StatelessWidget {
+class FinalizedDocumentsSection extends StatefulWidget {
   const FinalizedDocumentsSection({
     super.key,
     required this.quoteId,
@@ -9,8 +9,37 @@ class FinalizedDocumentsSection extends StatelessWidget {
   final String quoteId;
 
   @override
-  Widget build(BuildContext context) {
+  State<FinalizedDocumentsSection> createState() =>
+      _FinalizedDocumentsSectionState();
+}
+
+class _FinalizedDocumentsSectionState extends State<FinalizedDocumentsSection> {
+  Stream<List<FinalizedDocument>>? _docsStream;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     final repo = AppDependencies.of(context).finalizedDocumentsRepository;
+    _docsStream ??= repo.streamForQuote(widget.quoteId).asBroadcastStream(
+          // Broadcast so expansion rebuilds don't trigger "already listened to".
+          onCancel: (sub) => sub.cancel(),
+        );
+  }
+
+  @override
+  void didUpdateWidget(FinalizedDocumentsSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.quoteId != widget.quoteId) {
+      final repo = AppDependencies.of(context).finalizedDocumentsRepository;
+      _docsStream = repo.streamForQuote(widget.quoteId).asBroadcastStream(
+            // Broadcast so expansion rebuilds don't trigger "already listened to".
+            onCancel: (sub) => sub.cancel(),
+          );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       child: ExpansionTile(
         shape: const Border(),
@@ -22,7 +51,7 @@ class FinalizedDocumentsSection extends StatelessWidget {
         childrenPadding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
         children: [
           StreamBuilder<List<FinalizedDocument>>(
-            stream: repo.streamForQuote(quoteId),
+            stream: _docsStream,
             builder: (context, snapshot) {
               final docs = snapshot.data ?? const <FinalizedDocument>[];
               if (docs.isEmpty) {
