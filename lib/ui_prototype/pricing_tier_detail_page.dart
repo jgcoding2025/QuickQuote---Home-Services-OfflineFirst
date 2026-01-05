@@ -27,6 +27,8 @@ class PricingTierDetailPage extends StatefulWidget {
 class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   late List<PlanTier> planTiers;
 
+  bool get isEditable => !widget.isDefault;
+
   @override
   void initState() {
     super.initState();
@@ -50,8 +52,9 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         ],
         bottom: kDebugMode
             ? PreferredSize(
-                preferredSize:
-                    const Size.fromHeight(SyncStatusBanner.preferredHeight),
+                preferredSize: const Size.fromHeight(
+                  SyncStatusBanner.preferredHeight,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                   child: SyncStatusBanner(
@@ -393,7 +396,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ),
         _buildTable(
           context,
-          headers: const [
+          headers: [
             'Service type',
             'Description',
             '\$/Sq.Ft.',
