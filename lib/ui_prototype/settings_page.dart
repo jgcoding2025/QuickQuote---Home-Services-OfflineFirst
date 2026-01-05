@@ -194,45 +194,6 @@ class _SettingsPageState extends State<SettingsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        StreamBuilder<SyncStatus>(
-          stream: deps.syncService.statusStream,
-          initialData: deps.syncService.currentStatus,
-          builder: (context, snap) {
-            return StreamBuilder<bool>(
-              stream: deps.syncService.hasPeerOnlineStream,
-              initialData: deps.syncService.hasPeerOnline,
-              builder: (context, peerSnap) {
-                final bannerState = resolveSyncBannerState(
-                  status: snap.data ?? SyncStatus.offline,
-                  hasPeerOnline: peerSnap.data ?? false,
-                );
-                final definition = bannerState.definition;
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(definition.icon, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '${definition.title} — ${definition.description}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-        ),
-        const SizedBox(height: 12),
-        TextButton.icon(
-          onPressed: () => _showSyncStatusHelp(context),
-          icon: const Icon(Icons.info_outline),
-          label: const Text('What do these statuses mean?'),
-        ),
-        const SizedBox(height: 12),
-        _metricsRangeSelector(context),
-        const SizedBox(height: 12),
         FutureBuilder<List<MetricsBucket>>(
           future: metricsCollector.snapshot(_metricsRange),
           builder: (context, snapshot) {
@@ -249,6 +210,8 @@ class _SettingsPageState extends State<SettingsPage>
             );
           },
         ),
+        const SizedBox(height: 12),
+        _metricsRangeSelector(context),
       ],
     );
   }
@@ -565,12 +528,11 @@ class _MetricsGraphPanel extends StatelessWidget {
     final writeColor = Theme.of(context).colorScheme.tertiary;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 480;
         final graph = _ReadWriteGraph(
           buckets: buckets,
           readColor: readColor,
           writeColor: writeColor,
-          height: isCompact ? 120 : 160,
+          height: 160,
         );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -596,43 +558,6 @@ class _MetricsGraphPanel extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             graph,
-            if (isCompact) ...[
-              const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerRight,
-                child: OutlinedButton(
-                  onPressed: () => _showMetricsDialog(context),
-                  child: const Text('View Graph'),
-                ),
-              ),
-            ],
-          ],
-        );
-      },
-    );
-  }
-
-  void _showMetricsDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        final theme = Theme.of(context);
-        return AlertDialog(
-          title: Text('Database activity • ${_rangeLabel(range)}'),
-          content: SizedBox(
-            width: 520,
-            child: _ReadWriteGraph(
-              buckets: buckets,
-              readColor: theme.colorScheme.primary,
-              writeColor: theme.colorScheme.tertiary,
-              height: 240,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
           ],
         );
       },
