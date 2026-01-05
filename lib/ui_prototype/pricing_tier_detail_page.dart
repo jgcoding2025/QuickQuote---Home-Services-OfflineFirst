@@ -26,6 +26,12 @@ class PricingTierDetailPage extends StatefulWidget {
 
 class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   late List<PlanTier> planTiers;
+  final Map<String, PricingProfileServiceType> _defaultServiceTypesById = {};
+  final Map<String, PricingProfileFrequency> _defaultFrequenciesById = {};
+  final Map<String, PricingProfileRoomType> _defaultRoomTypesById = {};
+  final Map<String, PricingProfileSubItem> _defaultSubItemsById = {};
+  final Map<String, PricingProfileSize> _defaultSizesById = {};
+  final Map<String, PricingProfileComplexity> _defaultComplexitiesById = {};
 
   bool get isEditable => !widget.isDefault;
 
@@ -34,6 +40,14 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     super.initState();
     unawaited(widget.pricingProfilesRepo.ensureDefaultCatalogSeeded());
     planTiers = List<PlanTier>.from(widget.settingsData.planTiers);
+  }
+
+  @override
+  void didUpdateWidget(covariant PricingTierDetailPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.profileId != widget.profileId) {
+      _clearDefaultCaches();
+    }
   }
 
   @override
@@ -381,6 +395,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
       key: (item) => item.row.toString(),
       id: (item) => item.id,
     );
+    _cacheDefaultMatches(_defaultServiceTypesById, defaultMatches);
     final columnWidths = <int, TableColumnWidth>{
       0: const FlexColumnWidth(1.6),
       1: const FlexColumnWidth(3.2),
@@ -413,7 +428,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ],
           columnWidths: columnWidths,
           rows: sorted.map((service) {
-            final defaultItem = defaultMatches[service.id];
+            final defaultItem = defaultMatches[service.id] ??
+                _defaultServiceTypesById[service.id];
             return [
               _diffCell(
                 context,
@@ -496,6 +512,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           '${_normalizeText(item.frequency)}',
       id: (item) => item.id,
     );
+    _cacheDefaultMatches(_defaultFrequenciesById, defaultMatches);
     final columnWidths = <int, TableColumnWidth>{
       0: const FlexColumnWidth(1.8),
       1: const FlexColumnWidth(1.6),
@@ -526,7 +543,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ],
           columnWidths: columnWidths,
           rows: sorted.map((freq) {
-            final defaultItem = defaultMatches[freq.id];
+            final defaultItem =
+                defaultMatches[freq.id] ?? _defaultFrequenciesById[freq.id];
             return [
               _diffCell(
                 context,
@@ -601,6 +619,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
       key: (item) => item.row.toString(),
       id: (item) => item.id,
     );
+    _cacheDefaultMatches(_defaultRoomTypesById, defaultMatches);
     final columnWidths = <int, TableColumnWidth>{
       0: const FlexColumnWidth(1.6),
       1: const FlexColumnWidth(3),
@@ -633,7 +652,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ],
           columnWidths: columnWidths,
           rows: sorted.map((room) {
-            final defaultItem = defaultMatches[room.id];
+            final defaultItem =
+                defaultMatches[room.id] ?? _defaultRoomTypesById[room.id];
             return [
               _diffCell(
                 context,
@@ -715,6 +735,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           '::${item.minutes}',
       id: (item) => item.id,
     );
+    _cacheDefaultMatches(_defaultSubItemsById, defaultMatches);
     final columnWidths = <int, TableColumnWidth>{
       0: const FlexColumnWidth(1.6),
       1: const FlexColumnWidth(3),
@@ -745,7 +766,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ],
           columnWidths: columnWidths,
           rows: sorted.map((item) {
-            final defaultItem = defaultMatches[item.id];
+            final defaultItem =
+                defaultMatches[item.id] ?? _defaultSubItemsById[item.id];
             return [
               _diffCell(
                 context,
@@ -821,6 +843,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           '${_normalizeText(item.size)}::${_normalizeText(item.definition)}',
       id: (item) => item.id,
     );
+    _cacheDefaultMatches(_defaultSizesById, defaultMatches);
     final columnWidths = <int, TableColumnWidth>{
       0: const FlexColumnWidth(1.2),
       1: const FlexColumnWidth(3),
@@ -851,7 +874,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ],
           columnWidths: columnWidths,
           rows: sorted.map((item) {
-            final defaultItem = defaultMatches[item.id];
+            final defaultItem =
+                defaultMatches[item.id] ?? _defaultSizesById[item.id];
             return [
               _diffCell(
                 context,
@@ -926,6 +950,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           '${_normalizeText(item.level)}::${_normalizeText(item.definition)}',
       id: (item) => item.id,
     );
+    _cacheDefaultMatches(_defaultComplexitiesById, defaultMatches);
     final columnWidths = <int, TableColumnWidth>{
       0: const FlexColumnWidth(1.4),
       1: const FlexColumnWidth(3),
@@ -956,7 +981,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ],
           columnWidths: columnWidths,
           rows: sorted.map((item) {
-            final defaultItem = defaultMatches[item.id];
+            final defaultItem =
+                defaultMatches[item.id] ?? _defaultComplexitiesById[item.id];
             return [
               _diffCell(
                 context,
@@ -2236,6 +2262,22 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
       }
     }
     return matches;
+  }
+
+  void _cacheDefaultMatches<T>(
+    Map<String, T> cache,
+    Map<String, T> matches,
+  ) {
+    cache.addAll(matches);
+  }
+
+  void _clearDefaultCaches() {
+    _defaultServiceTypesById.clear();
+    _defaultFrequenciesById.clear();
+    _defaultRoomTypesById.clear();
+    _defaultSubItemsById.clear();
+    _defaultSizesById.clear();
+    _defaultComplexitiesById.clear();
   }
 
   Future<void> _renameProfile(
