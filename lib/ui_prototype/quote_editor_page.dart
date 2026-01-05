@@ -131,6 +131,38 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
 
   @override
   final items = <_QuoteItem>[];
+  @override
+  final pets = <Pet>[];
+  @override
+  final householdMembers = <HouseholdMember>[];
+  @override
+  OccupantsRules occupantsRules = OccupantsRules.defaults;
+
+  final TextEditingController _petNameController = TextEditingController();
+  final TextEditingController _petTypeController = TextEditingController();
+  final TextEditingController _petNotesController = TextEditingController();
+  final TextEditingController _householdNameController =
+      TextEditingController();
+  final TextEditingController _householdRelationshipController =
+      TextEditingController();
+  final TextEditingController _householdNotesController =
+      TextEditingController();
+
+  @override
+  TextEditingController get petNameController => _petNameController;
+  @override
+  TextEditingController get petTypeController => _petTypeController;
+  @override
+  TextEditingController get petNotesController => _petNotesController;
+  @override
+  TextEditingController get householdNameController =>
+      _householdNameController;
+  @override
+  TextEditingController get householdRelationshipController =>
+      _householdRelationshipController;
+  @override
+  TextEditingController get householdNotesController =>
+      _householdNotesController;
 
   late PricingProfilesRepositoryLocalFirst _pricingProfilesRepo;
   late OrgSettingsRepositoryLocalFirst _orgSettingsRepo;
@@ -191,6 +223,12 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
     _orgSettingsSub?.cancel();
     _syncService?.stopPolling();
     _autoSaveDebouncer.dispose();
+    _petNameController.dispose();
+    _petTypeController.dispose();
+    _petNotesController.dispose();
+    _householdNameController.dispose();
+    _householdRelationshipController.dispose();
+    _householdNotesController.dispose();
     super.dispose();
   }
 
@@ -458,6 +496,8 @@ class _QuoteEditorPageState extends State<QuoteEditorPage>
         subItemType: draft.subItemType,
         specialNotes: draft.specialNotes,
         items: draft.items,
+        pets: draft.pets,
+        householdMembers: draft.householdMembers,
       );
       final document = await deps.pdfService.generateFinalizedDocument(
         quote: quote,

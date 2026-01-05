@@ -110,6 +110,7 @@ class _QuoteSettingsData {
     required this.subItems,
     required this.sizes,
     required this.complexities,
+    required this.occupantsRules,
   });
 
   factory _QuoteSettingsData.empty() {
@@ -120,6 +121,7 @@ class _QuoteSettingsData {
       subItems: [],
       sizes: [],
       complexities: [],
+      occupantsRules: OccupantsRules.defaults,
     );
   }
 
@@ -129,4 +131,5 @@ class _QuoteSettingsData {
   final List<SubItemStandard> subItems;
   final List<SizeStandard> sizes;
   final List<ComplexityStandard> complexities;
+  final OccupantsRules occupantsRules;
 }

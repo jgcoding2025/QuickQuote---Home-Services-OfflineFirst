@@ -110,6 +110,7 @@ class QuotesPage extends StatelessWidget {
                         ccEnabled: q.ccEnabled,
                         taxRate: q.taxRate,
                         ccRate: q.ccRate,
+                        pricingProfileId: q.pricingProfileId,
                         defaultRoomType: q.defaultRoomType,
                         defaultLevel: q.defaultLevel,
                         defaultSize: q.defaultSize,
@@ -117,6 +118,8 @@ class QuotesPage extends StatelessWidget {
                         subItemType: q.subItemType,
                         specialNotes: q.specialNotes,
                         items: q.items,
+                        pets: q.pets,
+                        householdMembers: q.householdMembers,
                       );
 
                       final messenger = ScaffoldMessenger.of(context);

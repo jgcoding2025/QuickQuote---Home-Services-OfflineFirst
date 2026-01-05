@@ -434,6 +434,10 @@ class SyncService {
           defaultComplexity: Value(_string(data['defaultComplexity'])),
           subItemType: Value(_string(data['subItemType'])),
           specialNotes: Value(_string(data['specialNotes'])),
+          petsJson: Value(jsonEncode(_rawList(data['pets']))),
+          householdMembersJson: Value(
+            jsonEncode(_rawList(data['householdMembers'])),
+          ),
         ),
       );
       final rawItems = data['items'];
@@ -1319,6 +1323,13 @@ class SyncService {
 
   String _string(dynamic value) {
     return value?.toString() ?? '';
+  }
+
+  List<Map<String, dynamic>> _rawList(dynamic value) {
+    if (value is List) {
+      return value.whereType<Map<String, dynamic>>().toList();
+    }
+    return const <Map<String, dynamic>>[];
   }
 
   void _notifyDebug() {

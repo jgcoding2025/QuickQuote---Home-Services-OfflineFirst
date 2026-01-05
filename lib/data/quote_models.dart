@@ -32,6 +32,8 @@ class Quote {
     this.subItemType = '',
     this.specialNotes = '',
     this.items = const [],
+    this.pets = const [],
+    this.householdMembers = const [],
   });
 
   final String id;
@@ -66,6 +68,8 @@ class Quote {
   final String subItemType;
   final String specialNotes;
   final List<Map<String, dynamic>> items;
+  final List<Pet> pets;
+  final List<HouseholdMember> householdMembers;
 }
 
 class QuoteDraft {
@@ -101,6 +105,8 @@ class QuoteDraft {
     this.subItemType = '',
     this.specialNotes = '',
     this.items = const [],
+    this.pets = const [],
+    this.householdMembers = const [],
   });
 
   final String clientId;
@@ -134,6 +140,8 @@ class QuoteDraft {
   final String subItemType;
   final String specialNotes;
   final List<Map<String, dynamic>> items;
+  final List<Pet> pets;
+  final List<HouseholdMember> householdMembers;
 
   Map<String, dynamic> toMap() => {
         'clientId': clientId.trim(),
@@ -167,5 +175,114 @@ class QuoteDraft {
         'subItemType': subItemType.trim(),
         'specialNotes': specialNotes.trim(),
         'items': items,
+        'pets': pets.map((pet) => pet.toMap()).toList(),
+        'householdMembers':
+            householdMembers.map((member) => member.toMap()).toList(),
+      };
+}
+
+class Pet {
+  Pet({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.notes,
+    required this.excluded,
+    required this.addedAt,
+  });
+
+  factory Pet.fromMap(Map<String, dynamic> data) {
+    return Pet(
+      id: (data['id'] as String?) ?? '',
+      name: (data['name'] as String?) ?? '',
+      type: (data['type'] as String?) ?? '',
+      notes: (data['notes'] as String?) ?? '',
+      excluded: (data['excluded'] as bool?) ?? false,
+      addedAt: (data['addedAt'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  final String id;
+  final String name;
+  final String type;
+  final String notes;
+  final bool excluded;
+  final int addedAt;
+
+  Pet copyWith({
+    String? id,
+    String? name,
+    String? type,
+    String? notes,
+    bool? excluded,
+    int? addedAt,
+  }) {
+    return Pet(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      notes: notes ?? this.notes,
+      excluded: excluded ?? this.excluded,
+      addedAt: addedAt ?? this.addedAt,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'name': name.trim(),
+        'type': type.trim(),
+        'notes': notes.trim(),
+        'excluded': excluded,
+        'addedAt': addedAt,
+      };
+}
+
+class HouseholdMember {
+  HouseholdMember({
+    required this.id,
+    required this.name,
+    required this.relationship,
+    required this.notes,
+    required this.addedAt,
+  });
+
+  factory HouseholdMember.fromMap(Map<String, dynamic> data) {
+    return HouseholdMember(
+      id: (data['id'] as String?) ?? '',
+      name: (data['name'] as String?) ?? '',
+      relationship: (data['relationship'] as String?) ?? '',
+      notes: (data['notes'] as String?) ?? '',
+      addedAt: (data['addedAt'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  final String id;
+  final String name;
+  final String relationship;
+  final String notes;
+  final int addedAt;
+
+  HouseholdMember copyWith({
+    String? id,
+    String? name,
+    String? relationship,
+    String? notes,
+    int? addedAt,
+  }) {
+    return HouseholdMember(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      relationship: relationship ?? this.relationship,
+      notes: notes ?? this.notes,
+      addedAt: addedAt ?? this.addedAt,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'name': name.trim(),
+        'relationship': relationship.trim(),
+        'notes': notes.trim(),
+        'addedAt': addedAt,
       };
 }

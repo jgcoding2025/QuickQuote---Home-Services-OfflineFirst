@@ -15,6 +15,7 @@ import 'data/finalized_document_models.dart';
 import 'data/metrics_collector.dart';
 import 'data/org_settings_models.dart';
 import 'data/org_settings_repo_local_first.dart';
+import 'data/occupants_rules_loader.dart';
 import 'data/pricing_profile_catalog_repo_local_first.dart';
 import 'data/pricing_profile_models.dart';
 import 'data/pricing_profiles_repo_local_first.dart';

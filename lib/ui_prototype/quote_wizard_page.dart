@@ -390,6 +390,8 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
                         subItemType: 'Ceiling Fan',
                         specialNotes: '',
                         items: const [],
+                        pets: const [],
+                        householdMembers: const [],
                       );
 
                       await _quotesRepo.setQuote(newId, draft, isNew: true);
@@ -433,6 +435,8 @@ class _QuoteWizardPageState extends State<QuoteWizardPage> {
                               subItemType: draft.subItemType,
                               specialNotes: draft.specialNotes,
                               items: draft.items,
+                              pets: draft.pets,
+                              householdMembers: draft.householdMembers,
                             ),
                           ),
                         ),

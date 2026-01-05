@@ -177,6 +177,8 @@ class QuotesRepositoryLocalFirst {
       subItemType: d.subItemType,
       specialNotes: d.specialNotes,
       items: d.items,
+      pets: d.pets,
+      householdMembers: d.householdMembers,
     );
   }
 
@@ -228,6 +230,10 @@ class QuotesRepositoryLocalFirst {
 
   Future<Quote> _mapQuoteRow(QuoteRow row) async {
     final items = await _loadQuoteItems(row.id);
+    final pets = _decodeList(row.petsJson).map(Pet.fromMap).toList();
+    final householdMembers = _decodeList(row.householdMembersJson)
+        .map(HouseholdMember.fromMap)
+        .toList();
     return Quote(
       id: row.id,
       clientId: row.clientId,
@@ -261,6 +267,8 @@ class QuotesRepositoryLocalFirst {
       subItemType: row.subItemType,
       specialNotes: row.specialNotes,
       items: items,
+      pets: pets,
+      householdMembers: householdMembers,
     );
   }
 
@@ -312,6 +320,12 @@ class QuotesRepositoryLocalFirst {
       defaultComplexity: Value(d.defaultComplexity.trim()),
       subItemType: Value(d.subItemType.trim()),
       specialNotes: Value(d.specialNotes.trim()),
+      petsJson: Value(jsonEncode(d.pets.map((pet) => pet.toMap()).toList())),
+      householdMembersJson: Value(
+        jsonEncode(
+          d.householdMembers.map((member) => member.toMap()).toList(),
+        ),
+      ),
     );
   }
 
@@ -346,6 +360,16 @@ class QuotesRepositoryLocalFirst {
       }
     } catch (_) {}
     return const <String, dynamic>{};
+  }
+
+  List<Map<String, dynamic>> _decodeList(String payload) {
+    try {
+      final decoded = jsonDecode(payload);
+      if (decoded is List) {
+        return decoded.whereType<Map<String, dynamic>>().toList();
+      }
+    } catch (_) {}
+    return const <Map<String, dynamic>>[];
   }
 
   Future<void> _insertOutbox({

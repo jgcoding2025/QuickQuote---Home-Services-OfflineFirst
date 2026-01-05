@@ -144,6 +144,17 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   set specialNotes(String value);
 
   List<_QuoteItem> get items;
+  List<Pet> get pets;
+  List<HouseholdMember> get householdMembers;
+  OccupantsRules get occupantsRules;
+  set occupantsRules(OccupantsRules value);
+
+  TextEditingController get petNameController;
+  TextEditingController get petTypeController;
+  TextEditingController get petNotesController;
+  TextEditingController get householdNameController;
+  TextEditingController get householdRelationshipController;
+  TextEditingController get householdNotesController;
 
   Future<bool> _confirmDiscardChanges();
   Future<void> _saveQuote();
@@ -209,6 +220,7 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
     required List<String> complexityOptions,
     required List<String> roomTitles,
   });
+  Widget _buildOccupantsSection();
   Widget _buildSpecialNotesSection();
   Widget _buildPricingSection({
     required _Totals totals,
@@ -240,6 +252,7 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
   );
   Widget _row(String label, String value, {bool bold});
   String _money(double v);
+  String _formatTimestamp(int timestamp);
   Widget _pill(String label);
   Widget _buildRoomGroupSection({
     required Iterable<MapEntry<int, _QuoteItem>> roomEntries,
@@ -286,6 +299,7 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
 
 mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
   Future<_QuoteSettingsData> _loadQuoteSettingsData() async {
+    final occupantsRules = await OccupantsRulesLoader.load();
     if (pricingProfileId == 'default') {
       final serviceTypes = await _loadList(
         'assets/settings/service_type_standards.json',
@@ -319,6 +333,7 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
         subItems: subItems,
         sizes: sizes,
         complexities: complexities,
+        occupantsRules: occupantsRules,
       );
     }
 
@@ -387,6 +402,7 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
             ),
           )
           .toList(),
+      occupantsRules: occupantsRules,
     );
   }
 
@@ -565,6 +581,12 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
       items
         ..clear()
         ..addAll(quote.items.map((item) => _QuoteItem.fromMap(item)));
+      pets
+        ..clear()
+        ..addAll(quote.pets);
+      householdMembers
+        ..clear()
+        ..addAll(quote.householdMembers);
     } finally {
       _applyingRemote = false;
     }
@@ -653,6 +675,8 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
       subItemType: subItemType,
       specialNotes: specialNotes,
       items: items.map((item) => item.toMap()).toList(),
+      pets: pets,
+      householdMembers: householdMembers,
     );
   }
 
@@ -688,11 +712,23 @@ mixin _QuoteEditorDataMixin on _QuoteEditorStateAccess {
 
   @override
   _Totals _calcTotals() {
+    final petCount = petsPresent
+        ? pets.where((pet) => !pet.excluded).length
+        : 0;
+    final petMinutes = petCount * occupantsRules.petMinutesDefault;
+    final extraHousehold = (householdMembers.length -
+            occupantsRules.householdFreeCount)
+        .clamp(0, householdMembers.length)
+        .toInt();
+    final householdMinutes =
+        extraHousehold * occupantsRules.householdExtraMinutesPerPerson;
     final totalMinutes = items.fold<double>(
       0,
       (total, i) => total + (i.include ? _itemAdjustedMinutes(i) : 0),
     );
-    final adjustedMinutes = totalMinutes * _combinedMultiplier();
+    final baseMinutes =
+        totalMinutes + petMinutes.toDouble() + householdMinutes.toDouble();
+    final adjustedMinutes = baseMinutes * _combinedMultiplier();
     final hours = adjustedMinutes / 60.0;
     final subtotal = hours * laborRate;
     final tax = taxEnabled ? subtotal * taxRate : 0.0;
