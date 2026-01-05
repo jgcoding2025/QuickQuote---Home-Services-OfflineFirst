@@ -224,6 +224,9 @@ class FinalizedDocumentsRepositoryLocalFirst {
       'subItemType': quote.subItemType,
       'specialNotes': quote.specialNotes,
       'items': quote.items,
+      'pets': quote.pets.map((pet) => pet.toMap()).toList(),
+      'householdMembers':
+          quote.householdMembers.map((member) => member.toMap()).toList(),
     };
   }
 

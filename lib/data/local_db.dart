@@ -66,6 +66,8 @@ class Quotes extends Table {
   TextColumn get defaultComplexity => text().withDefault(const Constant(''))();
   TextColumn get subItemType => text().withDefault(const Constant(''))();
   TextColumn get specialNotes => text().withDefault(const Constant(''))();
+  TextColumn get petsJson => text().withDefault(const Constant('[]'))();
+  TextColumn get householdMembersJson => text().withDefault(const Constant('[]'))();
 
   @override
   Set<Column<Object>>? get primaryKey => {id};
@@ -282,7 +284,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -309,6 +311,10 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 3) {
             await m.createTable(finalizedDocuments);
+          }
+          if (from < 4) {
+            await m.addColumn(quotes, quotes.petsJson);
+            await m.addColumn(quotes, quotes.householdMembersJson);
           }
         },
       );

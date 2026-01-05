@@ -94,6 +94,20 @@ mixin _QuoteEditorUiHelpers on _QuoteEditorStateAccess {
   String _money(double v) => '\$${v.toStringAsFixed(2)}';
 
   @override
+  String _formatTimestamp(int timestamp) {
+    if (timestamp <= 0) {
+      return '--';
+    }
+    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    final mm = date.month.toString().padLeft(2, '0');
+    final dd = date.day.toString().padLeft(2, '0');
+    final yyyy = date.year.toString();
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '$mm/$dd/$yyyy $hour:$minute';
+  }
+
+  @override
   Widget _sectionCard(
     BuildContext context,
     String title,

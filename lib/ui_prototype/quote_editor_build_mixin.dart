@@ -153,6 +153,7 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
             _subItemStandards = data.subItems;
             _sizeStandards = data.sizes;
             _complexityStandards = data.complexities;
+            occupantsRules = data.occupantsRules;
             final serviceTypeOptions = data.serviceTypes.isNotEmpty
                 ? {
                     for (final standard
@@ -375,6 +376,8 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
                     complexityOptions: complexityOptions,
                     roomTitles: roomTitles.toList(),
                   ),
+                  const SizedBox(height: 12),
+                  _buildOccupantsSection(),
                   const SizedBox(height: 12),
                   _buildSpecialNotesSection(),
                   const SizedBox(height: 12),

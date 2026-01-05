@@ -1191,6 +1191,30 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, QuoteRow> {
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _petsJsonMeta = const VerificationMeta(
+    'petsJson',
+  );
+  @override
+  late final GeneratedColumn<String> petsJson = GeneratedColumn<String>(
+    'pets_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _householdMembersJsonMeta =
+      const VerificationMeta('householdMembersJson');
+  @override
+  late final GeneratedColumn<String> householdMembersJson =
+      GeneratedColumn<String>(
+        'household_members_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1227,6 +1251,8 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, QuoteRow> {
     defaultComplexity,
     subItemType,
     specialNotes,
+    petsJson,
+    householdMembersJson,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1492,6 +1518,21 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, QuoteRow> {
         ),
       );
     }
+    if (data.containsKey('pets_json')) {
+      context.handle(
+        _petsJsonMeta,
+        petsJson.isAcceptableOrUnknown(data['pets_json']!, _petsJsonMeta),
+      );
+    }
+    if (data.containsKey('household_members_json')) {
+      context.handle(
+        _householdMembersJsonMeta,
+        householdMembersJson.isAcceptableOrUnknown(
+          data['household_members_json']!,
+          _householdMembersJsonMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1637,6 +1678,14 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, QuoteRow> {
         DriftSqlType.string,
         data['${effectivePrefix}special_notes'],
       )!,
+      petsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pets_json'],
+      )!,
+      householdMembersJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_members_json'],
+      )!,
     );
   }
 
@@ -1681,6 +1730,8 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
   final String defaultComplexity;
   final String subItemType;
   final String specialNotes;
+  final String petsJson;
+  final String householdMembersJson;
   const QuoteRow({
     required this.id,
     required this.orgId,
@@ -1716,6 +1767,8 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
     required this.defaultComplexity,
     required this.subItemType,
     required this.specialNotes,
+    required this.petsJson,
+    required this.householdMembersJson,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1754,6 +1807,8 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
     map['default_complexity'] = Variable<String>(defaultComplexity);
     map['sub_item_type'] = Variable<String>(subItemType);
     map['special_notes'] = Variable<String>(specialNotes);
+    map['pets_json'] = Variable<String>(petsJson);
+    map['household_members_json'] = Variable<String>(householdMembersJson);
     return map;
   }
 
@@ -1793,6 +1848,8 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
       defaultComplexity: Value(defaultComplexity),
       subItemType: Value(subItemType),
       specialNotes: Value(specialNotes),
+      petsJson: Value(petsJson),
+      householdMembersJson: Value(householdMembersJson),
     );
   }
 
@@ -1836,6 +1893,9 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
       defaultComplexity: serializer.fromJson<String>(json['defaultComplexity']),
       subItemType: serializer.fromJson<String>(json['subItemType']),
       specialNotes: serializer.fromJson<String>(json['specialNotes']),
+      petsJson: serializer.fromJson<String>(json['petsJson']),
+      householdMembersJson:
+          serializer.fromJson<String>(json['householdMembersJson']),
     );
   }
   @override
@@ -1876,6 +1936,9 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
       'defaultComplexity': serializer.toJson<String>(defaultComplexity),
       'subItemType': serializer.toJson<String>(subItemType),
       'specialNotes': serializer.toJson<String>(specialNotes),
+      'petsJson': serializer.toJson<String>(petsJson),
+      'householdMembersJson':
+          serializer.toJson<String>(householdMembersJson),
     };
   }
 
@@ -1914,6 +1977,8 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
     String? defaultComplexity,
     String? subItemType,
     String? specialNotes,
+    String? petsJson,
+    String? householdMembersJson,
   }) => QuoteRow(
     id: id ?? this.id,
     orgId: orgId ?? this.orgId,
@@ -1949,6 +2014,8 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
     defaultComplexity: defaultComplexity ?? this.defaultComplexity,
     subItemType: subItemType ?? this.subItemType,
     specialNotes: specialNotes ?? this.specialNotes,
+    petsJson: petsJson ?? this.petsJson,
+    householdMembersJson: householdMembersJson ?? this.householdMembersJson,
   );
   QuoteRow copyWithCompanion(QuotesCompanion data) {
     return QuoteRow(
@@ -2020,6 +2087,10 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
       specialNotes: data.specialNotes.present
           ? data.specialNotes.value
           : this.specialNotes,
+      petsJson: data.petsJson.present ? data.petsJson.value : this.petsJson,
+      householdMembersJson: data.householdMembersJson.present
+          ? data.householdMembersJson.value
+          : this.householdMembersJson,
     );
   }
 
@@ -2059,7 +2130,9 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
           ..write('defaultSize: $defaultSize, ')
           ..write('defaultComplexity: $defaultComplexity, ')
           ..write('subItemType: $subItemType, ')
-          ..write('specialNotes: $specialNotes')
+          ..write('specialNotes: $specialNotes, ')
+          ..write('petsJson: $petsJson, ')
+          ..write('householdMembersJson: $householdMembersJson')
           ..write(')'))
         .toString();
   }
@@ -2100,6 +2173,8 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
     defaultComplexity,
     subItemType,
     specialNotes,
+    petsJson,
+    householdMembersJson,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -2138,7 +2213,9 @@ class QuoteRow extends DataClass implements Insertable<QuoteRow> {
           other.defaultSize == this.defaultSize &&
           other.defaultComplexity == this.defaultComplexity &&
           other.subItemType == this.subItemType &&
-          other.specialNotes == this.specialNotes);
+          other.specialNotes == this.specialNotes &&
+          other.petsJson == this.petsJson &&
+          other.householdMembersJson == this.householdMembersJson);
 }
 
 class QuotesCompanion extends UpdateCompanion<QuoteRow> {
@@ -2176,6 +2253,8 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
   final Value<String> defaultComplexity;
   final Value<String> subItemType;
   final Value<String> specialNotes;
+  final Value<String> petsJson;
+  final Value<String> householdMembersJson;
   final Value<int> rowid;
   const QuotesCompanion({
     this.id = const Value.absent(),
@@ -2212,6 +2291,8 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
     this.defaultComplexity = const Value.absent(),
     this.subItemType = const Value.absent(),
     this.specialNotes = const Value.absent(),
+    this.petsJson = const Value.absent(),
+    this.householdMembersJson = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   QuotesCompanion.insert({
@@ -2249,6 +2330,8 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
     this.defaultComplexity = const Value.absent(),
     this.subItemType = const Value.absent(),
     this.specialNotes = const Value.absent(),
+    this.petsJson = const Value.absent(),
+    this.householdMembersJson = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        orgId = Value(orgId),
@@ -2288,6 +2371,8 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
     Expression<String>? defaultComplexity,
     Expression<String>? subItemType,
     Expression<String>? specialNotes,
+    Expression<String>? petsJson,
+    Expression<String>? householdMembersJson,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2325,6 +2410,9 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
       if (defaultComplexity != null) 'default_complexity': defaultComplexity,
       if (subItemType != null) 'sub_item_type': subItemType,
       if (specialNotes != null) 'special_notes': specialNotes,
+      if (petsJson != null) 'pets_json': petsJson,
+      if (householdMembersJson != null)
+        'household_members_json': householdMembersJson,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2364,6 +2452,8 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
     Value<String>? defaultComplexity,
     Value<String>? subItemType,
     Value<String>? specialNotes,
+    Value<String>? petsJson,
+    Value<String>? householdMembersJson,
     Value<int>? rowid,
   }) {
     return QuotesCompanion(
@@ -2401,6 +2491,8 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
       defaultComplexity: defaultComplexity ?? this.defaultComplexity,
       subItemType: subItemType ?? this.subItemType,
       specialNotes: specialNotes ?? this.specialNotes,
+      petsJson: petsJson ?? this.petsJson,
+      householdMembersJson: householdMembersJson ?? this.householdMembersJson,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2510,6 +2602,13 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
     if (specialNotes.present) {
       map['special_notes'] = Variable<String>(specialNotes.value);
     }
+    if (petsJson.present) {
+      map['pets_json'] = Variable<String>(petsJson.value);
+    }
+    if (householdMembersJson.present) {
+      map['household_members_json'] =
+          Variable<String>(householdMembersJson.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2553,6 +2652,8 @@ class QuotesCompanion extends UpdateCompanion<QuoteRow> {
           ..write('defaultComplexity: $defaultComplexity, ')
           ..write('subItemType: $subItemType, ')
           ..write('specialNotes: $specialNotes, ')
+          ..write('petsJson: $petsJson, ')
+          ..write('householdMembersJson: $householdMembersJson, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -9573,6 +9674,8 @@ typedef $$QuotesTableCreateCompanionBuilder =
       Value<String> defaultComplexity,
       Value<String> subItemType,
       Value<String> specialNotes,
+      Value<String> petsJson,
+      Value<String> householdMembersJson,
       Value<int> rowid,
     });
 typedef $$QuotesTableUpdateCompanionBuilder =
@@ -9611,6 +9714,8 @@ typedef $$QuotesTableUpdateCompanionBuilder =
       Value<String> defaultComplexity,
       Value<String> subItemType,
       Value<String> specialNotes,
+      Value<String> petsJson,
+      Value<String> householdMembersJson,
       Value<int> rowid,
     });
 
@@ -9790,6 +9895,16 @@ class $$QuotesTableFilterComposer
 
   ColumnFilters<String> get specialNotes => $composableBuilder(
     column: $table.specialNotes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get petsJson => $composableBuilder(
+    column: $table.petsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get householdMembersJson => $composableBuilder(
+    column: $table.householdMembersJson,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -9972,6 +10087,16 @@ class $$QuotesTableOrderingComposer
     column: $table.specialNotes,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get petsJson => $composableBuilder(
+    column: $table.petsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get householdMembersJson => $composableBuilder(
+    column: $table.householdMembersJson,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$QuotesTableAnnotationComposer
@@ -10118,6 +10243,14 @@ class $$QuotesTableAnnotationComposer
     column: $table.specialNotes,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get petsJson =>
+      $composableBuilder(column: $table.petsJson, builder: (column) => column);
+
+  GeneratedColumn<String> get householdMembersJson => $composableBuilder(
+    column: $table.householdMembersJson,
+    builder: (column) => column,
+  );
 }
 
 class $$QuotesTableTableManager
@@ -10182,6 +10315,8 @@ class $$QuotesTableTableManager
                 Value<String> defaultComplexity = const Value.absent(),
                 Value<String> subItemType = const Value.absent(),
                 Value<String> specialNotes = const Value.absent(),
+                Value<String> petsJson = const Value.absent(),
+                Value<String> householdMembersJson = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => QuotesCompanion(
                 id: id,
@@ -10218,6 +10353,8 @@ class $$QuotesTableTableManager
                 defaultComplexity: defaultComplexity,
                 subItemType: subItemType,
                 specialNotes: specialNotes,
+                petsJson: petsJson,
+                householdMembersJson: householdMembersJson,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -10256,6 +10393,8 @@ class $$QuotesTableTableManager
                 Value<String> defaultComplexity = const Value.absent(),
                 Value<String> subItemType = const Value.absent(),
                 Value<String> specialNotes = const Value.absent(),
+                Value<String> petsJson = const Value.absent(),
+                Value<String> householdMembersJson = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => QuotesCompanion.insert(
                 id: id,
@@ -10292,6 +10431,8 @@ class $$QuotesTableTableManager
                 defaultComplexity: defaultComplexity,
                 subItemType: subItemType,
                 specialNotes: specialNotes,
+                petsJson: petsJson,
+                householdMembersJson: householdMembersJson,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

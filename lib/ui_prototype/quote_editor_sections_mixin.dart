@@ -310,12 +310,6 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
       Column(
         children: [
           SwitchListTile(
-            value: petsPresent,
-            onChanged: (v) => _markDirty(() => petsPresent = v),
-            title: const Text('Pets'),
-            subtitle: Text(petsPresent ? 'Yes' : 'No'),
-          ),
-          SwitchListTile(
             value: homeOccupied,
             onChanged: (v) => _markDirty(() => homeOccupied = v),
             title: const Text('Home Occupied'),
@@ -366,6 +360,285 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
         decoration: _fieldDecoration(''),
         onChanged: (v) => _markDirty(() => specialNotes = v),
       ),
+    );
+  }
+
+  @override
+  Widget _buildOccupantsSection() {
+    return _sectionCard(
+      context,
+      'Occupants',
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Pets', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            value: petsPresent,
+            onChanged: (v) => _markDirty(() => petsPresent = v),
+            title: const Text('Enable pets'),
+            subtitle: Text(
+              petsPresent
+                  ? '${pets.where((pet) => !pet.excluded).length} included'
+                  : 'Disabled',
+            ),
+          ),
+          if (petsPresent) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: petNameController,
+                    decoration: _fieldDecoration('Name'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: petTypeController,
+                    decoration: _fieldDecoration('Type'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: petNotesController,
+              decoration: _fieldDecoration('Notes'),
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.icon(
+                onPressed: () {
+                  final name = petNameController.text.trim();
+                  if (name.isEmpty) {
+                    _snack(context, 'Pet name is required.');
+                    return;
+                  }
+                  final now = DateTime.now();
+                  final pet = Pet(
+                    id: now.microsecondsSinceEpoch.toString(),
+                    name: name,
+                    type: petTypeController.text.trim(),
+                    notes: petNotesController.text.trim(),
+                    excluded: false,
+                    addedAt: now.millisecondsSinceEpoch,
+                  );
+                  _markDirty(() => pets.add(pet));
+                  petNameController.clear();
+                  petTypeController.clear();
+                  petNotesController.clear();
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('Add Pet'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (pets.isEmpty)
+              Text(
+                'No pets added yet.',
+                style: Theme.of(context).textTheme.bodySmall,
+              )
+            else
+              _buildOccupantsTable(
+                headers: const [
+                  'Name',
+                  'Type',
+                  'Notes',
+                  'Time Added',
+                  'Excluded',
+                  '',
+                ],
+                columnWidths: const {
+                  0: FlexColumnWidth(1.2),
+                  1: FlexColumnWidth(1),
+                  2: FlexColumnWidth(1.6),
+                  3: FlexColumnWidth(1),
+                  4: FixedColumnWidth(120),
+                  5: FixedColumnWidth(60),
+                },
+                rows: [
+                  for (final pet in pets)
+                    _occupantsRow(
+                      [
+                        Text(pet.name),
+                        Text(pet.type),
+                        Text(pet.notes),
+                        Text(_formatTimestamp(pet.addedAt)),
+                        Switch(
+                          value: pet.excluded,
+                          onChanged: (value) => _markDirty(() {
+                            final index = pets.indexOf(pet);
+                            pets[index] = pet.copyWith(excluded: value);
+                          }),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: () => _markDirty(() {
+                            pets.remove(pet);
+                          }),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+          ],
+          const SizedBox(height: 24),
+          Text('Household', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: householdNameController,
+                  decoration: _fieldDecoration('Name'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextFormField(
+                  controller: householdRelationshipController,
+                  decoration: _fieldDecoration('Relationship'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: householdNotesController,
+            decoration: _fieldDecoration('Notes'),
+          ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton.icon(
+              onPressed: () {
+                final name = householdNameController.text.trim();
+                if (name.isEmpty) {
+                  _snack(context, 'Household member name is required.');
+                  return;
+                }
+                final now = DateTime.now();
+                final member = HouseholdMember(
+                  id: now.microsecondsSinceEpoch.toString(),
+                  name: name,
+                  relationship: householdRelationshipController.text.trim(),
+                  notes: householdNotesController.text.trim(),
+                  addedAt: now.millisecondsSinceEpoch,
+                );
+                _markDirty(() => householdMembers.add(member));
+                householdNameController.clear();
+                householdRelationshipController.clear();
+                householdNotesController.clear();
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Add Household Member'),
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (householdMembers.isEmpty)
+            Text(
+              'No household members added yet.',
+              style: Theme.of(context).textTheme.bodySmall,
+            )
+          else
+            _buildOccupantsTable(
+              headers: const [
+                'Name',
+                'Relationship',
+                'Notes',
+                'Time Added',
+                '',
+              ],
+              columnWidths: const {
+                0: FlexColumnWidth(1.2),
+                1: FlexColumnWidth(1),
+                2: FlexColumnWidth(1.6),
+                3: FlexColumnWidth(1),
+                4: FixedColumnWidth(60),
+              },
+              rows: [
+                for (final member in householdMembers)
+                  _occupantsRow(
+                    [
+                      Text(member.name),
+                      Text(member.relationship),
+                      Text(member.notes),
+                      Text(_formatTimestamp(member.addedAt)),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () => _markDirty(() {
+                          householdMembers.remove(member);
+                        }),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Table _buildOccupantsTable({
+    required List<String> headers,
+    required List<TableRow> rows,
+    Map<int, TableColumnWidth>? columnWidths,
+  }) {
+    final theme = Theme.of(context);
+    return Table(
+      border: TableBorder.all(color: Colors.grey.shade300, width: 1),
+      columnWidths: columnWidths,
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        _occupantsHeaderRow(
+          headers,
+          headerColor: theme.colorScheme.surfaceContainerHighest,
+          headerTextColor: theme.colorScheme.onSurfaceVariant,
+        ),
+        ...rows,
+      ],
+    );
+  }
+
+  TableRow _occupantsHeaderRow(
+    List<String> headers, {
+    required Color headerColor,
+    required Color headerTextColor,
+  }) {
+    return _occupantsRow(
+      headers
+          .map(
+            (header) => Text(
+              header,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: headerTextColor,
+              ),
+            ),
+          )
+          .toList(),
+      rowColor: headerColor,
+    );
+  }
+
+  TableRow _occupantsRow(
+    List<Widget> cells, {
+    Color? rowColor,
+  }) {
+    return TableRow(
+      decoration: rowColor == null ? null : BoxDecoration(color: rowColor),
+      children: cells
+          .map(
+            (cell) => Padding(
+              padding: const EdgeInsets.all(8),
+              child: cell,
+            ),
+          )
+          .toList(),
     );
   }
 

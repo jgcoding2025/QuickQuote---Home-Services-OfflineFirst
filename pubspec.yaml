@@ -85,6 +85,7 @@ flutter:
     - assets/settings/frequency_standards.json
     - assets/settings/room_type_standards.json
     - assets/settings/sub_item_standards.json
+    - assets/occupants_rules.json
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

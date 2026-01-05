@@ -146,6 +146,14 @@ class QuotesRepo {
     final items = rawItems is List
         ? rawItems.whereType<Map<String, dynamic>>().toList()
         : <Map<String, dynamic>>[];
+    final rawPets = data['pets'];
+    final pets = rawPets is List
+        ? rawPets.whereType<Map<String, dynamic>>().toList()
+        : <Map<String, dynamic>>[];
+    final rawMembers = data['householdMembers'];
+    final members = rawMembers is List
+        ? rawMembers.whereType<Map<String, dynamic>>().toList()
+        : <Map<String, dynamic>>[];
 
     return Quote(
       id: doc.id,
@@ -181,6 +189,8 @@ class QuotesRepo {
       subItemType: s('subItemType'),
       specialNotes: s('specialNotes'),
       items: items,
+      pets: pets.map(Pet.fromMap).toList(),
+      householdMembers: members.map(HouseholdMember.fromMap).toList(),
     );
   }
 }
