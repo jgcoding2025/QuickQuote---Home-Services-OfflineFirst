@@ -28,7 +28,8 @@ void _showSyncStatusHelp(BuildContext context) {
             itemCount: SyncBannerState.values.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
-              final definition = SyncBannerState.values[index].definition;
+              final status = SyncBannerState.values[index];
+              final definition = status.definition;
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -45,6 +46,11 @@ void _showSyncStatusHelp(BuildContext context) {
                         const SizedBox(height: 4),
                         Text(
                           definition.description,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _syncStatusTriggerDetails(status),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
@@ -64,6 +70,35 @@ void _showSyncStatusHelp(BuildContext context) {
       );
     },
   );
+}
+
+String _syncStatusTriggerDetails(SyncBannerState status) {
+  final definition = status.definition;
+  final polling = definition.recommendedPollingSeconds == 0
+      ? 'Polling: disabled'
+      : 'Polling: every ${definition.recommendedPollingSeconds}s';
+  switch (status) {
+    case SyncBannerState.offline:
+      return 'Uploads: queued until online.\n'
+          'Downloads: paused.\n'
+          '$polling.';
+    case SyncBannerState.syncing:
+      return 'Uploads: running now.\n'
+          'Downloads: running now.\n'
+          '$polling.';
+    case SyncBannerState.idle:
+      return 'Uploads: when local changes are saved or manual sync.\n'
+          'Downloads: manual sync or when a peer comes online.\n'
+          '$polling while a peer is online.';
+    case SyncBannerState.peerOnlineEditing:
+      return 'Uploads: when local changes are saved.\n'
+          'Downloads: frequent polling while a peer is online.\n'
+          '$polling.';
+    case SyncBannerState.error:
+      return 'Uploads: retry after errors when possible.\n'
+          'Downloads: retry after errors when possible.\n'
+          '$polling.';
+  }
 }
 
 List<Widget> _simpleMenuLabels(List<DropdownMenuItem<String>> items) {
