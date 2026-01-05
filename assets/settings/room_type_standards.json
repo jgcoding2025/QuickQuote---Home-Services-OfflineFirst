@@ -98,6 +98,22 @@
   {
     "row": 13,
     "category": "Other",
+    "roomType": "Staircase Down",
+    "description": "From Main Floor to Downstairs",
+    "minutes": 15,
+    "squareFeet": 50
+  },
+    {
+    "row": 14,
+    "category": "Other",
+    "roomType": "Staircase Up",
+    "description": "From Main Floor to Upstairs",
+    "minutes": 15,
+    "squareFeet": 50
+  },
+  {
+    "row": 15,
+    "category": "Other",
     "roomType": "Laundry",
     "description": "",
     "minutes": 10,

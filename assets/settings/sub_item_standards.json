@@ -35,6 +35,12 @@
     "description": "",
     "minutes": 30
   },
+    {
+    "category": "Misc",
+    "subItem": "Couch",
+    "description": "",
+    "minutes": 15
+  },
   {
     "category": "Windows",
     "subItem": "Window: Standard",
