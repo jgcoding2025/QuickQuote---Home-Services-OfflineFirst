@@ -115,9 +115,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   ) {
     final syncService = AppDependencies.of(context).syncService;
     return RefreshIndicator(
-      onRefresh: () => syncService.downloadNow(
-        reason: 'pull_to_refresh:pricing_profile',
-      ),
+      onRefresh: () =>
+          syncService.downloadNow(reason: 'pull_to_refresh:pricing_profile'),
       child: ListView(
         padding: const EdgeInsets.all(16),
         physics: const AlwaysScrollableScrollPhysics(),
@@ -382,6 +381,15 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
       key: (item) => item.row.toString(),
       id: (item) => item.id,
     );
+    final columnWidths = <int, TableColumnWidth>{
+      0: const FlexColumnWidth(1.6),
+      1: const FlexColumnWidth(3.2),
+      2: const FlexColumnWidth(1),
+      3: const FlexColumnWidth(1),
+    };
+    if (isEditable) {
+      columnWidths[4] = const FlexColumnWidth(1.2);
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -437,13 +445,11 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                   onDelete: () => _deleteWithUndo(
                     context,
                     label: service.serviceType,
-                    delete: () => widget.pricingCatalogRepo.deleteServiceType(
+                    delete: () =>
+                        widget.pricingCatalogRepo.deleteServiceType(service.id),
+                    restore: () => widget.pricingCatalogRepo.restoreServiceType(
                       service.id,
                     ),
-                    restore: () =>
-                        widget.pricingCatalogRepo.restoreServiceType(
-                          service.id,
-                        ),
                   ),
                   hasDiff: _serviceTypeDiff(service, defaultItem),
                 ),
@@ -512,7 +518,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ),
         _buildTable(
           context,
-          headers: const [
+          headers: [
             'Service type',
             'Frequency',
             'Multiplier',
@@ -618,7 +624,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ),
         _buildTable(
           context,
-          headers: const [
+          headers: [
             'Room type',
             'Description',
             'Minutes',
@@ -731,7 +737,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ),
         _buildTable(
           context,
-          headers: const [
+          headers: [
             'Add-on item',
             'Description',
             'Minutes',
@@ -837,7 +843,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ),
         _buildTable(
           context,
-          headers: const [
+          headers: [
             'Size',
             'Definition',
             'Multiplier',
@@ -872,8 +878,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                   onDelete: () => _deleteWithUndo(
                     context,
                     label: item.size,
-                    delete: () =>
-                        widget.pricingCatalogRepo.deleteSize(item.id),
+                    delete: () => widget.pricingCatalogRepo.deleteSize(item.id),
                     restore: () =>
                         widget.pricingCatalogRepo.restoreSize(item.id),
                   ),
@@ -943,7 +948,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ),
         _buildTable(
           context,
-          headers: const [
+          headers: [
             'Complexity',
             'Definition',
             'Multiplier',
@@ -978,12 +983,10 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                   onDelete: () => _deleteWithUndo(
                     context,
                     label: item.level,
-                    delete: () => widget.pricingCatalogRepo.deleteComplexity(
-                      item.id,
-                    ),
-                    restore: () => widget.pricingCatalogRepo.restoreComplexity(
-                      item.id,
-                    ),
+                    delete: () =>
+                        widget.pricingCatalogRepo.deleteComplexity(item.id),
+                    restore: () =>
+                        widget.pricingCatalogRepo.restoreComplexity(item.id),
                   ),
                   hasDiff: _complexityDiff(item, defaultItem),
                 ),
@@ -1530,8 +1533,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
               if (name.isEmpty) {
                 return;
               }
-              final price =
-                  double.tryParse(priceController.text.trim()) ?? 0;
+              final price = double.tryParse(priceController.text.trim()) ?? 0;
               final multiplier =
                   double.tryParse(multiplierController.text.trim()) ?? 1;
               await widget.pricingCatalogRepo.createServiceType(
@@ -2095,10 +2097,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         _intDiff(item.minutes, defaultItem.minutes);
   }
 
-  bool _sizeDiff(
-    PricingProfileSize item,
-    PricingProfileSize? defaultItem,
-  ) {
+  bool _sizeDiff(PricingProfileSize item, PricingProfileSize? defaultItem) {
     if (defaultItem == null) {
       return true;
     }
@@ -2144,13 +2143,13 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   ) {
     final sorted = items.toList();
     sorted.sort((a, b) {
-      final serviceCompare =
-          _normalizeText(a.serviceType).compareTo(_normalizeText(b.serviceType));
+      final serviceCompare = _normalizeText(
+        a.serviceType,
+      ).compareTo(_normalizeText(b.serviceType));
       if (serviceCompare != 0) {
         return serviceCompare;
       }
-      return _normalizeText(a.frequency)
-          .compareTo(_normalizeText(b.frequency));
+      return _normalizeText(a.frequency).compareTo(_normalizeText(b.frequency));
     });
     return sorted;
   }
@@ -2160,13 +2159,15 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   ) {
     final sorted = items.toList();
     sorted.sort((a, b) {
-      final nameCompare =
-          _normalizeText(a.subItem).compareTo(_normalizeText(b.subItem));
+      final nameCompare = _normalizeText(
+        a.subItem,
+      ).compareTo(_normalizeText(b.subItem));
       if (nameCompare != 0) {
         return nameCompare;
       }
-      final descriptionCompare = _normalizeText(a.description)
-          .compareTo(_normalizeText(b.description));
+      final descriptionCompare = _normalizeText(
+        a.description,
+      ).compareTo(_normalizeText(b.description));
       if (descriptionCompare != 0) {
         return descriptionCompare;
       }
@@ -2178,13 +2179,15 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   List<PricingProfileSize> _sortedSizes(List<PricingProfileSize> items) {
     final sorted = items.toList();
     sorted.sort((a, b) {
-      final nameCompare =
-          _normalizeText(a.size).compareTo(_normalizeText(b.size));
+      final nameCompare = _normalizeText(
+        a.size,
+      ).compareTo(_normalizeText(b.size));
       if (nameCompare != 0) {
         return nameCompare;
       }
-      final definitionCompare = _normalizeText(a.definition)
-          .compareTo(_normalizeText(b.definition));
+      final definitionCompare = _normalizeText(
+        a.definition,
+      ).compareTo(_normalizeText(b.definition));
       if (definitionCompare != 0) {
         return definitionCompare;
       }
@@ -2198,13 +2201,15 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   ) {
     final sorted = items.toList();
     sorted.sort((a, b) {
-      final nameCompare =
-          _normalizeText(a.level).compareTo(_normalizeText(b.level));
+      final nameCompare = _normalizeText(
+        a.level,
+      ).compareTo(_normalizeText(b.level));
       if (nameCompare != 0) {
         return nameCompare;
       }
-      final definitionCompare = _normalizeText(a.definition)
-          .compareTo(_normalizeText(b.definition));
+      final definitionCompare = _normalizeText(
+        a.definition,
+      ).compareTo(_normalizeText(b.definition));
       if (definitionCompare != 0) {
         return definitionCompare;
       }
