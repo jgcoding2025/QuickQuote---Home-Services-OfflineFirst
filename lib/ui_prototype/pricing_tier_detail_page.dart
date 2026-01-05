@@ -27,6 +27,8 @@ class PricingTierDetailPage extends StatefulWidget {
 class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   late List<PlanTier> planTiers;
 
+  bool get isEditable => !widget.isDefault;
+
   @override
   void initState() {
     super.initState();
@@ -36,7 +38,6 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isEditable = !widget.isDefault;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.initialProfile.name),
@@ -50,8 +51,9 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         ],
         bottom: kDebugMode
             ? PreferredSize(
-                preferredSize:
-                    const Size.fromHeight(SyncStatusBanner.preferredHeight),
+                preferredSize: const Size.fromHeight(
+                  SyncStatusBanner.preferredHeight,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                   child: SyncStatusBanner(
@@ -112,9 +114,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   ) {
     final syncService = AppDependencies.of(context).syncService;
     return RefreshIndicator(
-      onRefresh: () => syncService.downloadNow(
-        reason: 'pull_to_refresh:pricing_profile',
-      ),
+      onRefresh: () =>
+          syncService.downloadNow(reason: 'pull_to_refresh:pricing_profile'),
       child: ListView(
         padding: const EdgeInsets.all(16),
         physics: const AlwaysScrollableScrollPhysics(),
@@ -379,6 +380,15 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
       key: (item) => item.row.toString(),
       id: (item) => item.id,
     );
+    final columnWidths = <int, TableColumnWidth>{
+      0: const FlexColumnWidth(1.6),
+      1: const FlexColumnWidth(3.2),
+      2: const FlexColumnWidth(1),
+      3: const FlexColumnWidth(1),
+    };
+    if (isEditable) {
+      columnWidths[4] = const FlexColumnWidth(1.2);
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -393,7 +403,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ),
         _buildTable(
           context,
-          headers: const [
+          headers: [
             'Service type',
             'Description',
             '\$/Sq.Ft.',
@@ -434,13 +444,11 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                   onDelete: () => _deleteWithUndo(
                     context,
                     label: service.serviceType,
-                    delete: () => widget.pricingCatalogRepo.deleteServiceType(
+                    delete: () =>
+                        widget.pricingCatalogRepo.deleteServiceType(service.id),
+                    restore: () => widget.pricingCatalogRepo.restoreServiceType(
                       service.id,
                     ),
-                    restore: () =>
-                        widget.pricingCatalogRepo.restoreServiceType(
-                          service.id,
-                        ),
                   ),
                   hasDiff: _serviceTypeDiff(service, defaultItem),
                 ),
@@ -507,7 +515,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ),
         _buildTable(
           context,
-          headers: const [
+          headers: [
             'Service type',
             'Frequency',
             'Multiplier',
@@ -613,7 +621,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ),
         _buildTable(
           context,
-          headers: const [
+          headers: [
             'Room type',
             'Description',
             'Minutes',
@@ -724,7 +732,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ),
         _buildTable(
           context,
-          headers: const [
+          headers: [
             'Add-on item',
             'Description',
             'Minutes',
@@ -829,7 +837,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ),
         _buildTable(
           context,
-          headers: const [
+          headers: [
             'Size',
             'Definition',
             'Multiplier',
@@ -864,8 +872,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                   onDelete: () => _deleteWithUndo(
                     context,
                     label: item.size,
-                    delete: () =>
-                        widget.pricingCatalogRepo.deleteSize(item.id),
+                    delete: () => widget.pricingCatalogRepo.deleteSize(item.id),
                     restore: () =>
                         widget.pricingCatalogRepo.restoreSize(item.id),
                   ),
@@ -934,7 +941,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           ),
         _buildTable(
           context,
-          headers: const [
+          headers: [
             'Complexity',
             'Definition',
             'Multiplier',
@@ -969,12 +976,10 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                   onDelete: () => _deleteWithUndo(
                     context,
                     label: item.level,
-                    delete: () => widget.pricingCatalogRepo.deleteComplexity(
-                      item.id,
-                    ),
-                    restore: () => widget.pricingCatalogRepo.restoreComplexity(
-                      item.id,
-                    ),
+                    delete: () =>
+                        widget.pricingCatalogRepo.deleteComplexity(item.id),
+                    restore: () =>
+                        widget.pricingCatalogRepo.restoreComplexity(item.id),
                   ),
                   hasDiff: _complexityDiff(item, defaultItem),
                 ),
@@ -1509,8 +1514,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
               if (name.isEmpty) {
                 return;
               }
-              final price =
-                  double.tryParse(priceController.text.trim()) ?? 0;
+              final price = double.tryParse(priceController.text.trim()) ?? 0;
               final multiplier =
                   double.tryParse(multiplierController.text.trim()) ?? 1;
               await widget.pricingCatalogRepo.createServiceType(
@@ -2036,10 +2040,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         _intDiff(item.minutes, defaultItem.minutes);
   }
 
-  bool _sizeDiff(
-    PricingProfileSize item,
-    PricingProfileSize? defaultItem,
-  ) {
+  bool _sizeDiff(PricingProfileSize item, PricingProfileSize? defaultItem) {
     if (defaultItem == null) {
       return true;
     }
