@@ -67,8 +67,6 @@ class _SettingsPageState extends State<SettingsPage>
                 final leftColumn = Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (kDebugMode) _debugSyncCard(context),
-                    if (kDebugMode) const SizedBox(height: 24),
                     _settingsSection(
                       context,
                       title: 'Account & Team',
@@ -99,8 +97,6 @@ class _SettingsPageState extends State<SettingsPage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (kDebugMode) const DebugSyncBanner(),
-                          if (kDebugMode) const SizedBox(height: 16),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -123,8 +119,6 @@ class _SettingsPageState extends State<SettingsPage>
                     padding: const EdgeInsets.all(16),
                     physics: const AlwaysScrollableScrollPhysics(),
                     children: [
-                      if (kDebugMode) const DebugSyncBanner(),
-                      if (kDebugMode) const SizedBox(height: 16),
                       leftColumn,
                       const SizedBox(height: 24),
                       rightColumn,
@@ -134,62 +128,6 @@ class _SettingsPageState extends State<SettingsPage>
               },
             );
           },
-        );
-      },
-    );
-  }
-
-  Widget _debugSyncCard(BuildContext context) {
-    final syncService = AppDependencies.of(context).syncService;
-    return ValueListenableBuilder<int>(
-      valueListenable: syncService.debugTick,
-      builder: (context, _, __) {
-        final blockers = syncService.debugBlockingReasons();
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Why isn’t this syncing?',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 12),
-                if (blockers.isEmpty)
-                  const Text('No blockers detected.')
-                else
-                  ...blockers.map(
-                    (reason) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text('• $reason'),
-                    ),
-                  ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () => syncService.uploadNow(
-                          reason: 'settings_upload_now',
-                        ),
-                        child: const Text('Run Upload Now'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () => syncService.downloadNow(
-                          reason: 'settings_download_now',
-                        ),
-                        child: const Text('Run Download Now'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
         );
       },
     );
