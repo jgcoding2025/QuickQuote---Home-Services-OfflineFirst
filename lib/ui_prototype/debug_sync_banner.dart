@@ -19,8 +19,12 @@ class DebugSyncBanner extends StatelessWidget {
       builder: (context, _, __) {
         final info = syncService.debugInfo;
         final cs = Theme.of(context).colorScheme;
-        final statusIcon = _statusIcon(syncService.currentStatus);
-        final statusColor = _statusColor(syncService.currentStatus, cs);
+        final bannerState = resolveSyncBannerState(
+          status: syncService.currentStatus,
+          hasPeerOnline: syncService.hasPeerOnline,
+        );
+        final statusDefinition = bannerState.definition;
+        final statusColor = _statusColor(bannerState, cs);
         return Material(
           color: cs.surfaceContainer,
           borderRadius: BorderRadius.circular(12),
@@ -39,7 +43,7 @@ class DebugSyncBanner extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        Icon(statusIcon, size: 18, color: statusColor),
+                        Icon(statusDefinition.icon, size: 18, color: statusColor),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(
@@ -94,28 +98,17 @@ class DebugSyncBanner extends StatelessWidget {
     );
   }
 
-  IconData _statusIcon(SyncStatus status) {
+  Color _statusColor(SyncBannerState status, ColorScheme scheme) {
     switch (status) {
-      case SyncStatus.online:
-        return Icons.wifi;
-      case SyncStatus.syncing:
-        return Icons.sync;
-      case SyncStatus.error:
-        return Icons.error_outline;
-      case SyncStatus.offline:
-        return Icons.wifi_off;
-    }
-  }
-
-  Color _statusColor(SyncStatus status, ColorScheme scheme) {
-    switch (status) {
-      case SyncStatus.online:
+      case SyncBannerState.idle:
         return scheme.primary;
-      case SyncStatus.syncing:
+      case SyncBannerState.peerOnlineEditing:
+        return scheme.tertiary;
+      case SyncBannerState.syncing:
         return scheme.secondary;
-      case SyncStatus.error:
+      case SyncBannerState.error:
         return scheme.error;
-      case SyncStatus.offline:
+      case SyncBannerState.offline:
         return scheme.onSurfaceVariant;
     }
   }
