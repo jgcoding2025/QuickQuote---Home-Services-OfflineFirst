@@ -55,7 +55,8 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
             initialValue: estimatedSqFt,
             decoration: _fieldDecoration('Estimated Sq Ft (rooms)'),
             keyboardType: TextInputType.number,
-            onChanged: (v) => _markDirty(() => estimatedSqFt = v),
+            readOnly: true,
+            enabled: false,
           ),
         ],
       ),
@@ -74,6 +75,8 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
     required List<String> frequencyOptions,
     required String resolvedServiceType,
     required String resolvedFrequency,
+    required List<String> statusOptions,
+    required String resolvedStatus,
   }) {
     return _sectionCard(
       context,
@@ -87,6 +90,21 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
             maxLines: 2,
             decoration: _fieldDecoration('Quote Name'),
             onChanged: (v) => _markDirty(() => quoteName = v),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            key: ValueKey('quote-status-$_remoteRevision'),
+            value: resolvedStatus,
+            items: statusOptions
+                .map(
+                  (option) => DropdownMenuItem(
+                    value: option,
+                    child: Text(option),
+                  ),
+                )
+                .toList(),
+            onChanged: (v) => _markDirty(() => status = v ?? status),
+            decoration: _fieldDecoration('Quote Status'),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
@@ -413,12 +431,6 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
           onPressed: _saveQuote,
           icon: const Icon(Icons.save_outlined),
           label: const Text('Save Quote'),
-        ),
-        const SizedBox(height: 12),
-        FilledButton(
-          onPressed: () =>
-              _snack(context, 'Later: Save to Firestore + mark Sent + PDF'),
-          child: const Text('Review / Next'),
         ),
       ],
     );

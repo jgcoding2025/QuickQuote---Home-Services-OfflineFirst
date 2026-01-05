@@ -182,6 +182,8 @@ mixin _QuoteEditorStateAccess on State<QuoteEditorPage> {
     required List<String> frequencyOptions,
     required String resolvedServiceType,
     required String resolvedFrequency,
+    required List<String> statusOptions,
+    required String resolvedStatus,
   });
   Widget _buildDiscussSection();
   Widget _buildRoomsSection({
