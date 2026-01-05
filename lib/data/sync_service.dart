@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -462,6 +463,7 @@ class SyncService {
     for (final doc in snap.docs) {
       final data = doc.data();
       final updatedAt = (data['updatedAt'] as int?) ?? 0;
+      final deleted = data['deleted'] == true;
       final hasPending = await _hasPendingOutbox(
         entityType: 'finalized_document',
         entityId: doc.id,
@@ -472,6 +474,20 @@ class SyncService {
       }
       if (updatedAt > maxUpdatedAt) {
         maxUpdatedAt = updatedAt;
+      }
+      if (deleted) {
+        final existing =
+            await (_db.select(_db.finalizedDocuments)
+                  ..where((tbl) => tbl.id.equals(doc.id))
+                  ..limit(1))
+                .getSingleOrNull();
+        if (existing != null) {
+          await (_db.delete(_db.finalizedDocuments)
+                ..where((tbl) => tbl.id.equals(doc.id)))
+              .go();
+          await _deleteLocalFile(existing.localPath);
+        }
+        continue;
       }
       final existing =
           await (_db.select(_db.finalizedDocuments)
@@ -509,6 +525,18 @@ class SyncService {
           );
     }
     await _db.setSyncState('finalized_document', orgId, maxUpdatedAt);
+  }
+
+  Future<void> _deleteLocalFile(String path) async {
+    if (path.trim().isEmpty) {
+      return;
+    }
+    try {
+      final file = File(path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (_) {}
   }
 
   Future<void> _downloadOrgSettings(String orgId) async {
