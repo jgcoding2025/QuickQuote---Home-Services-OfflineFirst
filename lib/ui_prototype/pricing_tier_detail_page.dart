@@ -58,9 +58,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                   child: SyncStatusBanner(
-                    onInfo: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const SettingsPage()),
-                    ),
+                    onInfo: () => _showSyncStatusHelp(context),
                   ),
                 ),
               )
