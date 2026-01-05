@@ -9,6 +9,7 @@ import 'data/app_controller.dart';
 import 'data/clients_repo_local_first.dart';
 import 'data/finalized_documents_repo_local_first.dart';
 import 'data/local_db.dart';
+import 'data/metrics_collector.dart';
 import 'data/org_settings_repo_local_first.dart';
 import 'data/pricing_profile_catalog_repo_local_first.dart';
 import 'data/pricing_profiles_repo_local_first.dart';
@@ -39,11 +40,13 @@ void main() async {
 
   final db = AppDatabase();
   final sessionController = SessionController();
-  final presenceService = PresenceService();
+  final metricsCollector = MetricsCollectors.create();
+  final presenceService = PresenceService(metricsCollector: metricsCollector);
   final syncService = SyncService(
     db: db,
     session: sessionController,
     presenceService: presenceService,
+    metricsCollector: metricsCollector,
   );
   await syncService.start();
   final clientsRepository = ClientsRepositoryLocalFirst(
@@ -87,6 +90,7 @@ void main() async {
     db: db,
     sessionController: sessionController,
     syncService: syncService,
+    metricsCollector: metricsCollector,
   );
 
   final existingUser = FirebaseAuth.instance.currentUser;
@@ -106,6 +110,7 @@ void main() async {
       pdfService: pdfService,
       syncService: syncService,
       appController: appController,
+      metricsCollector: metricsCollector,
       child: const UiPrototypeApp(),
     ),
   );
