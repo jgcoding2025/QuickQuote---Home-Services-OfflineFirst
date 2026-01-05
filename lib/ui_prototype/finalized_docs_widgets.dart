@@ -15,27 +15,47 @@ class FinalizedDocumentsSection extends StatefulWidget {
 
 class _FinalizedDocumentsSectionState extends State<FinalizedDocumentsSection> {
   Stream<List<FinalizedDocument>>? _docsStream;
+  StreamSubscription<List<FinalizedDocument>>? _docsSubscription;
+  StreamController<List<FinalizedDocument>>? _docsController;
+  FinalizedDocumentsRepositoryLocalFirst? _repo;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final repo = AppDependencies.of(context).finalizedDocumentsRepository;
-    _docsStream ??= repo.streamForQuote(widget.quoteId).asBroadcastStream(
-          // Broadcast so expansion rebuilds don't trigger "already listened to".
-          onCancel: (sub) => sub.cancel(),
-        );
+    if (_repo != repo || _docsStream == null) {
+      _repo = repo;
+      _attachDocsStream();
+    }
   }
 
   @override
   void didUpdateWidget(FinalizedDocumentsSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.quoteId != widget.quoteId) {
-      final repo = AppDependencies.of(context).finalizedDocumentsRepository;
-      _docsStream = repo.streamForQuote(widget.quoteId).asBroadcastStream(
-            // Broadcast so expansion rebuilds don't trigger "already listened to".
-            onCancel: (sub) => sub.cancel(),
-          );
+      _attachDocsStream();
     }
+  }
+
+  void _attachDocsStream() {
+    _docsSubscription?.cancel();
+    _docsController?.close();
+    final controller = StreamController<List<FinalizedDocument>>.broadcast();
+    _docsController = controller;
+    final repo = _repo ?? AppDependencies.of(context).finalizedDocumentsRepository;
+    _docsSubscription = repo.streamForQuote(widget.quoteId).listen(
+          controller.add,
+          onError: controller.addError,
+        );
+    // Broadcast controller keeps one source subscription alive across rebuilds.
+    _docsStream = controller.stream;
+  }
+
+  @override
+  void dispose() {
+    _docsSubscription?.cancel();
+    _docsController?.close();
+    super.dispose();
   }
 
   @override
