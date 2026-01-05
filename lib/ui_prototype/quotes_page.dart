@@ -123,7 +123,7 @@ class QuotesPage extends StatelessWidget {
                       messenger.clearSnackBars();
                       messenger.showSnackBar(
                         SnackBar(
-                          duration: const Duration(seconds: 8),
+                          duration: const Duration(seconds: 5),
                           content: Text('Deleted ${q.quoteName}'),
                           action: SnackBarAction(
                             label: 'UNDO',

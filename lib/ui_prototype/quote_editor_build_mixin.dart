@@ -237,6 +237,13 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
               frequency,
               frequencyOptions,
             );
+            final statusOptions = const [
+              'Draft',
+              'Sent',
+              'Approved',
+              'Declined',
+            ];
+            final resolvedStatus = _resolveOption(status, statusOptions);
 
             _syncOption(
               defaultRoomType,
@@ -261,6 +268,7 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
               resolvedPricingProfile,
               (v) => pricingProfileId = v,
             );
+            _syncOption(status, resolvedStatus, (v) => status = v);
 
             final totals = _calcTotals();
             final roomTitles = items
@@ -337,6 +345,8 @@ mixin _QuoteEditorBuildMixin on _QuoteEditorStateAccess {
                     frequencyOptions: frequencyOptions,
                     resolvedServiceType: resolvedServiceType,
                     resolvedFrequency: resolvedFrequency,
+                    statusOptions: statusOptions,
+                    resolvedStatus: resolvedStatus,
                   ),
                   const SizedBox(height: 12),
                   _buildDiscussSection(),

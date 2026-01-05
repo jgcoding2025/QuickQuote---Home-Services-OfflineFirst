@@ -108,7 +108,7 @@ class ClientsPage extends StatelessWidget {
                       messenger.clearSnackBars();
                       messenger.showSnackBar(
                         SnackBar(
-                          duration: const Duration(seconds: 8),
+                          duration: const Duration(seconds: 5),
                           content: Text('Deleted ${c.displayName}'),
                           action: SnackBarAction(
                             label: 'UNDO',
