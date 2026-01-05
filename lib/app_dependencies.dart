@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'data/clients_repo_local_first.dart';
 import 'data/app_controller.dart';
 import 'data/finalized_documents_repo_local_first.dart';
+import 'data/metrics_collector.dart';
 import 'data/org_settings_repo_local_first.dart';
 import 'data/pricing_profile_catalog_repo_local_first.dart';
 import 'data/pricing_profiles_repo_local_first.dart';
@@ -24,6 +25,7 @@ class AppDependencies extends InheritedWidget {
     required this.pdfService,
     required this.syncService,
     required this.appController,
+    required this.metricsCollector,
     required super.child,
   });
 
@@ -38,6 +40,7 @@ class AppDependencies extends InheritedWidget {
   final PdfService pdfService;
   final SyncService syncService;
   final AppController appController;
+  final MetricsCollector metricsCollector;
 
   static AppDependencies of(BuildContext context) {
     final result = context.dependOnInheritedWidgetOfExactType<AppDependencies>();

@@ -7,16 +7,20 @@ import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import 'metrics_collector.dart';
+
 class PresenceService with WidgetsBindingObserver {
   PresenceService({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
     SharedPreferences? preferences,
     Uuid? uuid,
+    MetricsCollector? metricsCollector,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance,
         _preferences = preferences,
-        _uuid = uuid ?? const Uuid();
+        _uuid = uuid ?? const Uuid(),
+        _metricsCollector = metricsCollector ?? const NoopMetricsCollector();
 
   static const Duration freshnessWindow = Duration(minutes: 2);
   static const Duration heartbeatInterval = Duration(seconds: 45);
@@ -26,6 +30,7 @@ class PresenceService with WidgetsBindingObserver {
   final FirebaseAuth _auth;
   final SharedPreferences? _preferences;
   final Uuid _uuid;
+  final MetricsCollector _metricsCollector;
 
   final _peerController = StreamController<bool>.broadcast();
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _presenceSub;
@@ -152,6 +157,7 @@ class PresenceService with WidgetsBindingObserver {
         .collection('presence_devices')
         .doc(_deviceId)
         .set(data, SetOptions(merge: true));
+    unawaited(_metricsCollector.recordWrite());
   }
 
   Future<void> _markOffline() async {
@@ -175,11 +181,13 @@ class PresenceService with WidgetsBindingObserver {
       },
       SetOptions(merge: true),
     );
+    unawaited(_metricsCollector.recordWrite());
   }
 
   void _handlePresenceSnapshot(
     QuerySnapshot<Map<String, dynamic>> snapshot,
   ) {
+    unawaited(_metricsCollector.recordRead(count: snapshot.docs.length));
     final now = DateTime.now();
     final cutoff = now.subtract(freshnessWindow);
     final deviceId = _deviceId;

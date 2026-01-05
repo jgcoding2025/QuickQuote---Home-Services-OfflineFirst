@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 
 import 'local_db.dart';
+import 'metrics_collector.dart';
 import 'session_controller.dart';
 import 'sync_service.dart';
 
@@ -25,13 +28,16 @@ class AppController {
     required AppDatabase db,
     required SessionController sessionController,
     required SyncService syncService,
+    MetricsCollector? metricsCollector,
   })  : _db = db,
         _sessionController = sessionController,
-        _syncService = syncService;
+        _syncService = syncService,
+        _metricsCollector = metricsCollector ?? const NoopMetricsCollector();
 
   final AppDatabase _db;
   final SessionController _sessionController;
   final SyncService _syncService;
+  final MetricsCollector _metricsCollector;
 
   static const guestOrgId = 'guest-org';
   static const demoOrgId = 'demo-org';
@@ -114,6 +120,7 @@ class AppController {
       SetOptions(merge: true),
     );
     await batch.commit();
+    unawaited(_metricsCollector.recordWrite(count: 3));
     await _activateOrg(orgId: orgId, role: 'owner', user: user);
   }
 
@@ -171,6 +178,8 @@ class AppController {
         SetOptions(merge: true),
       );
     });
+    unawaited(_metricsCollector.recordRead());
+    unawaited(_metricsCollector.recordWrite(count: 3));
     await _activateOrg(orgId: orgId, role: role, user: user);
   }
 
@@ -181,11 +190,13 @@ class AppController {
     }
     final userDoc =
         await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    unawaited(_metricsCollector.recordRead());
     if (userDoc.data()?['orgId'] != null) {
       return false;
     }
     final orgDoc =
         await FirebaseFirestore.instance.collection('orgs').doc(demoOrgId).get();
+    unawaited(_metricsCollector.recordRead());
     if (!orgDoc.exists) {
       return false;
     }
@@ -195,6 +206,7 @@ class AppController {
         .collection('members')
         .limit(1)
         .get();
+    unawaited(_metricsCollector.recordRead(count: membersSnap.docs.length));
     return membersSnap.docs.isEmpty;
   }
 
@@ -207,6 +219,7 @@ class AppController {
         .collection('orgs')
         .doc(demoOrgId)
         .get();
+    unawaited(_metricsCollector.recordRead());
     if (!orgDoc.exists) {
       throw StateError('Demo org does not exist.');
     }
@@ -216,6 +229,7 @@ class AppController {
         .collection('members')
         .limit(1)
         .get();
+    unawaited(_metricsCollector.recordRead(count: membersSnap.docs.length));
     if (membersSnap.docs.isNotEmpty) {
       throw StateError('Demo org has already been claimed.');
     }
@@ -244,6 +258,7 @@ class AppController {
       SetOptions(merge: true),
     );
     await batch.commit();
+    unawaited(_metricsCollector.recordWrite(count: 2));
     await _activateOrg(orgId: demoOrgId, role: 'owner', user: user);
   }
 
@@ -264,6 +279,7 @@ class AppController {
       'usedByUid': null,
       'usedAt': null,
     });
+    unawaited(_metricsCollector.recordWrite());
     return code;
   }
 
@@ -308,6 +324,7 @@ class AppController {
   Future<_UserProfile> _loadUserProfile(User user) async {
     final doc =
         await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    unawaited(_metricsCollector.recordRead());
     if (!doc.exists) {
       return _UserProfile.missing(email: user.email);
     }
@@ -334,6 +351,7 @@ class AppController {
       },
       SetOptions(merge: true),
     );
+    unawaited(_metricsCollector.recordWrite());
   }
 
   Future<String> _generateUniqueInviteCode() async {
@@ -343,6 +361,7 @@ class AppController {
           .collection('invites')
           .doc(code)
           .get();
+      unawaited(_metricsCollector.recordRead());
       if (!existing.exists) {
         return code;
       }

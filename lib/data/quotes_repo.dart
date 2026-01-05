@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'quote_models.dart';
+import 'metrics_collector.dart';
 
 class QuotesRepo {
-  QuotesRepo({required this.orgId});
+  QuotesRepo({required this.orgId, MetricsCollector? metricsCollector})
+      : _metricsCollector = metricsCollector ?? const NoopMetricsCollector();
   final String orgId;
+  final MetricsCollector _metricsCollector;
 
   String newQuoteId() => _col.doc().id;
 
@@ -23,6 +28,7 @@ class QuotesRepo {
     }
 
     await _col.doc(quoteId).set(data, SetOptions(merge: true));
+    unawaited(_metricsCollector.recordWrite());
   }
 
   Future<Quote> createQuote(QuoteDraft d) async {
@@ -34,6 +40,7 @@ class QuotesRepo {
     };
 
     await _col.doc(id).set(data, SetOptions(merge: true));
+    unawaited(_metricsCollector.recordWrite());
 
     return Quote(
       id: id,
@@ -57,8 +64,10 @@ class QuotesRepo {
       'updatedAt': FieldValue.serverTimestamp(),
     };
     final snapshot = await docRef.get();
+    unawaited(_metricsCollector.recordRead());
     if (snapshot.exists) {
       await docRef.set(data, SetOptions(merge: true));
+      unawaited(_metricsCollector.recordWrite());
       return;
     }
     await docRef.set(
@@ -68,6 +77,7 @@ class QuotesRepo {
       },
       SetOptions(merge: true),
     );
+    unawaited(_metricsCollector.recordWrite());
   }
 
   Future<void> restoreQuote(String quoteId, QuoteDraft d) async {
@@ -77,14 +87,17 @@ class QuotesRepo {
       'updatedAt': FieldValue.serverTimestamp(),
     };
     await _col.doc(quoteId).set(data, SetOptions(merge: true));
+    unawaited(_metricsCollector.recordWrite());
   }
 
   Future<void> deleteQuote(String quoteId) async {
     await _col.doc(quoteId).delete();
+    unawaited(_metricsCollector.recordWrite());
   }
 
   Stream<List<Quote>> streamQuotes() {
     return _col.orderBy('createdAt', descending: true).snapshots().map((snap) {
+      unawaited(_metricsCollector.recordRead(count: snap.docs.length));
       return snap.docs.map((d) => _quoteFromDoc(d)).toList();
     });
   }
@@ -94,7 +107,10 @@ class QuotesRepo {
         .where('clientId', isEqualTo: clientId)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map((d) => _quoteFromDoc(d)).toList());
+        .map((snap) {
+      unawaited(_metricsCollector.recordRead(count: snap.docs.length));
+      return snap.docs.map((d) => _quoteFromDoc(d)).toList();
+    });
   }
 
   CollectionReference<Map<String, dynamic>> get _col => FirebaseFirestore
