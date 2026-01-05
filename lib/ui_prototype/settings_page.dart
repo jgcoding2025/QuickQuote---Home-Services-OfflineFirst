@@ -20,6 +20,13 @@ class _SettingsPageState extends State<SettingsPage>
   String? _inviteCode;
   String? _inviteError;
 
+  String _formatRole(String role) {
+    if (role == 'owner') {
+      return 'Owner';
+    }
+    return role;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -201,7 +208,7 @@ class _SettingsPageState extends State<SettingsPage>
               },
             ),
             const SizedBox(height: 8),
-            Text('Role: ${session?.role ?? 'Offline'}'),
+            Text('Role: ${_formatRole(session?.role ?? 'Offline')}'),
             const SizedBox(height: 12),
             StreamBuilder<bool>(
               stream: peerStream,
@@ -249,12 +256,48 @@ class _SettingsPageState extends State<SettingsPage>
                         final data = doc.data();
                         final email = data['email'] as String? ?? doc.id;
                         final role = data['role'] as String? ?? 'member';
+                        final name = data['name'] as String?;
                         final active = data['active'] as bool? ?? true;
                         final isSelf = doc.id == session?.userId;
+                        final displayName =
+                            (name == null || name.isEmpty) ? email : name;
+                        final displayRole = _formatRole(role);
                         return Card(
                           child: ListTile(
-                            title: Text(email),
-                            subtitle: Text(role),
+                            title: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        displayName,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      displayRole,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  email,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  softWrap: true,
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ],
+                            ),
                             trailing: isOwner
                                 ? Switch(
                                     value: active,
