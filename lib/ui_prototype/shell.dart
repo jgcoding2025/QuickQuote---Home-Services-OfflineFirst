@@ -37,13 +37,20 @@ class _PrototypeShellState extends State<PrototypeShell> {
                   stream: deps.syncService.statusStream,
                   initialData: deps.syncService.currentStatus,
                   builder: (context, snap) {
-                    final status = switch (snap.data) {
-                      SyncStatus.online => _SyncStatus.online,
-                      SyncStatus.syncing => _SyncStatus.syncing,
-                      SyncStatus.error => _SyncStatus.error,
-                      _ => _SyncStatus.offline,
-                    };
-                    return _SyncBanner(status: status);
+                    return StreamBuilder<bool>(
+                      stream: deps.syncService.hasPeerOnlineStream,
+                      initialData: deps.syncService.hasPeerOnline,
+                      builder: (context, peerSnap) {
+                        final bannerState = resolveSyncBannerState(
+                          status: snap.data ?? SyncStatus.offline,
+                          hasPeerOnline: peerSnap.data ?? false,
+                        );
+                        return _SyncBanner(
+                          state: bannerState,
+                          onInfo: () => _showSyncStatusHelp(context),
+                        );
+                      },
+                    );
                   },
                 ),
                 if (kDebugMode) const SizedBox(height: 8),
@@ -77,45 +84,77 @@ class _PrototypeShellState extends State<PrototypeShell> {
       ),
     );
   }
+
+  void _showSyncStatusHelp(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Sync Status Help'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: SyncBannerState.values.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final definition = SyncBannerState.values[index].definition;
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(definition.icon, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            definition.title,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            definition.description,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
-enum _SyncStatus { online, offline, syncing, error }
-
 class _SyncBanner extends StatelessWidget {
-  const _SyncBanner({required this.status});
-  final _SyncStatus status;
+  const _SyncBanner({required this.state, this.onInfo});
+  final SyncBannerState state;
+  final VoidCallback? onInfo;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    String text;
-    IconData icon;
-    Color bg;
+    final bg = switch (state) {
+      SyncBannerState.idle => cs.primaryContainer,
+      SyncBannerState.syncing => cs.secondaryContainer,
+      SyncBannerState.peerOnlineEditing => cs.tertiaryContainer,
+      SyncBannerState.offline => cs.surfaceContainerHighest,
+      SyncBannerState.error => cs.errorContainer,
+    };
 
-    switch (status) {
-      case _SyncStatus.online:
-        text = 'Online';
-        icon = Icons.wifi;
-        bg = cs.primaryContainer;
-        break;
-      case _SyncStatus.offline:
-        text = 'Offline — changes will sync automatically';
-        icon = Icons.wifi_off;
-        bg = cs.surfaceContainerHighest;
-        break;
-      case _SyncStatus.syncing:
-        text = 'Pending upload — syncing…';
-        icon = Icons.cloud_upload_outlined;
-        bg = cs.secondaryContainer;
-        break;
-
-      case _SyncStatus.error:
-        text = 'Sync error — tap to retry';
-        icon = Icons.error_outline;
-        bg = cs.errorContainer;
-        break;
-    }
+    final definition = state.definition;
 
     return Container(
       decoration: BoxDecoration(
@@ -125,9 +164,29 @@ class _SyncBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18),
+          Icon(definition.icon, size: 18),
           const SizedBox(width: 8),
-          Expanded(child: Text(text)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  definition.title,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                Text(
+                  definition.description,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ],
+            ),
+          ),
+          if (onInfo != null)
+            IconButton(
+              tooltip: 'Sync status help',
+              onPressed: onInfo,
+              icon: const Icon(Icons.info_outline),
+            ),
         ],
       ),
     );
