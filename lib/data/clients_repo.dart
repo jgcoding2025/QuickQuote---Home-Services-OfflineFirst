@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'client_models.dart';
+import 'metrics_collector.dart';
 
 class ClientsRepo {
-  ClientsRepo({required this.orgId});
+  ClientsRepo({required this.orgId, MetricsCollector? metricsCollector})
+      : _metricsCollector = metricsCollector ?? const NoopMetricsCollector();
   final String orgId;
+  final MetricsCollector _metricsCollector;
 
   String newClientId() => _col.doc().id;
 
@@ -23,6 +28,7 @@ class ClientsRepo {
     }
 
     await _col.doc(clientId).set(data, SetOptions(merge: true));
+    unawaited(_metricsCollector.recordWrite());
   }
 
   CollectionReference<Map<String, dynamic>> get _col => FirebaseFirestore
@@ -33,12 +39,14 @@ class ClientsRepo {
 
   Stream<List<Client>> streamClients() {
     return _col.orderBy('lastName').snapshots().map((snap) {
+      unawaited(_metricsCollector.recordRead(count: snap.docs.length));
       return snap.docs.map((d) => _clientFromDoc(d)).toList();
     });
   }
 
   Future<void> deleteClient(String clientId) async {
     await _col.doc(clientId).delete();
+    unawaited(_metricsCollector.recordWrite());
   }
 
   Future<void> restoreClient(String clientId, ClientDraft draft) async {

@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'local_db.dart';
 import 'presence_service.dart';
 import 'session_controller.dart';
+import 'metrics_collector.dart';
 
 enum SyncStatus { online, offline, syncing, error }
 
@@ -38,13 +39,16 @@ class SyncService {
     required AppDatabase db,
     required SessionController session,
     required PresenceService presenceService,
+    MetricsCollector? metricsCollector,
   })  : _db = db,
         _sessionController = session,
-        _presenceService = presenceService;
+        _presenceService = presenceService,
+        _metricsCollector = metricsCollector ?? const NoopMetricsCollector();
 
   final AppDatabase _db;
   final SessionController _sessionController;
   final PresenceService _presenceService;
+  final MetricsCollector _metricsCollector;
   final _statusController = StreamController<SyncStatus>.broadcast();
   final ValueNotifier<int> _debugTick = ValueNotifier<int>(0);
   StreamSubscription<dynamic>? _connectivitySub;
@@ -272,6 +276,7 @@ class SyncService {
         'deleted': payload['deleted'] == true || item.opType == 'delete',
       };
       await doc.set(data, SetOptions(merge: true));
+      unawaited(_metricsCollector.recordWrite());
       debugPrint('OUTBOX: transaction start for item ${item.id}.');
       await _db.transaction(() async {
         await (_db.update(_db.outbox)..where((tbl) => tbl.id.equals(item.id)))
@@ -309,6 +314,7 @@ class SyncService {
         .collection('clients')
         .where('updatedAt', isGreaterThan: lastSync)
         .get();
+    unawaited(_metricsCollector.recordRead(count: snap.docs.length));
     var maxUpdatedAt = lastSync;
     for (final doc in snap.docs) {
       final data = doc.data();
@@ -363,6 +369,7 @@ class SyncService {
         .collection('quotes')
         .where('updatedAt', isGreaterThan: lastSync)
         .get();
+    unawaited(_metricsCollector.recordRead(count: snap.docs.length));
     var maxUpdatedAt = lastSync;
     for (final doc in snap.docs) {
       final data = doc.data();
@@ -446,6 +453,7 @@ class SyncService {
         .collection('finalizedDocuments')
         .where('updatedAt', isGreaterThan: lastSync)
         .get();
+    unawaited(_metricsCollector.recordRead(count: snap.docs.length));
     var maxUpdatedAt = lastSync;
     for (final doc in snap.docs) {
       final data = doc.data();
@@ -507,6 +515,7 @@ class SyncService {
         .collection('settings')
         .doc('defaults')
         .get();
+    unawaited(_metricsCollector.recordRead());
     final data = doc.data();
     if (data == null) {
       return;
@@ -560,6 +569,7 @@ class SyncService {
         .doc(orgId)
         .collection('pricingProfiles')
         .get();
+    unawaited(_metricsCollector.recordRead(count: snap.docs.length));
     final profileIds = <String>[];
     var maxUpdatedAt = lastSync;
     for (final doc in snap.docs) {
@@ -622,6 +632,7 @@ class SyncService {
           .where('updatedAt', isGreaterThan: lastSync)
           .orderBy('updatedAt')
           .get();
+      unawaited(_metricsCollector.recordRead(count: snap.docs.length));
       for (final doc in snap.docs) {
         final data = doc.data();
         final updatedAt = (data['updatedAt'] as int?) ?? 0;
@@ -687,6 +698,7 @@ class SyncService {
           .where('updatedAt', isGreaterThan: lastSync)
           .orderBy('updatedAt')
           .get();
+      unawaited(_metricsCollector.recordRead(count: snap.docs.length));
       for (final doc in snap.docs) {
         final data = doc.data();
         final updatedAt = (data['updatedAt'] as int?) ?? 0;
@@ -747,6 +759,7 @@ class SyncService {
           .where('updatedAt', isGreaterThan: lastSync)
           .orderBy('updatedAt')
           .get();
+      unawaited(_metricsCollector.recordRead(count: snap.docs.length));
       for (final doc in snap.docs) {
         final data = doc.data();
         final updatedAt = (data['updatedAt'] as int?) ?? 0;
@@ -812,6 +825,7 @@ class SyncService {
           .where('updatedAt', isGreaterThan: lastSync)
           .orderBy('updatedAt')
           .get();
+      unawaited(_metricsCollector.recordRead(count: snap.docs.length));
       for (final doc in snap.docs) {
         final data = doc.data();
         final updatedAt = (data['updatedAt'] as int?) ?? 0;
@@ -875,6 +889,7 @@ class SyncService {
           .where('updatedAt', isGreaterThan: lastSync)
           .orderBy('updatedAt')
           .get();
+      unawaited(_metricsCollector.recordRead(count: snap.docs.length));
       for (final doc in snap.docs) {
         final data = doc.data();
         final updatedAt = (data['updatedAt'] as int?) ?? 0;
@@ -935,6 +950,7 @@ class SyncService {
           .where('updatedAt', isGreaterThan: lastSync)
           .orderBy('updatedAt')
           .get();
+      unawaited(_metricsCollector.recordRead(count: snap.docs.length));
       for (final doc in snap.docs) {
         final data = doc.data();
         final updatedAt = (data['updatedAt'] as int?) ?? 0;
