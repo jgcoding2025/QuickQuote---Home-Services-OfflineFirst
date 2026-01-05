@@ -176,6 +176,7 @@ class SettingsData {
     required this.frequencies,
     required this.roomTypes,
     required this.subItems,
+    required this.occupantsRules,
   });
 
   factory SettingsData.empty() {
@@ -187,6 +188,7 @@ class SettingsData {
       frequencies: const [],
       roomTypes: const [],
       subItems: const [],
+      occupantsRules: OccupantsRules.defaults,
     );
   }
 
@@ -197,6 +199,7 @@ class SettingsData {
   final List<FrequencyStandard> frequencies;
   final List<RoomTypeStandard> roomTypes;
   final List<SubItemStandard> subItems;
+  final OccupantsRules occupantsRules;
 }
 
 Color _parseColor(String value) {

@@ -152,6 +152,7 @@ class _SettingsPageState extends State<SettingsPage>
       'assets/settings/plan_tiers.json',
       PlanTier.fromJson,
     );
+    final occupantsRules = await OccupantsRulesLoader.load();
     final serviceTypes = await _loadList(
       'assets/settings/service_type_standards.json',
       ServiceTypeStandard.fromJson,
@@ -185,6 +186,7 @@ class _SettingsPageState extends State<SettingsPage>
       frequencies: frequencies,
       roomTypes: roomTypes,
       subItems: subItems,
+      occupantsRules: occupantsRules,
     );
   }
 

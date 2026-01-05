@@ -149,6 +149,15 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
           const SizedBox(height: 16),
           _sectionTile(
             context,
+            title: 'Occupants',
+            child: _occupantsRulesSection(
+              context,
+              widget.settingsData.occupantsRules,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _sectionTile(
+            context,
             title: 'Service Types',
             child: _serviceTypeSection(
               context,
@@ -357,6 +366,38 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
             ];
           }).toList(),
         ),
+      ],
+    );
+  }
+
+  Widget _occupantsRulesSection(
+    BuildContext context,
+    OccupantsRules rules,
+  ) {
+    return _buildTable(
+      context,
+      headers: const ['Occupant Type', 'Minutes Added', 'Notes'],
+      columnWidths: const {
+        0: FlexColumnWidth(1.4),
+        1: FlexColumnWidth(1),
+        2: FlexColumnWidth(2.2),
+      },
+      rows: [
+        [
+          'Pet',
+          '${rules.petMinutesDefault} min',
+          'Per included pet',
+        ],
+        [
+          'Household (included)',
+          '0 min',
+          'First ${rules.householdFreeCount} people',
+        ],
+        [
+          'Household (extra)',
+          '${rules.householdExtraMinutesPerPerson} min',
+          'Per person over ${rules.householdFreeCount}',
+        ],
       ],
     );
   }
