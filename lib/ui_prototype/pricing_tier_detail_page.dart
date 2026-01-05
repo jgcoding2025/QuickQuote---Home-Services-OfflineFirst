@@ -54,10 +54,10 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         bottom: kDebugMode
             ? PreferredSize(
                 preferredSize:
-                    const Size.fromHeight(DebugSyncBanner.preferredHeight),
+                    const Size.fromHeight(SyncStatusBanner.preferredHeight),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                  child: DebugSyncBanner(
+                  child: SyncStatusBanner(
                     onInfo: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const SettingsPage()),
                     ),
