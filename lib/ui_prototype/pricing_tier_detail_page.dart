@@ -490,7 +490,9 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     final defaultMatches = _matchDefaultsByKey<PricingProfileFrequency>(
       items: sorted,
       defaults: defaultSorted,
-      key: (item) => '${item.serviceType}::${item.frequency}',
+      key: (item) =>
+          '${_normalizeText(item.serviceType)}::'
+          '${_normalizeText(item.frequency)}',
       id: (item) => item.id,
     );
     final columnWidths = <int, TableColumnWidth>{
@@ -707,7 +709,9 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     final defaultMatches = _matchDefaultsByKey<PricingProfileSubItem>(
       items: sorted,
       defaults: defaultSorted,
-      key: (item) => item.subItem,
+      key: (item) =>
+          '${_normalizeText(item.subItem)}::${_normalizeText(item.description)}'
+          '::${item.minutes}',
       id: (item) => item.id,
     );
     final columnWidths = <int, TableColumnWidth>{
@@ -812,7 +816,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     final defaultMatches = _matchDefaultsByKey<PricingProfileSize>(
       items: sorted,
       defaults: defaultSorted,
-      key: (item) => item.size,
+      key: (item) =>
+          '${_normalizeText(item.size)}::${_normalizeText(item.definition)}',
       id: (item) => item.id,
     );
     final columnWidths = <int, TableColumnWidth>{
@@ -916,7 +921,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     final defaultMatches = _matchDefaultsByKey<PricingProfileComplexity>(
       items: sorted,
       defaults: defaultSorted,
-      key: (item) => item.level,
+      key: (item) =>
+          '${_normalizeText(item.level)}::${_normalizeText(item.definition)}',
       id: (item) => item.id,
     );
     final columnWidths = <int, TableColumnWidth>{
@@ -1055,6 +1061,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
               );
               if (context.mounted) {
                 Navigator.pop(context);
+                setState(() {});
+                _snack(context, 'Service type updated.');
               }
             },
             child: const Text('Save'),
@@ -1121,6 +1129,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
               );
               if (context.mounted) {
                 Navigator.pop(context);
+                setState(() {});
+                _snack(context, 'Frequency updated.');
               }
             },
             child: const Text('Save'),
@@ -1191,6 +1201,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
               );
               if (context.mounted) {
                 Navigator.pop(context);
+                setState(() {});
+                _snack(context, 'Room type updated.');
               }
             },
             child: const Text('Save'),
@@ -1251,6 +1263,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
               );
               if (context.mounted) {
                 Navigator.pop(context);
+                setState(() {});
+                _snack(context, 'Add-on item updated.');
               }
             },
             child: const Text('Save'),
@@ -1308,6 +1322,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
               );
               if (context.mounted) {
                 Navigator.pop(context);
+                setState(() {});
+                _snack(context, 'Size updated.');
               }
             },
             child: const Text('Save'),
@@ -1370,6 +1386,8 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
               );
               if (context.mounted) {
                 Navigator.pop(context);
+                setState(() {});
+                _snack(context, 'Complexity updated.');
               }
             },
             child: const Text('Save'),
@@ -1973,7 +1991,7 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
     if (defaultValue == null) {
       return true;
     }
-    return value.trim() != defaultValue.trim();
+    return _normalizeText(value) != _normalizeText(defaultValue);
   }
 
   bool _doubleDiff(double value, double? defaultValue) {
@@ -2061,6 +2079,10 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
         _doubleDiff(item.multiplier, defaultItem.multiplier);
   }
 
+  String _normalizeText(String value) {
+    return value.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase();
+  }
+
   List<PricingProfileServiceType> _sortedServiceTypes(
     List<PricingProfileServiceType> items,
   ) {
@@ -2082,11 +2104,13 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   ) {
     final sorted = items.toList();
     sorted.sort((a, b) {
-      final serviceCompare = a.serviceType.compareTo(b.serviceType);
+      final serviceCompare =
+          _normalizeText(a.serviceType).compareTo(_normalizeText(b.serviceType));
       if (serviceCompare != 0) {
         return serviceCompare;
       }
-      return a.frequency.compareTo(b.frequency);
+      return _normalizeText(a.frequency)
+          .compareTo(_normalizeText(b.frequency));
     });
     return sorted;
   }
@@ -2096,9 +2120,15 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   ) {
     final sorted = items.toList();
     sorted.sort((a, b) {
-      final nameCompare = a.subItem.compareTo(b.subItem);
+      final nameCompare =
+          _normalizeText(a.subItem).compareTo(_normalizeText(b.subItem));
       if (nameCompare != 0) {
         return nameCompare;
+      }
+      final descriptionCompare = _normalizeText(a.description)
+          .compareTo(_normalizeText(b.description));
+      if (descriptionCompare != 0) {
+        return descriptionCompare;
       }
       return a.id.compareTo(b.id);
     });
@@ -2108,9 +2138,15 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   List<PricingProfileSize> _sortedSizes(List<PricingProfileSize> items) {
     final sorted = items.toList();
     sorted.sort((a, b) {
-      final nameCompare = a.size.compareTo(b.size);
+      final nameCompare =
+          _normalizeText(a.size).compareTo(_normalizeText(b.size));
       if (nameCompare != 0) {
         return nameCompare;
+      }
+      final definitionCompare = _normalizeText(a.definition)
+          .compareTo(_normalizeText(b.definition));
+      if (definitionCompare != 0) {
+        return definitionCompare;
       }
       return a.id.compareTo(b.id);
     });
@@ -2122,9 +2158,15 @@ class _PricingTierDetailPageState extends State<PricingTierDetailPage> {
   ) {
     final sorted = items.toList();
     sorted.sort((a, b) {
-      final nameCompare = a.level.compareTo(b.level);
+      final nameCompare =
+          _normalizeText(a.level).compareTo(_normalizeText(b.level));
       if (nameCompare != 0) {
         return nameCompare;
+      }
+      final definitionCompare = _normalizeText(a.definition)
+          .compareTo(_normalizeText(b.definition));
+      if (definitionCompare != 0) {
+        return definitionCompare;
       }
       return a.id.compareTo(b.id);
     });
