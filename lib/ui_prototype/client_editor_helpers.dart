@@ -21,7 +21,6 @@ mixin _ClientEditorHelpers on State<ClientEditorPage> {
   );
   int _autoSaveGeneration = 0;
 
-  bool get _allowPopOnce;
   set _allowPopOnce(bool value);
 
   TextEditingController get firstName;
