@@ -365,6 +365,8 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
 
   @override
   Widget _buildOccupantsSection() {
+    final includedPetCount =
+        petsPresent ? pets.where((pet) => !pet.excluded).length : 0;
     return _sectionCard(
       context,
       'Occupants',
@@ -380,7 +382,7 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
             title: const Text('Enable pets'),
             subtitle: Text(
               petsPresent
-                  ? '${pets.where((pet) => !pet.excluded).length} included'
+                  ? '$includedPetCount included'
                   : 'Disabled',
             ),
           ),
@@ -443,43 +445,42 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
                 style: Theme.of(context).textTheme.bodySmall,
               )
             else
-              _buildOccupantsTable(
-                headers: const [
-                  'Name',
-                  'Type',
-                  'Notes',
-                  'Time Added',
-                  'Excluded',
-                  '',
-                ],
-                columnWidths: const {
-                  0: FlexColumnWidth(1.2),
-                  1: FlexColumnWidth(1),
-                  2: FlexColumnWidth(1.6),
-                  3: FlexColumnWidth(1),
-                  4: FixedColumnWidth(120),
-                  5: FixedColumnWidth(60),
-                },
-                rows: [
+              Column(
+                children: [
                   for (final pet in pets)
-                    _occupantsRow(
-                      [
-                        Text(pet.name),
-                        Text(pet.type),
-                        Text(pet.notes),
-                        Text(_formatTimestamp(pet.addedAt)),
-                        Switch(
+                    _buildOccupantCard(
+                      title: pet.name,
+                      subtitle: pet.type.isEmpty ? 'Pet' : pet.type,
+                      minutesAdded: pet.excluded || !petsPresent
+                          ? 0
+                          : occupantsRules.petMinutesDefault,
+                      details: [
+                        _occupantDetailRow(
+                          'Minutes added',
+                          '${pet.excluded || !petsPresent ? 0 : occupantsRules.petMinutesDefault} min',
+                        ),
+                        _occupantDetailRow(
+                          'Notes',
+                          pet.notes.isEmpty ? '—' : pet.notes,
+                        ),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
                           value: pet.excluded,
                           onChanged: (value) => _markDirty(() {
                             final index = pets.indexOf(pet);
                             pets[index] = pet.copyWith(excluded: value);
                           }),
+                          title: const Text('Exclude from minutes'),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => _markDirty(() {
-                            pets.remove(pet);
-                          }),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed: () => _markDirty(() {
+                              pets.remove(pet);
+                            }),
+                            icon: const Icon(Icons.delete_outline),
+                            label: const Text('Remove'),
+                          ),
                         ),
                       ],
                     ),
@@ -545,34 +546,37 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
               style: Theme.of(context).textTheme.bodySmall,
             )
           else
-            _buildOccupantsTable(
-              headers: const [
-                'Name',
-                'Relationship',
-                'Notes',
-                'Time Added',
-                '',
-              ],
-              columnWidths: const {
-                0: FlexColumnWidth(1.2),
-                1: FlexColumnWidth(1),
-                2: FlexColumnWidth(1.6),
-                3: FlexColumnWidth(1),
-                4: FixedColumnWidth(60),
-              },
-              rows: [
-                for (final member in householdMembers)
-                  _occupantsRow(
-                    [
-                      Text(member.name),
-                      Text(member.relationship),
-                      Text(member.notes),
-                      Text(_formatTimestamp(member.addedAt)),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => _markDirty(() {
-                          householdMembers.remove(member);
-                        }),
+            Column(
+              children: [
+                for (final entry in householdMembers.asMap().entries)
+                  _buildOccupantCard(
+                    title: entry.value.name,
+                    subtitle: entry.value.relationship.isEmpty
+                        ? 'Household member'
+                        : entry.value.relationship,
+                    minutesAdded: entry.key >= occupantsRules.householdFreeCount
+                        ? occupantsRules.householdExtraMinutesPerPerson
+                        : 0,
+                    details: [
+                      _occupantDetailRow(
+                        'Minutes added',
+                        '${entry.key >= occupantsRules.householdFreeCount ? occupantsRules.householdExtraMinutesPerPerson : 0} min',
+                      ),
+                      _occupantDetailRow(
+                        'Notes',
+                        entry.value.notes.isEmpty
+                            ? '—'
+                            : entry.value.notes,
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () => _markDirty(() {
+                            householdMembers.remove(entry.value);
+                          }),
+                          icon: const Icon(Icons.delete_outline),
+                          label: const Text('Remove'),
+                        ),
                       ),
                     ],
                   ),
@@ -583,62 +587,76 @@ mixin _QuoteEditorSectionsMixin on _QuoteEditorStateAccess {
     );
   }
 
-  Table _buildOccupantsTable({
-    required List<String> headers,
-    required List<TableRow> rows,
-    Map<int, TableColumnWidth>? columnWidths,
+  Widget _buildOccupantCard({
+    required String title,
+    required String subtitle,
+    required int minutesAdded,
+    required List<Widget> details,
   }) {
-    final theme = Theme.of(context);
-    return Table(
-      border: TableBorder.all(color: Colors.grey.shade300, width: 1),
-      columnWidths: columnWidths,
-      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-      children: [
-        _occupantsHeaderRow(
-          headers,
-          headerColor: theme.colorScheme.surfaceContainerHighest,
-          headerTextColor: theme.colorScheme.onSurfaceVariant,
-        ),
-        ...rows,
-      ],
-    );
-  }
-
-  TableRow _occupantsHeaderRow(
-    List<String> headers, {
-    required Color headerColor,
-    required Color headerTextColor,
-  }) {
-    return _occupantsRow(
-      headers
-          .map(
-            (header) => Text(
-              header,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: headerTextColor,
+    return Card(
+      child: ExpansionTile(
+        title: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ),
             ),
-          )
-          .toList(),
-      rowColor: headerColor,
+            _minutesPill(minutesAdded),
+          ],
+        ),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        children: details,
+      ),
     );
   }
 
-  TableRow _occupantsRow(
-    List<Widget> cells, {
-    Color? rowColor,
-  }) {
-    return TableRow(
-      decoration: rowColor == null ? null : BoxDecoration(color: rowColor),
-      children: cells
-          .map(
-            (cell) => Padding(
-              padding: const EdgeInsets.all(8),
-              child: cell,
+  Widget _occupantDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
-          )
-          .toList(),
+          ),
+          Expanded(child: Text(value)),
+        ],
+      ),
+    );
+  }
+
+  Widget _minutesPill(int minutes) {
+    final scheme = Theme.of(context).colorScheme;
+    final background = minutes == 0
+        ? scheme.surfaceContainerHighest
+        : scheme.primary.withValues(alpha: 0.12);
+    final textColor = minutes == 0 ? scheme.onSurfaceVariant : scheme.primary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        '$minutes min',
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
     );
   }
 
